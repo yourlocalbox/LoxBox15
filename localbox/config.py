@@ -1,5 +1,13 @@
+"""
+Module holding configuration and configparser related functions
+"""
 from ConfigParser import ConfigParser
+
+
 class ConfigSingleton(object):
+    """
+    Singleton which has all configruation related info.
+    """
     _instance = None
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
@@ -17,8 +25,16 @@ class ConfigSingleton(object):
             self.configparser.read(location)
 
     def get(self, section, field):
+        """
+        Returns the value of a certain field in a certain section on the
+        configuration
+        """
         return self.configparser.get(section, field)
 
     def getint(self, section, field):
+        """
+        Returns the value of a certain field in a certain section on the
+        configuration, cast to an int.
+        """
         return self.configparser.getint(section, field)
 

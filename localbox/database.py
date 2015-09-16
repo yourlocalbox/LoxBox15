@@ -2,8 +2,6 @@
 Database implementation class
 """
 from logging import getLogger
-from logging import DEBUG
-from logging import StreamHandler
 
 from os.path import exists
 from ConfigParser import NoSectionError
@@ -64,7 +62,7 @@ def sqlite_execute(command, params=None):
                 connection.close()
         except UnboundLocalError:
             pass
- 
+
 
 def mysql_execute(command, params=None):
     """
