@@ -1,4 +1,8 @@
-from json import dumps, JSONEncoder
+"""
+Encoding functions specific to localbox
+"""
+from json import JSONEncoder
+from urllib import unquote
 
 
 class LocalBoxJSONEncoder(JSONEncoder):

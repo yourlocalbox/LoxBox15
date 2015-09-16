@@ -2,8 +2,39 @@
 LocalBox shares module.
 """
 from json import dumps
+
 from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
+
+class User(object):
+    """
+    User object, limited to more or less the 'name' only, given how the actual
+    user administration is done by the authentication mechanism.
+    """
+    def __init__(self, name=None):
+        self.name = name
+
+    def to_json(self):
+        """
+        Method to turn an object into JSON.
+        """
+        return {'id': self.name, 'title': self.name, 'type': 'user'}
+
+
+class Group(object):
+    """
+    Underdefined group object which due to lack of user administration will
+    probably be removed at a later stage.
+    """
+    def __init__(self, name=None, users=None):
+        self.name = name
+        self.users = users
+
+    def to_json(self):
+        """
+        Method to turn an object into JSON.
+        """
+        return {'id': self.name, 'title': self.name, 'type': 'group'}
 
 class Invitation(object):
     """

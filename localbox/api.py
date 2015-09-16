@@ -5,7 +5,6 @@ from json import dumps
 from re import compile as regex_compile
 
 from .shares import list_share_items
-from .database import database_execute
 
 def exec_shares(request_handler):
     """

@@ -6,74 +6,21 @@ from BaseHTTPServer import HTTPServer
 from json import dumps, JSONEncoder
 from re import compile as regex_compile
 from ssl import wrap_socket
-from urllib import unquote
-from api import ROUTING_LIST
 
+
+from .shares import list_share_items
+from .api import ROUTING_LIST
 from .config import ConfigSingleton
 from .database import database_execute
 
 from pprint import pprint
 
 
-class LocalBoxJSONEncoder(JSONEncoder):
-    """
-    JSONEncoder for localbox classes
-    """
-    def default(self, o):
-        """
-        The way objects are usually encoded into JSON.
-        """
-        if hasattr(o, 'to_json'):
-            return o.to_json()
-        return o.__dict__
-
-
-class User(object):
-    """
-    User object, limited to more or less the 'name' only, given how the actual
-    user administration is done by the authentication mechanism.
-    """
-    def __init__(self, name=None):
-        self.name = name
-
-    def to_json(self):
-        """
-        Method to turn an object into JSON.
-        """
-        return {'id': self.name, 'title': self.name, 'type': 'user'}
-
-
-class Group(object):
-    """
-    Underdefined group object which due to lack of user administration will
-    probably be removed at a later stage.
-    """
-    def __init__(self, name=None, users=None):
-        self.name = name
-        self.users = users
-
-    def to_json(self):
-        """
-        Method to turn an object into JSON.
-        """
-        return {'id': self.name, 'title': self.name, 'type': 'group'}
-
 def authentication_dummy():
     """
     return the string 'user' and pretend authentication happened
     """
     return "user"
-
-
-def localbox_path_decoder(path):
-    """
-    A 'localbox_path' is a unix filepath with the urlencoded components.
-    """
-    realpath = []
-    components = path.split('/')
-    for component in components:
-        realpath.append(unquote(component))
-    return '/'.join(realpath)
 
 
 class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
