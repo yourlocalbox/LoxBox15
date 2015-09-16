@@ -13,9 +13,9 @@ from sqlite3 import connect as sqlite_connect
 from MySQLdb import Error
 
 
-from config import ConfigSingleton
+from .config import ConfigSingleton
 
-def database_execute(command, params = None):
+def database_execute(command, params=None):
     """
     Function to execute a sql statement on the database
     """
@@ -30,7 +30,7 @@ def database_execute(command, params = None):
     else:
         print "Unknown database type, cannot continue"
 
-def sqlite_execute(command, params = None):
+def sqlite_execute(command, params=None):
     """
     Function to execute a sql statement on the mysql database
     """
@@ -64,9 +64,9 @@ def sqlite_execute(command, params = None):
                 connection.close()
         except UnboundLocalError:
             pass
-        
+ 
 
-def mysql_execute(command, params = None):
+def mysql_execute(command, params=None):
     """
     Function to execute a sql statement on the mysql database
     """
