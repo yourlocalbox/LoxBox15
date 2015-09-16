@@ -77,6 +77,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         """
         self.do_request()
 
+
     def do_GET(self):
         """
         handle a POST request
