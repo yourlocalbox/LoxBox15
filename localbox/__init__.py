@@ -1,19 +1,20 @@
 """
 LocalBox main initialization class.
 """
-from BaseHTTPServer import BaseHTTPRequestHandler
-from BaseHTTPServer import HTTPServer
 from json import dumps, JSONEncoder
 from re import compile as regex_compile
 from ssl import wrap_socket
-
-
+try:
+    from BaseHTTPServer import BaseHTTPRequestHandler
+    from BaseHTTPServer import HTTPServer
+except(ImportError) as e:
+    from http.server import BaseHTTPRequestHandler
+    from http.server import HTTPServer
 from .shares import list_share_items
 from .api import ROUTING_LIST
 from .config import ConfigSingleton
 from .database import database_execute
 
-from pprint import pprint
 
 
 def authentication_dummy():
@@ -39,7 +40,6 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         data = list_share_items(path2)
-        print data
         self.wfile.write(data)
 
     def exec_invitations(self):
@@ -62,12 +62,13 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         """
         Handle a request (do_POST and do_GET both forward to this function)
         """
+        print("processing "+ self.path)
         self.user = authentication_dummy()
         if not self.user:
-            print "authentication problem"
+            print("authentication problem")
             return
         for regex, function in ROUTING_LIST:
-            print "Matching" + self.path + " with pattern " + regex.pattern
+            print("Matching" + self.path + " with pattern " + regex.pattern)
             if regex.match(self.path):
                 function(self)
 
@@ -97,4 +98,5 @@ def main():
     httpd = HTTPServer(server_address, LocalBoxHTTPRequestHandler)
     httpd.socket = wrap_socket(httpd.socket, server_side=True,
                                certfile=certfile, keyfile=keyfile)
+    print("ready")
     httpd.serve_forever()

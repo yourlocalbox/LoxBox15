@@ -1,8 +1,10 @@
 """
 Module holding configuration and configparser related functions
 """
-from ConfigParser import ConfigParser
-
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 
 class ConfigSingleton(object):
     """

@@ -2,7 +2,11 @@
 Encoding functions specific to localbox
 """
 from json import JSONEncoder
-from urllib import unquote
+try:
+    from urllib import unquote
+except ImportError:
+    from urllib.parse import unquote
+
 
 
 class LocalBoxJSONEncoder(JSONEncoder):

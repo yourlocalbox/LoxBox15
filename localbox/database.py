@@ -4,7 +4,6 @@ Database implementation class
 from logging import getLogger
 
 from os.path import exists
-from ConfigParser import NoSectionError
 
 from MySQLdb import connect as mysql_connect
 from sqlite3 import connect as sqlite_connect
@@ -26,7 +25,7 @@ def database_execute(command, params=None):
     elif (dbtype == "sqlite3") or (dbtype == "sqlite"):
         return sqlite_execute(command, params)
     else:
-        print "Unknown database type, cannot continue"
+        print("Unknown database type, cannot continue")
 
 def sqlite_execute(command, params=None):
     """
@@ -41,7 +40,6 @@ def sqlite_execute(command, params=None):
         connection = sqlite_connect(filename)
         cursor = connection.cursor()
         if init_db:
-            print"#iinitialising the database"
             for sql in file('database.sql').read().split("\n"):
                 if sql != "" and sql != None:
                     cursor.execute(sql)
@@ -53,9 +51,9 @@ def sqlite_execute(command, params=None):
         connection.commit()
         return cursor.fetchall()
     except Error as mysqlerror:
-        print "MySQL Error: %d: %s" % (mysqlerror.args[0], mysqlerror.args[1])
+        print("MySQL Error: %d: %s" % (mysqlerror.args[0], mysqlerror.args[1]))
     except NoSectionError:
-        print "Please configure the database"
+        print("Please configure the database")
     finally:
         try:
             if connection:
@@ -82,9 +80,7 @@ def mysql_execute(command, params=None):
         connection.commit()
         return cursor.fetchall()
     except Error as mysqlerror:
-        print "MySQL Error: %d: %s" % (mysqlerror.args[0], mysqlerror.args[1])
-    except NoSectionError:
-        print "Please configure the database"
+        print("MySQL Error: %d: %s" % (mysqlerror.args[0], mysqlerror.args[1]))
     finally:
         try:
             if connection:
