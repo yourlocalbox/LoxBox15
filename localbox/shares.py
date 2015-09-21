@@ -165,3 +165,15 @@ def list_share_items(path=None):
             users.append(User(userentry[0]))
         returndata.append(Share(users, shareid, item))
     return dumps(returndata, cls=LocalBoxJSONEncoder)
+
+def toggle_invite_state(request_handler, newstate):
+    invite_identifier = int(request_handler.path.split('/')[3])
+    user = request_handler.user
+    readsql = "select 1 from invitations where state!=? and receiver = ? and id = ?;"
+    readresult = database_execute(readsql, (newstate, user, invite_identifier))
+    if len(readresult) != 0:
+        sql = "update invitations set state=? where receiver = ? and id = ?;"
+        result = database_execute(sql, (newstate, user, invite_identifier))
+        request_handler.send_response(200)
+        request_handler.end_headers()
+    return(len(readresult)!=0)

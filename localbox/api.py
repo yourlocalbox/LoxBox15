@@ -6,6 +6,7 @@ from re import compile as regex_compile
 
 from .shares import list_share_items
 from .shares import get_database_invitations
+from .shares import toggle_invite_state
 from .encoding import localbox_path_decoder
 
 def exec_shares(request_handler):
@@ -28,6 +29,30 @@ def exec_invitations(request_handler):
     request_handler.send_response(200)
     request_handler.end_headers()
     request_handler.wfile.write(get_database_invitations(request_handler.user))
+
+def exec_invite_accept(request_handler):
+    """
+    Accepts/reopens an invitation to filesharing.
+    """
+    result = toggle_invite_state(request_handler, 'accepted')
+    if result:
+        request_handler.send_response(200)
+    else:
+        request_handler.send_response(404)
+    request_handler.end_headers()
+
+def exec_invite_reject(request_handler):
+    """
+    Rejects/cancels an invitation to filesharing.
+    """
+    result = toggle_invite_state(request_handler, 'rejected')
+    if result:
+        request_handler.send_response(200)
+    else:
+        request_handler.send_response(404)
+    
+    request_handler.end_headers()
+
 
 def exec_user(request_handler):
     """
@@ -52,11 +77,6 @@ def exec_files_path(request_handler):
         """
         localbox_path_decoder(s)  
         request_handler.wfile.write(dumps(info))
-        
-    """
-    # 20 GET /lox_api/files/{path}
-    # Download file '{path}' naar de localbox server. {path} is een relatief file path met urlencoded componenten (e.g.: path/to/file%20met%20spaties).
-    """      
     elif(request_handler.command=="GET"):
         print "Running files path :  20 GET /lox_api/files/{path}"
         s = "\/lox_api\/files\/.*"
@@ -87,6 +107,8 @@ def exec_operations_copy(request_handler):
 
 ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/invitations"),      exec_invitations),
+    (regex_compile(r"\/lox_api\/invite/[0-9]+/accept"), exec_invite_accept),
+    (regex_compile(r"\/lox_api\/invite/[0-9]+/reject"), exec_invite_reject),
     (regex_compile(r"\/lox_api\/user"),             exec_user),
     (regex_compile(r"\/lox_api\/shares\/.*"),       exec_shares),
     (regex_compile(r"\/lox_api\/files\/.*"),        exec_files_path),
