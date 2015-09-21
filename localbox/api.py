@@ -45,9 +45,9 @@ def exec_files_path(request_handler):
     """        
     if (request_handler.command=="POST"):
         print "Running files path :  2 POST /lox_api/files/{path}"
-        s = "\/lox_api\/files\/.*"
-        s.lstrip(".*")
-        localbox_path_decoder(s)
+        string = "\/lox_api\/files\/.*"
+        string.lstrip(".*")
+        localbox_path_decoder(string)
         request_handler.wfile.write(dumps(info))
         
     """
