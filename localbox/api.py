@@ -45,7 +45,11 @@ def exec_files_path(request_handler):
         print "Running files path :  2 POST /lox_api/files/{path}"
         s = "\/lox_api\/files\/.*"
         s.lstrip(".*")
-        localbox_path_decoder(s)
+   
+        """
+        A 'localbox_path' is a unix filepath with the urlencoded components.
+        """
+        localbox_path_decoder(s)  
         request_handler.wfile.write(dumps(info))
         
     """
