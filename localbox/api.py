@@ -45,7 +45,6 @@ def exec_files_path(request_handler):
         print "Running files path :  2 POST /lox_api/files/{path}"
         s = "\/lox_api\/files\/.*"
         s.lstrip(".*")
-   
         """
         A 'localbox_path' is a unix filepath with the urlencoded components.
         """
@@ -53,11 +52,15 @@ def exec_files_path(request_handler):
         request_handler.wfile.write(dumps(info))
         
     """
-    # GET /lox_api/files/{path}
+    # 20 GET /lox_api/files/{path}
     # Download file '{path}' naar de localbox server. {path} is een relatief file path met urlencoded componenten (e.g.: path/to/file%20met%20spaties).
     """      
     elif(request_handler.command=="GET"):
-        pass
+        print "Running files path :  20 GET /lox_api/files/{path}"
+        s = "\/lox_api\/files\/.*"
+        s.lstrip(".*")
+        localbox_path_decoder(s)  
+        request_handler.wfile.write(dumps(info))
 
 
 # 10 POST /lox_api/operations/copy
