@@ -1,8 +1,6 @@
 """
 LocalBox main initialization class.
 """
-from json import dumps, JSONEncoder
-from re import compile as regex_compile
 from ssl import wrap_socket
 try:
     from BaseHTTPServer import BaseHTTPRequestHandler
@@ -10,10 +8,8 @@ try:
 except(ImportError) as e:
     from http.server import BaseHTTPRequestHandler
     from http.server import HTTPServer
-from .shares import list_share_items
 from .api import ROUTING_LIST
 from .config import ConfigSingleton
-from .database import database_execute
 
 
 
@@ -30,34 +26,6 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
     in do_POST and do_GET (which in their turn forward said requests to
     do_request)
     """
-    def exec_shares(self):
-        """
-        Handle share information
-        """
-        path2 = self.path.replace('/lox_api/shares/', '', 1)
-
-        self.send_response(200)
-        self.end_headers()
-
-        data = list_share_items(path2)
-        self.wfile.write(data)
-
-    def exec_invitations(self):
-        """
-        Handle invitation listing
-        """
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write("invites")
-
-    def exec_user(self):
-        """
-        Handle user info (or pretend to)
-        """
-        info = {'name': 'user', 'public_key': 'FT9CH-XVXW7',
-                'private_key': 'RPR49-VDHYD', 'complete': 'No!'}
-        self.wfile.write(dumps(info))
-
     def do_request(self):
         """
         Handle a request (do_POST and do_GET both forward to this function)
