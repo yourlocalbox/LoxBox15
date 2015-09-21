@@ -6,6 +6,9 @@ from json import dumps
 from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
 
+from pprint import pprint
+
+
 class User(object):
     """
     User object, limited to more or less the 'name' only, given how the actual
@@ -57,7 +60,26 @@ class Invitation(object):
         This creates a JSON serialisation of the Invitation. This serialisation
         is primarily for returning values and not a complete serialisation.
         """
-        return {'id': self.identifier, 'share': self.share, 'item': self.share['item']}
+        return {'id': self.identifier, 'share': self.share, 'item': self.share.item}
+
+    def save_to_database(self):
+        params = (self.sender, self.receiver, self.share.identifier, self.state)
+        if self.identifier == None:
+            sql = "insert into invitations (sender, receiver, share_id, state) values (?, ?, ?, ?)"
+        else:
+            params.append(self.identifier)
+            sql = "update invitations set sender = ?, receiver = ?, share_id = ?, state = ? where id = ?"
+
+        database_execute(sql, params)
+
+def get_database_invitations(user):
+    sql = "select id, sender, receiver, share_id, state from invitations where receiver = ?"
+    result = database_execute(sql, (user,))
+    invitation_list = []
+    for entry in result:
+        share = get_share_by_id(entry[3])
+        invitation_list.append(Invitation(entry[0], entry[4], share, entry[1], entry[2]))
+    return(dumps(invitation_list, cls=LocalBoxJSONEncoder))
 
 class ShareItem(object):
     """
@@ -99,6 +121,16 @@ class Share(object):
     def to_json(self):
         return {'identities': self.users, 'id': self.identifier,
                 'item': self.item}
+
+
+def get_share_by_id(identifier):
+    sharesql = 'select user, path from shares where id = ?'
+    sharedata = database_execute(sharesql, (identifier,))[0]
+    pprint(sharedata)
+    itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at, title, is_dir from shareitem where path = ?'
+    itemdata = database_execute(itemsql, (sharedata[1],))[0]
+    shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3], itemdata[4], itemdata[5], itemdata[6], itemdata[7])
+    return Share(sharedata[0], identifier, shareitem)
 
 
 def list_share_items(path=None):

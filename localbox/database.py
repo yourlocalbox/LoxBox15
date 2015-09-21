@@ -2,8 +2,11 @@
 Database implementation class
 """
 from logging import getLogger
-
 from os.path import exists
+try:
+     from ConfigParser import NoSectionError
+except:
+     from configparser import NoSectionError
 
 from MySQLdb import connect as mysql_connect
 from sqlite3 import connect as sqlite_connect

@@ -4,7 +4,8 @@ LocalBox API Implementation module
 from json import dumps
 from re import compile as regex_compile
 
-from .shares   import list_share_items
+from .shares import list_share_items
+from .shares import get_database_invitations
 from .encoding import localbox_path_decoder
 
 def exec_shares(request_handler):
@@ -23,9 +24,10 @@ def exec_invitations(request_handler):
     """
     Handle invitation listing
     """
+    
     request_handler.send_response(200)
     request_handler.end_headers()
-    request_handler.wfile.write("invites")
+    request_handler.wfile.write(get_database_invitations(request_handler.user))
 
 def exec_user(request_handler):
     """
