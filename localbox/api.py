@@ -124,7 +124,7 @@ def exec_user(request_handler):
     if (request_handler.user): # is user loggen in ?
         sql = "select name, public_key, private_key from user where user = request_handler.user"
     result = database_execute(sql, (request_handler.user,))    
-    request_handler.wfile.write(dumps(info))
+    request_handler.wfile.write(dumps(result))
 
 
     """
@@ -144,8 +144,8 @@ def exec_user_username(request_handler):
         sql = "select name, public_key, private_key from user where user = request_handler.user"
     result = database_execute(sql, (user,)) 
 
-    info = {'name':'user', 'public_key':'FT9CH-XVXW7', 'private_key':'RPR49-VDHYD'}
-    request_handler.wfile.write(dumps(info))
+    info = {'name':'result.user', 'public_key':'result.public_key', 'private_key':'private_key'}
+    request_handler.wfile.write(dumps(result))
     
 
 def exec_create_share(request_handler):
