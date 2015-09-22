@@ -62,7 +62,7 @@ def exec_files_path(request_handler):
     # Download file '{path}' naar de localbox server. {path} is een relatief file path met urlencoded componenten (e.g.: path/to/file%20met%20spaties).
     """
 #    elif (request_handler.command=="GET"):
-#        print "Running files path :  20 GET /lox_api/files/{path}")
+#        print ("Running files path :  20 GET /lox_api/files/{path}")
 #        s = "\/lox_api\/files\/.*"
 #        s.lstrip(".*")
 #        localbox_path_decoder(s)  
