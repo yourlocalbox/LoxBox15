@@ -9,6 +9,7 @@ from os.path import join
 from .shares import list_share_items
 from .shares import get_database_invitations
 from .encoding import localbox_path_decoder
+from .shares import toggle_invite_state
 
 def exec_shares(request_handler):
     """
@@ -154,7 +155,7 @@ def exec_create_share(request_handler):
     user = json_object.username
     myself = request_handler.user
     from_file = join(bindpoint, myself, path2)
-    to_file = join(*bindpoint, user, path2)
+    to_file = join(bindpoint, user, path2)
     if exists(to_file):
         print("file exists. problem!")
     symlink(from_file, to_file)
@@ -166,7 +167,7 @@ ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/invite/[0-9]+/accept"), exec_invite_accept),
     (regex_compile(r"\/lox_api\/invite/[0-9]+/reject"), exec_invite_reject),
     (regex_compile(r"\/lox_api\/operations\/copy"), exec_operations_copy),
-    (regex_compile(r"\/lox_api\/share_create\/.*")m exec_share_create),
+    (regex_compile(r"\/lox_api\/share_create\/.*"), exec_create_share),
     (regex_compile(r"\/lox_api\/shares\/.*"), exec_shares),
     (regex_compile(r"\/lox_api\/user"), exec_user),
     (regex_compile(r"\/lox_api\/user_username"), exec_user_username),  
