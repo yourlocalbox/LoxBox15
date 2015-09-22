@@ -55,15 +55,6 @@ def exec_invite_reject(request_handler):
     request_handler.end_headers()
 
 
-def exec_user(request_handler):
-    """
-    Handle user info (or pretend to)
-    """
-    info = {'name': 'user', 'public_key': 'FT9CH-XVXW7',
-            'private_key': 'RPR49-VDHYD', 'complete': 'No!'}
-    request_handler.wfile.write(dumps(info))
-
-
 def exec_files_path(request_handler):
     """
     # 2 POST /lox_api/files/{path}    
