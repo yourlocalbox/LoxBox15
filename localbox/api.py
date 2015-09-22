@@ -40,29 +40,33 @@ def exec_user(request_handler):
 
 def exec_files_path(request_handler):
     """
-    # 2 POST /lox_api/files/{path}
+    # 2 POST /lox_api/files/{path}    
     # Upload file '{path}' naar de localbox server. {path} is een relatief file path met urlencoded componenten (e.g.: path/to/file%20met%20spaties).
     """        
     if (request_handler.command=="POST"):
-        print "Running files path :  2 POST /lox_api/files/{path}"
-        s = "\/lox_api\/files\/.*"
-        s.lstrip(".*")
+        print ("Running files path :  2 POST /lox_api/files/{path}")  
+        print (request_handler.path)
+        request_handler.to_paths = request_handler.path    # "\/lox_api\/files\/.*"
+        
+        request_handler.from_path = '\/lox_api\/files\/CentOS-6.7-x86_64-bin-DVD1.iso'
+        filefrom_path = '\/lox_api\/files\/CentOS-6.7-x86_64-bin-DVD1.iso'.lstrip('\/lox_api\/files\/.*')
+
         """
         A 'localbox_path' is a unix filepath with the urlencoded components.
         """
-        localbox_path_decoder(s)  
+        localbox_path_decoder(request_handler.to_paths+filefrom_path)  
         request_handler.wfile.write(dumps(info))
         
     """
     # 20 GET /lox_api/files/{path}
     # Download file '{path}' naar de localbox server. {path} is een relatief file path met urlencoded componenten (e.g.: path/to/file%20met%20spaties).
-    """      
-    elif(request_handler.command=="GET"):
-        print "Running files path :  20 GET /lox_api/files/{path}"
-        s = "\/lox_api\/files\/.*"
-        s.lstrip(".*")
-        localbox_path_decoder(s)  
-        request_handler.wfile.write(dumps(info))
+    """
+#    elif (request_handler.command=="GET"):
+#        print "Running files path :  20 GET /lox_api/files/{path}")
+#        s = "\/lox_api\/files\/.*"
+#        s.lstrip(".*")
+#        localbox_path_decoder(s)  
+#        request_handler.rfile.read(dumps(info))
 
 
 # 10 POST /lox_api/operations/copy
@@ -80,7 +84,7 @@ def exec_operations_copy(request_handler):
     bindpoint = configparser.get('httpd', 'bindpoint')
     user      = request_handler.user
 
-    print "Running operations copy : 10 POST /lox_api/operations/copy"
+    print ("Running operations copy : 10 POST /lox_api/operations/copy")
     request_handler.send_response(200) 
     request_handler.end_headers()
     
