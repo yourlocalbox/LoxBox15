@@ -3,6 +3,8 @@ LocalBox API Implementation module
 """
 from json import dumps
 from re import compile as regex_compile
+from os import symlink
+from os.path import join
 
 from .shares import list_share_items
 from .shares import get_database_invitations
@@ -24,10 +26,33 @@ def exec_invitations(request_handler):
     """
     Handle invitation listing
     """
-    
     request_handler.send_response(200)
     request_handler.end_headers()
     request_handler.wfile.write(get_database_invitations(request_handler.user))
+
+def exec_invite_accept(request_handler):
+    """
+    Accepts/reopens an invitation to filesharing.
+    """
+    result = toggle_invite_state(request_handler, 'accepted')
+    if result:
+        request_handler.send_response(200)
+    else:
+        request_handler.send_response(404)
+    request_handler.end_headers()
+
+def exec_invite_reject(request_handler):
+    """
+    Rejects/cancels an invitation to filesharing.
+    """
+    result = toggle_invite_state(request_handler, 'rejected')
+    if result:
+        request_handler.send_response(200)
+    else:
+        request_handler.send_response(404)
+
+    request_handler.end_headers()
+
 
 def exec_user(request_handler):
     """
@@ -83,54 +108,34 @@ def exec_operations_copy(request_handler):
     request_handler.from_path,
     request_handler.to_path
     bindpoint = configparser.get('httpd', 'bindpoint')
-    user      = request_handler.user
+    user = request_handler.user
 
-    print ("Running operations copy : 10 POST /lox_api/operations/copy")
-    request_handler.send_response(200) 
+    print("Running operations copy : 10 POST /lox_api/operations/copy")
+    request_handler.send_response(200)
     request_handler.end_headers()
 
 
-    """
-    # 29 POST /lox_api/user   # 13
-    """    
-def exec_user(request_handler):
-    print ("running exec user")
-    # Haal name, public_key, private_key from user uit database.
-    if (request_handler.user): # is user loggen in ?
-        sql = "select name, public_key, private_key from user where user = request_handler.user"
-    result = database_execute(sql, (request_handler.user,))    
-    request_handler.wfile.write(dumps(info))
-
-
-    """
-    # 30 GET /lox_api/user/{username}   # 14
-    """   
-# Return een JSON dictionary met gebruikersinformatie.
-# Indien er geen gebruikersnaam meegegeven is met het request wordt de info van de huidige user gebruikt.
-# De velden in dit dictionary zijn 'name', 'public_key' en 'private_key'.
-# De 'private_key' wordt alleen meegestuurd voor de ingelogde gebruiker.
-#
-# Deze keys worden gebruikt om bestanden mee te encrypten.
-# In het geval van de 'private_key' gaat het om een de key om mee de decoderen.
-def exec_user_username(request_handler):
-    print ("running exec user username")
-#   get info below from DB, private_key only if logged in user is logged in.
-    if (request_handler.user): # is user loggen in ?
-        sql = "select name, public_key, private_key from user where user = request_handler.user"
-    result = database_execute(sql, (user,)) 
-
-    info = {'name':'user', 'public_key':'FT9CH-XVXW7', 'private_key':'RPR49-VDHYD'}
-    request_handler.wfile.write(dumps(info))   
-
-
-    
+def exec_create_share(request_handler):
+    json_object = request_Handler.rfile.read()
+    path2 = request_handler.path.replace('/lox_api/share_create/', '', 1)
+    bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+    user = json_object.username
+    myself = request_handler.user
+    from_file = join(bindpoint, myself, path2)
+    to_file = join(*bindpoint, user, path2)
+    if exists(to_file):
+        print("file exists. problem!")
+    symlink(from_file, to_file)
+    request_handler.send_response(200)
 
 ROUTING_LIST = [
-    (regex_compile(r"\/lox_api\/invitations"),      exec_invitations),
-    (regex_compile(r"\/lox_api\/user"),             exec_user),
-    (regex_compile(r"\/lox_api\/user_username"),    exec_user_username),    
-    (regex_compile(r"\/lox_api\/shares\/.*"),       exec_shares),
-    (regex_compile(r"\/lox_api\/files\/.*"),        exec_files_path),
+    (regex_compile(r"\/lox_api\/files\/.*"), exec_files_path),
+    (regex_compile(r"\/lox_api\/invitations"), exec_invitations),
+    (regex_compile(r"\/lox_api\/invite/[0-9]+/accept"), exec_invite_accept),
+    (regex_compile(r"\/lox_api\/invite/[0-9]+/reject"), exec_invite_reject),
     (regex_compile(r"\/lox_api\/operations\/copy"), exec_operations_copy),
+    (regex_compile(r"\/lox_api\/share_create\/.*")m exec_share_create),
+    (regex_compile(r"\/lox_api\/shares\/.*"), exec_shares),
+    (regex_compile(r"\/lox_api\/user"), exec_user),
 ]
 
