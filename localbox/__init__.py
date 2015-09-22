@@ -5,7 +5,7 @@ from ssl import wrap_socket
 try:
     from BaseHTTPServer import BaseHTTPRequestHandler
     from BaseHTTPServer import HTTPServer
-except(ImportError) as e:
+except ImportError:
     from http.server import BaseHTTPRequestHandler
     from http.server import HTTPServer
 from .api import ROUTING_LIST

@@ -67,8 +67,9 @@ class Invitation(object):
         if self.identifier == None:
             sql = "insert into invitations (sender, receiver, share_id, state) values (?, ?, ?, ?)"
         else:
-            params.append(self.identifier)
-            sql = "update invitations set sender = ?, receiver = ?, share_id = ?, state = ? where id = ?"
+            params = params + (self.identifier,)
+            sql = "update invitations set sender = ?, receiver = ?, "\
+                  "share_id = ?, state = ? where id = ?"
 
         database_execute(sql, params)
 
@@ -79,7 +80,7 @@ def get_database_invitations(user):
     for entry in result:
         share = get_share_by_id(entry[3])
         invitation_list.append(Invitation(entry[0], entry[4], share, entry[1], entry[2]))
-    return(dumps(invitation_list, cls=LocalBoxJSONEncoder))
+    return dumps(invitation_list, cls=LocalBoxJSONEncoder)
 
 class ShareItem(object):
     """
@@ -127,9 +128,11 @@ def get_share_by_id(identifier):
     sharesql = 'select user, path from shares where id = ?'
     sharedata = database_execute(sharesql, (identifier,))[0]
     pprint(sharedata)
-    itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at, title, is_dir from shareitem where path = ?'
+    itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at,'\
+              'title, is_dir from shareitem where path = ?'
     itemdata = database_execute(itemsql, (sharedata[1],))[0]
-    shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3], itemdata[4], itemdata[5], itemdata[6], itemdata[7])
+    shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3],
+                          itemdata[4], itemdata[5], itemdata[6], itemdata[7])
     return Share(sharedata[0], identifier, shareitem)
 
 
@@ -173,7 +176,7 @@ def toggle_invite_state(request_handler, newstate):
     readresult = database_execute(readsql, (newstate, user, invite_identifier))
     if len(readresult) != 0:
         sql = "update invitations set state=? where receiver = ? and id = ?;"
-        result = database_execute(sql, (newstate, user, invite_identifier))
+        database_execute(sql, (newstate, user, invite_identifier))
         request_handler.send_response(200)
         request_handler.end_headers()
-    return(len(readresult)!=0)
+    return len(readresult) != 0
