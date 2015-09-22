@@ -3,6 +3,8 @@ LocalBox API Implementation module
 """
 from json import dumps
 from re import compile as regex_compile
+from os import symlink
+from os.path import join
 
 from .shares import list_share_items
 from .shares import get_database_invitations
@@ -105,6 +107,20 @@ def exec_operations_copy(request_handler):
     request_handler.end_headers()
 
 
+def exec_create_share(request_handler):
+    json_object = request_Handler.rfile.read()
+    path2 = request_handler.path.replace('/lox_api/share_create/', '', 1)
+    bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+    user = json_object.username
+    myself = request_handler.user
+    from_file = join(bindpoint, myself, path2)
+    to_file = join(*bindpoint, user, path2)
+    if exists(to_file):
+        print("file exists. problem!")
+    symlink(from_file, to_file)
+    request_handler.send_response(200)
+    request_handler.end_headers()
+
 ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/invitations"), exec_invitations),
     (regex_compile(r"\/lox_api\/invite/[0-9]+/accept"), exec_invite_accept),
@@ -113,5 +129,6 @@ ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/shares\/.*"), exec_shares),
     (regex_compile(r"\/lox_api\/files\/.*"), exec_files_path),
     (regex_compile(r"\/lox_api\/operations\/copy"), exec_operations_copy),
+    (regex_compile(r"\/lox_api\/share_create\/.*")m exec_share_create),
 ]
 
