@@ -69,7 +69,7 @@ def exec_files_path(request_handler):
         bindpoint = request_handler.bindpoint.user.path   # "\/lox_api\/files\/.*"
         wfile     = request_handler.rfile
         
-        localbox_path_decoder(points+bindpoint+wfile)       
+        localbox_path_decoder(points+bindpoint+wfile)      
         request_handler.wfile.write(dumps(info))
         
     """
@@ -105,6 +105,7 @@ def exec_operations_copy(request_handler):
     print("Running operations copy : 10 POST /lox_api/operations/copy")
     request_handler.send_response(200)
     request_handler.end_headers()
+
 
     """
     # 29 POST /lox_api/user   # 13
