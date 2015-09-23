@@ -17,7 +17,7 @@ from .config import ConfigSingleton
 
 def exec_shares(request_handler):
     """
-    Handle share information
+    Handle share information  
     """
     path2 = request_handler.path.replace('/lox_api/shares/', '', 1)
 
