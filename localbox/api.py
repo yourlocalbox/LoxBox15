@@ -8,6 +8,7 @@ from os import symlink
 from os.path import join
 from os.path import exists
 
+from .database import database_execute
 from .shares import Share, ShareItem, Invitation
 from .shares import list_share_items
 from .shares import get_database_invitations
@@ -17,7 +18,7 @@ from .config import ConfigSingleton
 
 def exec_shares(request_handler):
     """
-    Handle share information
+    Handle share information  
     """
     path2 = request_handler.path.replace('/lox_api/shares/', '', 1)
 
@@ -84,6 +85,7 @@ def exec_files_path(request_handler):
         print ("Running files path :  20 GET /lox_api/files/{path}")
 
         puntjes = ".."
+        bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
         bindpoint = request_handler.bindpoint.user.path   # "\/lox_api\/files\/.*"
         rfile     = request_handler.rfile
 
@@ -182,6 +184,6 @@ ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/share_create\/.*"), exec_create_share),
     (regex_compile(r"\/lox_api\/shares\/.*"), exec_shares),
     (regex_compile(r"\/lox_api\/user"), exec_user),
-    (regex_compile(r"\/lox_api\/user_username"), exec_user_username),  
+    (regex_compile(r"\/lox_api\/user\/.*"), exec_user_username),  
 ]
 
