@@ -131,7 +131,7 @@ def exec_user(request_handler):
 # In het geval van de 'private_key' gaat het om een de key om mee de decoderen.
 def exec_user_username(request_handler):
     print ("running exec user username")
-#   get info below from DB, private_key only if logged in user is logged in.
+#   get info below from DB, private_key only if user is logged in.
     if (request_handler.user): # is user loggen in ?
         sql = "select name, public_key, private_key from user where user = request_handler.user"
     result = database_execute(sql, (user,)) 
