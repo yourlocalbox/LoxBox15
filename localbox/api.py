@@ -2,14 +2,17 @@
 LocalBox API Implementation module
 """
 from json import dumps
+from json import loads
 from re import compile as regex_compile
 from os import symlink
 from os.path import join
+from os.path import exists
 
 from .shares import list_share_items
 from .shares import get_database_invitations
 from .encoding import localbox_path_decoder
 from .shares import toggle_invite_state
+from .config import ConfigSingleton
 
 def exec_shares(request_handler):
     """
@@ -147,17 +150,23 @@ def exec_user_username(request_handler):
     info = {'name':'user', 'public_key':'FT9CH-XVXW7', 'private_key':'RPR49-VDHYD'}
     request_handler.wfile.write(dumps(info))
     
+from pprint import pprint
 
 def exec_create_share(request_handler):
-    json_object = request_Handler.rfile.read()
+    length = int(request_handler.headers.getheader('content-length'))
+    body = request_handler.rfile.read(length)
+    print(body)
+    json_object = loads(body)
+    pprint(json_object)
     path2 = request_handler.path.replace('/lox_api/share_create/', '', 1)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-    user = json_object.username
+    user = json_object['username']
     myself = request_handler.user
     from_file = join(bindpoint, myself, path2)
     to_file = join(bindpoint, user, path2)
-    if exists(to_file):
-        print("file exists. problem!")
+    if exists(to_file) or not exists(from_file):
+        print(to_file + " exists or " + from_file + "does not exist.")
+        exit
     symlink(from_file, to_file)
     request_handler.send_response(200)
 
