@@ -70,13 +70,14 @@ def exec_files_path(request_handler):
     path = localbox_path_decoder(path)      
     filepath = join(bindpoint, request_handler.user, path)
     if (request_handler.command=="POST"):
-        filedescriptor = open(filepath, 'w')
-        length = int(request_handler.headers.getheader('content-length'))
+        filedescriptor = open(filepath, 'wb')
+        length = int(request_handler.headers.get('content-length'))
+        from shutil import copyfile
         filedescriptor.write(request_handler.rfile.read(length))
 
     if (request_handler.command=="GET"):
         print ("Running files path :  20 GET /lox_api/files/{path}")
-        filedescriptor = open(filepath, 'r')
+        filedescriptor = open(filepath, 'rb')
         request_handler.wfile.write(filedescriptor.read())
 
 
@@ -135,7 +136,7 @@ def exec_user_username(request_handler):
 from pprint import pprint
 
 def exec_create_share(request_handler):
-    length = int(request_handler.headers.getheader('content-length'))
+    length = int(request_handler.headers.get('content-length'))
     body = request_handler.rfile.read(length)
     json_list = loads(body)
     path2 = request_handler.path.replace('/lox_api/share_create/', '', 1)

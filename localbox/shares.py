@@ -6,7 +6,6 @@ from json import dumps
 from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
 
-from pprint import pprint
 
 
 class User(object):
@@ -76,7 +75,6 @@ class Invitation(object):
             sql = "select id from invitations where sender = ? and receiver = ?" \
                   "and share_id = ? and state = ?"
             result = database_execute(sql, params)
-            print result
             self.identifier = result
 
 def get_database_invitations(user):
@@ -130,7 +128,6 @@ class Share(object):
                 'item': self.item}
 
     def save_to_database(self):
-        pprint(self.__dict__)
         params = (self.users, self.item.path)
         if self.identifier is None:
             sql = 'insert into shares (user, path) values (?, ?)'
@@ -142,7 +139,6 @@ class Share(object):
 def get_share_by_id(identifier):
     sharesql = 'select user, path from shares where id = ?'
     sharedata = database_execute(sharesql, (identifier,))[0]
-    pprint(sharedata)
     itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at,'\
               'title, is_dir from shareitem where path = ?'
     itemdata = database_execute(itemsql, (sharedata[1],))[0]
