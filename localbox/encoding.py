@@ -1,6 +1,8 @@
 """
 Encoding functions specific to localbox
 """
+from pprint import pprint
+from os.path import join
 from json import JSONEncoder
 try:
     from urllib import unquote
@@ -26,8 +28,12 @@ def localbox_path_decoder(path):
     """
     A 'localbox_path' is a unix filepath with the urlencoded components.
     """
+    pprint(path)
     realpath = []
     components = path.split('/')
     for component in components:
-        realpath.append(unquote(component))
-    return '/'.join(realpath)
+        if component != '':
+            realpath.append(unquote(component))
+    newpath = join(*realpath)
+    print newpath
+    return newpath

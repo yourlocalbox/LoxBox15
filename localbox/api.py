@@ -65,17 +65,14 @@ def exec_files_path(request_handler):
     # 2 POST /lox_api/files/{path}    
     # Upload file '{path}' naar de localbox server. {path} is een relatief file path met urlencoded componenten (e.g.: path/to/file%20met%20spaties).
     """        
+    path = request_handler.path.replace('/lox_api/files/', '', 1)
     if (request_handler.command=="POST"):
-        print ("Running files path :  2 POST /lox_api/files/{path}")  
-        """
-        A 'localbox_path' is a unix filepath with the urlencoded components.
-        """
-        points = ".."
-        bindpoint = request_handler.bindpoint.user.path   # "\/lox_api\/files\/.*"
-        wfile     = request_handler.rfile
-        
-        localbox_path_decoder(points+bindpoint+wfile)      
-        request_handler.wfile.write(dumps(info))
+        bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+        path = localbox_path_decoder(path)      
+        filepath = join(bindpoint, request_handler.user, path)
+        filedescriptor = open(filepath, 'w')
+        length = int(request_handler.headers.getheader('content-length'))
+        filedescriptor.write(request_handler.rfile.read(length))
         
     """
     # 20 GET /lox_api/files/{path}
@@ -120,7 +117,7 @@ def exec_user(request_handler):
     print ("running exec user")
     # Haal name, public_key, private_key from user uit database.
     if (request_handler.user): # is user loggen in ?
-        sql = "select name, public_key, private_key from user where user = request_handler.user"
+        sql = "select name, public_key, private_key from user where user = ?"
     result = database_execute(sql, (request_handler.user,))    
     request_handler.wfile.write(dumps(result))
 
@@ -139,7 +136,7 @@ def exec_user_username(request_handler):
     print ("running exec user username")
 #   get info below from DB, private_key only if user is logged in.
     if (request_handler.user): # is user loggen in ?
-        sql = "select name, public_key, private_key from user where user = request_handler.user"
+        sql = "select name, public_key, private_key from user where user = ?"
     result = database_execute(sql, (user,)) 
 
     info = {'name':'result.user', 'public_key':'result.public_key', 'private_key':'private_key'}
