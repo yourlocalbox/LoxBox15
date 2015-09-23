@@ -58,15 +58,6 @@ def exec_invite_reject(request_handler):
     request_handler.end_headers()
 
 
-def exec_user(request_handler):
-    """
-    Handle user info (or pretend to)
-    """
-    info = {'name': 'user', 'public_key': 'FT9CH-XVXW7',
-            'private_key': 'RPR49-VDHYD', 'complete': 'No!'}
-    request_handler.wfile.write(dumps(info))
-
-
 def exec_files_path(request_handler):
     """
     # 2 POST /lox_api/files/{path}    
@@ -81,7 +72,7 @@ def exec_files_path(request_handler):
         bindpoint = request_handler.bindpoint.user.path   # "\/lox_api\/files\/.*"
         wfile     = request_handler.rfile
         
-        localbox_path_decoder(points+bindpoint+wfile)       
+        localbox_path_decoder(points+bindpoint+wfile)      
         request_handler.wfile.write(dumps(info))
         
     """
@@ -118,6 +109,7 @@ def exec_operations_copy(request_handler):
     request_handler.send_response(200)
     request_handler.end_headers()
 
+
     """
     # 29 POST /lox_api/user   # 13
     """    
@@ -127,7 +119,7 @@ def exec_user(request_handler):
     if (request_handler.user): # is user loggen in ?
         sql = "select name, public_key, private_key from user where user = request_handler.user"
     result = database_execute(sql, (request_handler.user,))    
-    request_handler.wfile.write(dumps(info))
+    request_handler.wfile.write(dumps(result))
 
 
     """
@@ -142,13 +134,13 @@ def exec_user(request_handler):
 # In het geval van de 'private_key' gaat het om een de key om mee de decoderen.
 def exec_user_username(request_handler):
     print ("running exec user username")
-#   get info below from DB, private_key only if logged in user is logged in.
+#   get info below from DB, private_key only if user is logged in.
     if (request_handler.user): # is user loggen in ?
         sql = "select name, public_key, private_key from user where user = request_handler.user"
     result = database_execute(sql, (user,)) 
 
-    info = {'name':'user', 'public_key':'FT9CH-XVXW7', 'private_key':'RPR49-VDHYD'}
-    request_handler.wfile.write(dumps(info))
+    info = {'name':'result.user', 'public_key':'result.public_key', 'private_key':'private_key'}
+    request_handler.wfile.write(dumps(result))
     
 from pprint import pprint
 
