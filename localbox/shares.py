@@ -72,6 +72,12 @@ class Invitation(object):
                   "share_id = ?, state = ? where id = ?"
 
         database_execute(sql, params)
+        if self.identifier == None:
+            sql = "select id from invitations where sender = ? and receiver = ?" \
+                  "and share_id = ? and state = ?"
+            result = database_execute(sql, params)
+            print result
+            self.identifier = result
 
 def get_database_invitations(user):
     sql = "select id, sender, receiver, share_id, state from invitations where receiver = ?"
@@ -123,6 +129,15 @@ class Share(object):
         return {'identities': self.users, 'id': self.identifier,
                 'item': self.item}
 
+    def save_to_database(self):
+        pprint(self.__dict__)
+        params = (self.users, self.item.path)
+        if self.identifier is None:
+            sql = 'insert into shares (user, path) values (?, ?)'
+        else:
+            sql = 'update shares set user = ?, path = ? where id = ?'
+            params = params + (self.identifier,)
+        database_execute(sql, params)
 
 def get_share_by_id(identifier):
     sharesql = 'select user, path from shares where id = ?'

@@ -39,6 +39,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             print("Matching" + self.path + " with pattern " + regex.pattern)
             if regex.match(self.path):
                 function(self)
+                break
 
     def do_POST(self):
         """

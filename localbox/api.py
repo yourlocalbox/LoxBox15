@@ -8,6 +8,7 @@ from os import symlink
 from os.path import join
 from os.path import exists
 
+from .shares import Share, ShareItem, Invitation
 from .shares import list_share_items
 from .shares import get_database_invitations
 from .encoding import localbox_path_decoder
@@ -147,19 +148,29 @@ from pprint import pprint
 def exec_create_share(request_handler):
     length = int(request_handler.headers.getheader('content-length'))
     body = request_handler.rfile.read(length)
-    print(body)
-    json_object = loads(body)
-    pprint(json_object)
+    json_list = loads(body)
     path2 = request_handler.path.replace('/lox_api/share_create/', '', 1)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-    user = json_object['username']
-    myself = request_handler.user
-    from_file = join(bindpoint, myself, path2)
-    to_file = join(bindpoint, user, path2)
-    if exists(to_file) or not exists(from_file):
-        print(to_file + " exists or " + from_file + "does not exist.")
-        exit
-    symlink(from_file, to_file)
+    sender = request_handler.user
+    from_file = join(bindpoint, sender, path2)
+    # TODO: something something group
+    share = Share(sender, None, ShareItem(path=path2))
+    share.save_to_database()
+    for json_object in json_list:
+        if json_object['type'] == 'user':
+            receiver = json_object['username']
+            to_file = join(bindpoint, receiver, path2)
+            if exists(to_file):
+                print("destination " + to_file + " exists.")
+                request_handler.send_response(500)
+                return
+            if not exists(from_file):
+                print("source " + from_file + "does not exist.")
+                request_handler.send_response(500)
+                return
+            symlink(from_file, to_file)
+            invite = Invitation(None, 'pending', share, sender, receiver)
+            invite.save_to_database()
     request_handler.send_response(200)
 
 ROUTING_LIST = [
