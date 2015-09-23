@@ -66,28 +66,18 @@ def exec_files_path(request_handler):
     # Upload file '{path}' naar de localbox server. {path} is een relatief file path met urlencoded componenten (e.g.: path/to/file%20met%20spaties).
     """        
     path = request_handler.path.replace('/lox_api/files/', '', 1)
+    bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+    path = localbox_path_decoder(path)      
+    filepath = join(bindpoint, request_handler.user, path)
     if (request_handler.command=="POST"):
-        bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-        path = localbox_path_decoder(path)      
-        filepath = join(bindpoint, request_handler.user, path)
         filedescriptor = open(filepath, 'w')
         length = int(request_handler.headers.getheader('content-length'))
         filedescriptor.write(request_handler.rfile.read(length))
-        
-    """
-    # 20 GET /lox_api/files/{path}
-    # Download file '{path}' naar de localbox server. {path} is een relatief file path met urlencoded componenten (e.g.: path/to/file%20met%20spaties).
-    """
+
     if (request_handler.command=="GET"):
         print ("Running files path :  20 GET /lox_api/files/{path}")
-
-        puntjes = ".."
-        bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-        bindpoint = request_handler.bindpoint.user.path   # "\/lox_api\/files\/.*"
-        rfile     = request_handler.rfile
-
-        localbox_path_decoder(points+bindpoint+rfile)  
-        request_handler.rfile.read(dumps(info))
+        filedescriptor = open(filepath, 'r')
+        request_handler.wfile.write(filedescriptor.read())
 
 
 # 10 POST /lox_api/operations/copy
