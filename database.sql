@@ -2,6 +2,7 @@ CREATE TABLE shareitem (icon char(255), path char(255), has_keys boolean, is_sha
 CREATE TABLE shares (id integer primary key autoincrement, user char(255), path char(255));
 CREATE TABLE invitations (id INTEGER PRIMARY KEY AUTOINCREMENT, sender char(255), receiver char(255), share_id int, state char(255), FOREIGN KEY (share_id) REFERENCES share(id));
 CREATE TABLE users (name char(255), public_key char(255), private_key char(255));
+CREATE TABLE keys (path char(255), user char(255), key char(255), iv char(255));
 
 -- this is (sqlite) default/test data, [cs]hould be removed before launch
 insert into shareitem VALUES('', 'ponies', 0, 0, 0, DATETIME(), 'ponies', 0);
