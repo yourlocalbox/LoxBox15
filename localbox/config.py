@@ -9,11 +9,13 @@ except ImportError:
     from configparser import ConfigParser
     from configparser import NoOptionError, NoSectionError
 
+
 class ConfigSingleton(object):
     """
     Singleton which has all configruation related info.
     """
     _instance = None
+
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(ConfigSingleton, cls).__new__(
@@ -58,4 +60,3 @@ class ConfigSingleton(object):
         configuration, cast to an int.
         """
         return self.configparser.getint(section, field)
-

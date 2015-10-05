@@ -2,13 +2,11 @@
 LocalBox shares module.
 """
 from json import dumps
-from os.path import islink
 
 from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
 from .files import stat_reader
 from .files import get_filesystem_path
-
 
 
 class User(object):
@@ -41,6 +39,7 @@ class Group(object):
         """
         return {'id': self.name, 'title': self.name, 'type': 'group'}
 
+
 class Invitation(object):
     """
     The state of being asked to join in sharing a file.
@@ -62,32 +61,39 @@ class Invitation(object):
         This creates a JSON serialisation of the Invitation. This serialisation
         is primarily for returning values and not a complete serialisation.
         """
-        return {'id': self.identifier, 'share': self.share, 'item': self.share.item}
+        return {'id': self.identifier, 'share': self.share,
+                'item': self.share.item}
 
     def save_to_database(self):
-        params = (self.sender, self.receiver, self.share.identifier, self.state)
-        if self.identifier == None:
-            sql = "insert into invitations (sender, receiver, share_id, state) values (?, ?, ?, ?)"
+        params = (self.sender, self.receiver, self.share.identifier,
+                  self.state)
+        if self.identifier is None:
+            sql = "insert into invitations (sender, receiver, share_id, "\
+                  "state) values (?, ?, ?, ?)"
         else:
             params = params + (self.identifier,)
             sql = "update invitations set sender = ?, receiver = ?, "\
                   "share_id = ?, state = ? where id = ?"
 
         database_execute(sql, params)
-        if self.identifier == None:
-            sql = "select id from invitations where sender = ? and receiver = ?" \
-                  "and share_id = ? and state = ?"
+        if self.identifier is None:
+            sql = "select id from invitations where sender = ? and " \
+                  "receiver = ?  and share_id = ? and state = ?"
             result = database_execute(sql, params)
             self.identifier = result
 
+
 def get_database_invitations(user):
-    sql = "select id, sender, receiver, share_id, state from invitations where receiver = ?"
+    sql = "select id, sender, receiver, share_id, state from invitations " \
+          "where receiver = ?"
     result = database_execute(sql, (user,))
     invitation_list = []
     for entry in result:
         share = get_share_by_id(entry[3])
-        invitation_list.append(Invitation(entry[0], entry[4], share, entry[1], entry[2]))
+        invitation_list.append(Invitation(entry[0], entry[4], share, entry[1],
+                                          entry[2]))
     return dumps(invitation_list, cls=LocalBoxJSONEncoder)
+
 
 class ShareItem(object):
     """
@@ -116,8 +122,10 @@ class ShareItem(object):
                 'modified_at': self.modified_at, 'title': self.title,
                 'is_dir': self.is_dir}
 
+
 def get_shareitem_by_path(localbox_path, user):
     return stat_reader(get_filesystem_path(localbox_path), user)
+
 
 class Share(object):
     """
@@ -141,6 +149,7 @@ class Share(object):
             params = params + (self.identifier,)
         database_execute(sql, params)
 
+
 def get_share_by_id(identifier):
     sharesql = 'select user, path from shares where id = ?'
     sharedata = database_execute(sharesql, (identifier,))[0]
@@ -158,19 +167,19 @@ def list_share_items(path=None):
     path are returned.
     """
     if path is None:
-        data = database_execute('select shareitem.icon, shareitem.path, ' +
-                                'shareitem.has_keys, shareitem.is_share, ' +
-                                'shareitem.is_shared, shareitem.modified_at, ' +
-                                'shareitem.title, shareitem.is_dir, shares.id ' +
-                                'from shareitem,' +
+        data = database_execute('select shareitem.icon, shareitem.path, '
+                                'shareitem.has_keys, shareitem.is_share, '
+                                'shareitem.is_shared, shareitem.modified_at, '
+                                'shareitem.title, shareitem.is_dir, shares.id '
+                                'from shareitem,'
                                 'shares where shares.path = shareitem.path')
     else:
-        data = database_execute('select shareitem.icon, shareitem.path, ' +
-                                'shareitem.has_keys, shareitem.is_share, ' +
-                                'shareitem.is_shared, shareitem.modified_at, ' +
-                                'shareitem.title, shareitem.is_dir, shares.id ' +
-                                'from shareitem, shares where ' +
-                                'shares.path = shareitem.path and ' +
+        data = database_execute('select shareitem.icon, shareitem.path, '
+                                'shareitem.has_keys, shareitem.is_share, '
+                                'shareitem.is_shared, shareitem.modified_at, '
+                                'shareitem.title, shareitem.is_dir, shares.id'
+                                'from shareitem, shares where '
+                                'shares.path = shareitem.path and '
                                 'shareitem.path = ?', (path,))
     returndata = []
     for entry in data:
@@ -178,17 +187,19 @@ def list_share_items(path=None):
         item = ShareItem(entry[0], entry[1], entry[2], entry[3], entry[4],
                          entry[5], entry[6], entry[7])
         users = []
-        userentries = database_execute('select shares.user from shares where ' +
-                                       'shares.id = ?', (shareid,))
+        userentries = database_execute('select shares.user from shares where' +
+                                       ' shares.id = ?', (shareid,))
         for userentry in userentries:
             users.append(User(userentry[0]))
         returndata.append(Share(users, shareid, item))
     return dumps(returndata, cls=LocalBoxJSONEncoder)
 
+
 def toggle_invite_state(request_handler, newstate):
     invite_identifier = int(request_handler.path.split('/')[3])
     user = request_handler.user
-    readsql = "select 1 from invitations where state!=? and receiver = ? and id = ?;"
+    readsql = "select 1 from invitations where state!=? and receiver = ? and "\
+              "id = ?"
     readresult = database_execute(readsql, (newstate, user, invite_identifier))
     if len(readresult) != 0:
         sql = "update invitations set state=? where receiver = ? and id = ?;"

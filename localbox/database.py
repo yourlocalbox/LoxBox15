@@ -4,9 +4,9 @@ Database implementation class
 from logging import getLogger
 from os.path import exists
 try:
-     from ConfigParser import NoSectionError
+    from ConfigParser import NoSectionError
 except:
-     from configparser import NoSectionError
+    from configparser import NoSectionError
 
 from MySQLdb import connect as mysql_connect
 from sqlite3 import connect as sqlite_connect
@@ -15,11 +15,13 @@ from MySQLdb import Error
 
 from .config import ConfigSingleton
 
+
 def database_execute(command, params=None):
     """
     Function to execute a sql statement on the database
     """
-    getLogger("database").debug("database_execute(" + command + ", " + str(params) + ")")
+    getLogger("database").debug("database_execute(" + command + ", " +
+                                str(params) + ")")
     parser = ConfigSingleton()
     dbtype = parser.get('database', 'type')
     if dbtype == "mysql":
@@ -30,12 +32,14 @@ def database_execute(command, params=None):
     else:
         print("Unknown database type, cannot continue")
 
+
 def sqlite_execute(command, params=None):
     """
     Function to execute a sql statement on the mysql database
     """
-    #NOTE mostly copypasta'd from mysql_execute, may be a better way
-    getLogger("database").debug("sqlite_execute(" + command + ", " + str(params) + ")")
+    # NOTE mostly copypasta'd from mysql_execute, may be a better way
+    getLogger("database").debug("sqlite_execute(" + command + ", " +
+                                str(params) + ")")
     try:
         parser = ConfigSingleton()
         filename = parser.get('database', 'filename')
@@ -44,7 +48,7 @@ def sqlite_execute(command, params=None):
         cursor = connection.cursor()
         if init_db:
             for sql in file('database.sql').read().split("\n"):
-                if sql != "" and sql != None:
+                if sql != "" and sql is not None:
                     cursor.execute(sql)
                     connection.commit()
         if params:
@@ -69,7 +73,8 @@ def mysql_execute(command, params=None):
     """
     Function to execute a sql statement on the mysql database
     """
-    getLogger("database").debug("mysql_execute(" + command + ", " + str(params) + ")")
+    getLogger("database").debug("mysql_execute(" + command + ", " + str(params)
+                                + ")")
     parser = ConfigSingleton()
     try:
         host = parser.get('database', 'hostname')
@@ -77,7 +82,8 @@ def mysql_execute(command, params=None):
         pawd = parser.get('database', 'password')
         dbse = parser.get('database', 'database')
         port = parser.getint('database', 'port')
-        connection = mysql_connect(host=host, port=port, user=user, passwd=pawd, db=dbse)
+        connection = mysql_connect(host=host, port=port, user=user,
+                                   passwd=pawd, db=dbse)
         cursor = connection.cursor()
         cursor.execute(command, params)
         connection.commit()
@@ -92,10 +98,7 @@ def mysql_execute(command, params=None):
             pass
 
 
-
-
-def get_key_and_iv(path, user):
-    sql = "select key, iv from keys where path = ? and user = ?;"
-    result = database_execute(sql, (localbox_path, request_handler.user))[0]
+def get_key_and_iv(localbox_path, user):
+    sql = "select key, iv from keys where path = ? and user = ?"
+    result = database_execute(sql, (localbox_path, user))[0]
     return result
-

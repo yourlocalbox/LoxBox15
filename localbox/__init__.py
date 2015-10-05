@@ -5,8 +5,8 @@ from ssl import wrap_socket
 try:
     halter = raw_input
 except NameError:
-    # raw_input does not exist in python3, but input does, so in both python2 and
-    # python3 we are now able to use the 'input()' funcion.
+    # raw_input does not exist in python3, but input does, so in both python2
+    # and python3 we are now able to use the 'input()' funcion.
     halter = input
 
 
@@ -38,7 +38,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         """
         Handle a request (do_POST and do_GET both forward to this function)
         """
-        print("processing "+ self.path)
+        print("processing " + self.path)
         self.user = authentication_dummy()
         if not self.user:
             print("authentication problem")
@@ -47,19 +47,18 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         print("Finding " + self.path)
         for regex, function in ROUTING_LIST:
             if regex.match(self.path):
-                print("Matching " + self.path + " with pattern " + regex.pattern)
+                print("Matching " + self.path + " to " + regex.pattern)
                 match_found = True
                 function(self)
                 break
         if not match_found:
-            print("Could not match the path: "+ self.path)
+            print("Could not match the path: " + self.path)
 
     def do_POST(self):
         """
         handle a POST request
         """
         self.do_request()
-
 
     def do_GET(self):
         """
@@ -75,7 +74,8 @@ def main():
     configparser = ConfigSingleton()
     SymlinkCache()
     port = int(configparser.get('httpd', 'port', 443))
-    insecure_mode = configparser.getboolean('httpd', 'insecure-http', default=False)
+    insecure_mode = configparser.getboolean('httpd', 'insecure-http',
+                                            default=False)
     server_address = ('', port)
     httpd = HTTPServer(server_address, LocalBoxHTTPRequestHandler)
     if insecure_mode:
@@ -89,5 +89,5 @@ def main():
         httpd.socket = wrap_socket(httpd.socket, server_side=True,
                                    certfile=certfile, keyfile=keyfile)
     print("ready")
-    #httpd.handle_request()
-    httpd.serve_forever()
+    httpd.handle_request()
+    # httpd.serve_forever()

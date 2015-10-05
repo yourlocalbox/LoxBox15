@@ -10,4 +10,3 @@ if __name__ == '__main__':
     LOG.setLevel(-1)
     LOG.addHandler(StreamHandler())
     main()
-

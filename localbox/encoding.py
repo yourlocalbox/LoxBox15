@@ -8,6 +8,7 @@ try:
 except ImportError:
     from urllib.parse import unquote
 
+
 class LocalBoxJSONEncoder(JSONEncoder):
     """
     JSONEncoder for localbox classes

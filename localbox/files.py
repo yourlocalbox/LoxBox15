@@ -17,6 +17,7 @@ from os import sep
 
 from .config import ConfigSingleton
 
+
 def get_filesystem_path(localbox_path, user):
     """
     Given a LocalBox path (e.g. '/file_name'), return the corresponding
@@ -38,7 +39,8 @@ def stat_reader(filesystem_path, user):
         title = 'Home'
     else:
         title = [item for item in split(filesystem_path) if item != ''][-1]
-    localboxpath = '/' + join(relpath(filesystem_path, bindpath)).replace(sep, '/')
+    localboxpath = '/' + join(relpath(filesystem_path,
+                                      bindpath)).replace(sep, '/')
     if localboxpath == '/.':
         localboxpath = '/'
     statstruct = stat(filesystem_path)
@@ -65,6 +67,7 @@ class SymlinkCache(object):
     Singleton keeping track of all symlinks (shares)
     """
     _instance = None
+
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(SymlinkCache, cls).__new__(
@@ -84,8 +87,8 @@ class SymlinkCache(object):
 
     def exists(self, absolute_file_name):
         """
-        Check whether absolute_file_name is in the cache, and thus a destination
-        of a symlink and thus a 'share' folder
+        Check whether absolute_file_name is in the cache, and thus a
+        destination of a symlink and thus a 'share' folder
         """
         return absolute_file_name in self.cache
 
