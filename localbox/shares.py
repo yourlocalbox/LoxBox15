@@ -2,9 +2,12 @@
 LocalBox shares module.
 """
 from json import dumps
+from os.path import islink
 
 from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
+from .files import stat_reader
+from .files import get_filesystem_path
 
 
 
@@ -113,6 +116,8 @@ class ShareItem(object):
                 'modified_at': self.modified_at, 'title': self.title,
                 'is_dir': self.is_dir}
 
+def get_shareitem_by_path(localbox_path, user):
+    return stat_reader(get_filesystem_path(localbox_path), user)
 
 class Share(object):
     """

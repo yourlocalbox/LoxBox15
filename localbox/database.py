@@ -90,3 +90,12 @@ def mysql_execute(command, params=None):
                 connection.close()
         except UnboundLocalError:
             pass
+
+
+
+
+def get_key_and_iv(path, user):
+    sql = "select key, iv from keys where path = ? and user = ?;"
+    result = database_execute(sql, (localbox_path, request_handler.user))[0]
+    return result
+

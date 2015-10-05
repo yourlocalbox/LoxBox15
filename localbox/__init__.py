@@ -3,14 +3,22 @@ LocalBox main initialization class.
 """
 from ssl import wrap_socket
 try:
+    halter = raw_input
+except NameError:
+    # raw_input does not exist in python3, but input does, so in both python2 and
+    # python3 we are now able to use the 'input()' funcion.
+    halter = input
+
+
+try:
     from BaseHTTPServer import BaseHTTPRequestHandler
     from BaseHTTPServer import HTTPServer
-except(ImportError) as e:
+except ImportError:
     from http.server import BaseHTTPRequestHandler
     from http.server import HTTPServer
 from .api import ROUTING_LIST
 from .config import ConfigSingleton
-
+from .files import SymlinkCache
 
 
 def authentication_dummy():
@@ -35,11 +43,16 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         if not self.user:
             print("authentication problem")
             return
+        match_found = False
+        print "Finding " + self.path
         for regex, function in ROUTING_LIST:
-            print("Matching" + self.path + " with pattern " + regex.pattern)
             if regex.match(self.path):
+                print("Matching " + self.path + " with pattern " + regex.pattern)
+                match_found = True
                 function(self)
                 break
+        if not match_found:
+            print("Could not match thhe path: "+ self.path)
 
     def do_POST(self):
         """
@@ -60,12 +73,20 @@ def main():
     run the actual LocalBox Server
     """
     configparser = ConfigSingleton()
-    certfile = configparser.get('httpd', 'certfile')
-    keyfile = configparser.get('httpd', 'keyfile')
-    port = int(configparser.get('httpd', 'port'))
+    SymlinkCache()
+    port = int(configparser.get('httpd', 'port', 443))
+    insecure_mode = configparser.getboolean('httpd', 'insecure-http', default=False)
     server_address = ('', port)
     httpd = HTTPServer(server_address, LocalBoxHTTPRequestHandler)
-    httpd.socket = wrap_socket(httpd.socket, server_side=True,
-                               certfile=certfile, keyfile=keyfile)
+    if insecure_mode:
+        print("WARNING: Running Insecure HTTP.")
+        print("WARNING: Therefore, SSL has not been enabled.")
+        print("WARNING: Therefore, THIS SERVER IS NOT SECURE!!!.")
+        halter("Press a key to continue.")
+    else:
+        certfile = configparser.get('httpd', 'certfile')
+        keyfile = configparser.get('httpd', 'keyfile')
+        httpd.socket = wrap_socket(httpd.socket, server_side=True,
+                                   certfile=certfile, keyfile=keyfile)
     print("ready")
     httpd.serve_forever()
