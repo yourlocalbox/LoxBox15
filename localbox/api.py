@@ -30,7 +30,24 @@ from .encoding import localbox_path_decoder
 from .shares import toggle_invite_state
 from .config import ConfigSingleton
 
-def get_body_json(request_handler)
+def prepare_string(string, encoding="UTF-8"):
+    """
+    Prepares a string to be sent over the wire. Python3 requires 'string's to
+    be encoded as bytes accoding to an encoding (e.g. UTF-8) before sending them
+    through a socket. Within python2, 'bytes' more or less are strings, and the
+    bytes' constructor only accepts one argument. Hence, this function will
+    return the right type of object for sending over the network.
+    @param string string to be encoded.
+    @param encoding optional encoding in case it should not by UTF8 encoded.
+    @return the string as a socket write prepared bytes type.
+    """
+    try:
+        return(bytes(string, encoding))
+    except TypeError:
+        return string
+
+
+def get_body_json(request_handler):
     """
     does the necesary things in order to extract a json element from the requests' body
     """
@@ -38,6 +55,25 @@ def get_body_json(request_handler)
     value = request_handler.rfile.read(length)
     return loads(value)
 
+
+def exec_leave_share(request_handler):
+    path = request_handler.path.replace('/lox_api/shares/', '', 1).replace('/leave', '',1)
+    bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+    linkpath = join(bindpoint, request_handler.user, path)
+    if(islink(linkpath)):
+        remove(linkpath)
+        request_handler.send_response(200)
+        request_handler.end_headers()
+    else:
+        request_handler.send_response(404)
+        request_handler.end_headers()
+
+def exec_remove_shares(request_handler):
+    shareid = int(request_handler.path.replace('/lox_api/shares/', '', 1).replace('/revoke', '',1))
+    sql = 'remove from shares where id = ?'
+    database_execute(sql, (shareid))
+    request_handler.send_response(200)
+    request_handler.end_headers()
 
 
 def exec_edit_shares(request_handler):
@@ -354,17 +390,22 @@ def exec_identities(request_handler):
         outputlist.append({'id': entry[0], 'name': entry[0], 'type':'user'})
     request_handler.wfile.write(dumps(outputlist))
 
+def test(request_handler):
+    request_handler.wfile.write(prepare_string("this is a log of wfile writing"))
+
 ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/files\/.*"), exec_files_path),
     (regex_compile(r"\/lox_api\/invitations"), exec_invitations),
     (regex_compile(r"\/lox_api\/invite/[0-9]+/accept"), exec_invite_accept),
-    (regex_compile(r"\/lox_api\/invite/[0-9]+/reject"), exec_invite_reject),
+    (regex_compile(r"\/lox_api\/invite/[0-9]+/revoke"), exec_invite_reject),
     (regex_compile(r"\/lox_api\/operations\/copy"), exec_operations_copy),
     (regex_compile(r"\/lox_api\/operations\/move"), exec_operations_move),
     (regex_compile(r"\/lox_api\/operations\/delete"), exec_operations_delete),
     (regex_compile(r"\/lox_api\/operations\/create_folder"), exec_operations_create_folder),
     (regex_compile(r"\/lox_api\/share_create\/.*"), exec_create_share),
     (regex_compile(r"\/lox_api\/shares\/.*\/edit"), exec_edit_shares),
+    (regex_compile(r"\/lox_api\/shares\/.*\/revoke"), exec_remove_shares),
+    (regex_compile(r"\/lox_api\/shares\/.*\/leave"), exec_leave_share),
     (regex_compile(r"\/lox_api\/shares\/.*"), exec_shares),
     (regex_compile(r"\/lox_api\/user\/.*"), exec_user_username),  
     (regex_compile(r"\/lox_api\/user"), exec_user),
@@ -373,6 +414,7 @@ ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/meta\/.*"), exec_meta),
     (regex_compile(r"\/lox_api\/identities"), exec_identities),
 
+    (regex_compile(r"\/test.*"), test),
     (regex_compile(r"\/login"), fake_login),
     (regex_compile(r"\/login_check"), fake_login_check),
     (regex_compile(r"\/register_app"), fake_register_app),

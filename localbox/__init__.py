@@ -44,7 +44,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             print("authentication problem")
             return
         match_found = False
-        print "Finding " + self.path
+        print("Finding " + self.path)
         for regex, function in ROUTING_LIST:
             if regex.match(self.path):
                 print("Matching " + self.path + " with pattern " + regex.pattern)
@@ -52,7 +52,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
                 function(self)
                 break
         if not match_found:
-            print("Could not match thhe path: "+ self.path)
+            print("Could not match the path: "+ self.path)
 
     def do_POST(self):
         """
@@ -89,4 +89,5 @@ def main():
         httpd.socket = wrap_socket(httpd.socket, server_side=True,
                                    certfile=certfile, keyfile=keyfile)
     print("ready")
+    #httpd.handle_request()
     httpd.serve_forever()

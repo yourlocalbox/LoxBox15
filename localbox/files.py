@@ -90,14 +90,14 @@ class SymlinkCache(object):
         return absolute_file_name in self.cache
 
     def get(self, path):
-        return self.cache['path']
+        return self.cache[path]
 
     def __init__(self):
         if not hasattr(self, 'cache'):
-            print "initialising SymlinkCache"
+            print("initialising SymlinkCache")
             self.cache = {}
             self.build_cache()
-            print "initialised SymlinkCache"
+            print("initialised SymlinkCache")
 
     def build_cache(self):
         """
