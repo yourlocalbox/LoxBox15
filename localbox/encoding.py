@@ -4,7 +4,7 @@ Encoding functions specific to localbox
 from os.path import join
 from json import JSONEncoder
 try:
-    from urllib import unquote
+    from urllib import unquote  # pylint: disable=E0611
 except ImportError:
     from urllib.parse import unquote  # pylint: disable=E0611,F0401
 

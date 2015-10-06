@@ -46,9 +46,6 @@ class Invitation(object):
     """
     The state of being asked to join in sharing a file.
     """
-    PENDING = 'pending'
-    ACCEPTED = 'accepted'
-    REVOKED = 'revoked'
 
     def __init__(self, identifier=None, state=None, share=None, sender=None,
                  receiver=None):
@@ -95,9 +92,8 @@ def get_database_invitations(user):
     @param user the user for who to return invitations
     @return the invitations for this user
     """
-    # TODO: where state is not accepted
     sql = "select id, sender, receiver, share_id, state from invitations " \
-          "where receiver = ?"
+          "where receiver = ? where state != 'accepted'"
     result = database_execute(sql, (user,))
     invitation_list = []
     for entry in result:
@@ -143,7 +139,7 @@ def get_shareitem_by_path(localbox_path, user):
     @param user name of the user for who to do this
     @return the metadata for the share on the supplied path
     """
-    return stat_reader(get_filesystem_path(localbox_path), user)
+    return stat_reader(get_filesystem_path(localbox_path, user), user)
 
 
 class Share(object):

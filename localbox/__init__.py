@@ -3,7 +3,7 @@ LocalBox main initialization class.
 """
 from ssl import wrap_socket
 try:
-    halter = raw_input
+    halter = raw_input  # pylint: disable=E0602
 except NameError:
     # raw_input does not exist in python3, but input does, so in both python2
     # and python3 we are now able to use the 'input()' funcion.

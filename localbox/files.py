@@ -88,7 +88,7 @@ class SymlinkCache(object):
         """
         if absolute_filename in self.cache.keys():
             self.cache.pop(absolute_filename)
-        for key, value in self.cache.iteritems():
+        for key, value in self.cache.items():
             if absolute_filename in value:
                 newvalue = value.remove(absolute_filename)
                 self.cache[key] = newvalue

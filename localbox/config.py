@@ -7,7 +7,7 @@ try:
     from ConfigParser import NoOptionError, NoSectionError
 except ImportError:
     from configparser import ConfigParser  # pylint: disable=F0401
-    # pylint: disable=F0401, E501
+    # pylint: disable=F0401
     from configparser import NoOptionError, NoSectionError
 
 

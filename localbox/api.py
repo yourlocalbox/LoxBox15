@@ -110,7 +110,6 @@ def exec_edit_shares(request_handler):
     path = share.item.path
     links = symlinks.get(path)
 
-    # TODO: clean old links
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     newlinks = []
     for entry in json:
@@ -299,7 +298,6 @@ def exec_user(request_handler):
     returns public- and private key information about the current user
     @param request_handler the object which has the body to extract as json
     """
-    # TODO: this is the function to SEND encryption keys, dummy!
     print("running exec user")
     sql = "select public_key, private_key from users where name = ?"
     result = database_execute(sql, (request_handler.user,))[0]
@@ -349,7 +347,7 @@ def exec_create_share(request_handler):
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     sender = request_handler.user
     from_file = join(bindpoint, sender, path2)
-    # TODO: something something group
+    # TODO: something something something group
     share = Share(sender, None, ShareItem(path=path2))
     share.save_to_database()
     for json_object in json_list:
@@ -483,8 +481,7 @@ def fake_register_app(request_handler):
                           '5Rj6Iq1M5L8sPjJ6WzkEXblw==',
               "access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
               "token_type": "Bearer", "expires_in": 600,
-              "refresh_token": "tNXAVVo2QE7c5MKgFCB1mKuAPsu4xL", "scope": "all"
-              }
+              "refresh_token": "tNXAVVo2QE7c5MKgFB1mKuAPsu4xL", "scope": "all"}
     request_handler.send_response(200)
     request_handler.send_header('PHPSESSID', 'padding')
     request_handler.send_header('Domain', '10.42.0.1')
