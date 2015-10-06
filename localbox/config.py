@@ -6,8 +6,9 @@ try:
     from ConfigParser import ConfigParser
     from ConfigParser import NoOptionError, NoSectionError
 except ImportError:
-    from configparser import ConfigParser # pylint: disable=F0401
-    from configparser import NoOptionError, NoSectionError # pylint: disable=F0401
+    from configparser import ConfigParser  # pylint: disable=F0401
+    # pylint: disable=F0401, E501
+    from configparser import NoOptionError, NoSectionError
 
 
 class ConfigSingleton(object):

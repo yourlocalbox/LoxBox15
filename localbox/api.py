@@ -118,9 +118,10 @@ def exec_edit_shares(request_handler):
         newlinks.append(to_file)
         symlink(path, to_file)
     for link in links:
-         if link not in newlinks:
-             remove(link)
-             symlinks.remove(link)
+        if link not in newlinks:
+            remove(link)
+            symlinks.remove(link)
+
 
 def exec_shares(request_handler):
     """
@@ -483,7 +484,7 @@ def fake_register_app(request_handler):
               "access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
               "token_type": "Bearer", "expires_in": 600,
               "refresh_token": "tNXAVVo2QE7c5MKgFCB1mKuAPsu4xL", "scope": "all"
-             }
+              }
     request_handler.send_response(200)
     request_handler.send_header('PHPSESSID', 'padding')
     request_handler.send_header('Domain', '10.42.0.1')

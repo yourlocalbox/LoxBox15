@@ -6,7 +6,7 @@ from os.path import exists
 try:
     from ConfigParser import NoSectionError
 except ImportError:
-    from configparser import NoSectionError #pylint: disable=F0401
+    from configparser import NoSectionError  # pylint: disable=F0401
 
 from MySQLdb import connect as mysql_connect
 from sqlite3 import connect as sqlite_connect

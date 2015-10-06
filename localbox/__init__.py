@@ -14,8 +14,8 @@ try:
     from BaseHTTPServer import BaseHTTPRequestHandler
     from BaseHTTPServer import HTTPServer
 except ImportError:
-    from http.server import BaseHTTPRequestHandler # pylint: disable=F0401
-    from http.server import HTTPServer # pylint: disable=F0401
+    from http.server import BaseHTTPRequestHandler  # pylint: disable=F0401
+    from http.server import HTTPServer  # pylint: disable=F0401
 from .api import ROUTING_LIST
 from .config import ConfigSingleton
 from .files import SymlinkCache
@@ -23,8 +23,8 @@ from .files import SymlinkCache
 
 def authentication_dummy():
     """
-    return the string 'user' and pretend authentication happened. To be replaced
-    with actual authentication before delivery.
+    return the string 'user' and pretend authentication happened. To be
+    replaced with actual authentication before delivery.
     @return "user"
     """
     return "user"
@@ -41,7 +41,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         Handle a request (do_POST and do_GET both forward to this function).
         """
         print("processing " + self.path)
-        self.user = authentication_dummy() # pylint: disable=W0201
+        self.user = authentication_dummy()  # pylint: disable=W0201
         if not self.user:
             print("authentication problem")
             return

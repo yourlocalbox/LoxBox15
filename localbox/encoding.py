@@ -6,14 +6,14 @@ from json import JSONEncoder
 try:
     from urllib import unquote
 except ImportError:
-    from urllib.parse import unquote # pylint: disable=E0611,F0401
+    from urllib.parse import unquote  # pylint: disable=E0611,F0401
 
 
 class LocalBoxJSONEncoder(JSONEncoder):
     """
     JSONEncoder for localbox classes
     """
-    def default(self, o): #pylint: disable=E0202
+    def default(self, o):  # pylint: disable=E0202
         """
         The way objects are usually encoded into JSON.
         @param o the object to encode into json
