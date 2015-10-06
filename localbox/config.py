@@ -6,8 +6,8 @@ try:
     from ConfigParser import ConfigParser
     from ConfigParser import NoOptionError, NoSectionError
 except ImportError:
-    from configparser import ConfigParser
-    from configparser import NoOptionError, NoSectionError
+    from configparser import ConfigParser # pylint: disable=F0401
+    from configparser import NoOptionError, NoSectionError # pylint: disable=F0401
 
 
 class ConfigSingleton(object):
@@ -36,6 +36,10 @@ class ConfigSingleton(object):
         """
         Returns the value of a certain field in a certain section on the
         configuration
+        @param section the [section] in which to look for the information
+        @param field the name of the configuration item to read
+        @param default Value to return when the config option can't be found
+        @return the value of said configuration item
         """
         try:
             result = self.configparser.get(section, field)
@@ -47,6 +51,10 @@ class ConfigSingleton(object):
         """
         Returns the value of a certain field in a certain section on the
         configuration in a boolean context
+        @param section the [section] in which to look for the information
+        @param field the name of the configuration item to read
+        @param default Value to return when the config option can't be found
+        @return the boolean value of said configuration item
         """
         try:
             result = self.configparser.getboolean(section, field)
@@ -58,5 +66,9 @@ class ConfigSingleton(object):
         """
         Returns the value of a certain field in a certain section on the
         configuration, cast to an int.
+        @param section the [section] in which to look for the information
+        @param field the name of the configuration item to read
+        @param default Value to return when the config option can't be found
+        @return the integer value of said configuration item
         """
         return self.configparser.getint(section, field)

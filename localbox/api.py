@@ -1,5 +1,6 @@
 """
-LocalBox API Implementation module
+LocalBox API Implementation module. This module holds the implementation of the
+API call handlers as well as directly related support functions
 """
 from json import dumps
 from json import loads
@@ -44,7 +45,7 @@ def prepare_string(string, encoding="UTF-8"):
     @return the string as a socket write prepared bytes type.
     """
     try:
-        return(bytes(string, encoding))
+        return bytes(string, encoding)
     except TypeError:
         return string
 
@@ -71,7 +72,7 @@ def exec_leave_share(request_handler):
 
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     linkpath = join(bindpoint, request_handler.user, path)
-    if(islink(linkpath)):
+    if islink(linkpath):
         remove(linkpath)
         request_handler.send_response(200)
         request_handler.end_headers()
@@ -108,12 +109,18 @@ def exec_edit_shares(request_handler):
     symlinks = SymlinkCache()
     path = share.item.path
     links = symlinks.get(path)
+
     # TODO: clean old links
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+    newlinks = []
     for entry in json:
         to_file = join(bindpoint, entry.title, basename(entry.path))
+        newlinks.append(to_file)
         symlink(path, to_file)
-
+    for link in links:
+         if link not in newlinks:
+             remove(link)
+             symlinks.remove(link)
 
 def exec_shares(request_handler):
     """
@@ -176,23 +183,27 @@ def exec_files_path(request_handler):
     if path != '':
         path = localbox_path_decoder(path)
     filepath = get_filesystem_path(path, request_handler.user)
-    if (request_handler.command == "POST"):
+    if request_handler.command == "POST":
         filedescriptor = open(filepath, 'wb')
         length = int(request_handler.headers.get('content-length'))
         filedescriptor.write(request_handler.rfile.read(length))
 
-    if (request_handler.command == "GET"):
+    if request_handler.command == "GET":
         if isdir(filepath):
+            # Not really looping but we need the first set of values
             for path, directories, files in walk(filepath):
+                if files is None or directories is None:
+                    print("filesystem related problems")
+                    return
+                # path, directories, files = walk(filepath).next()
+                dirdict = stat_reader(path, request_handler.user)
+                dirdict['children'] = []
+                for child in directories + files:
+                    user = request_handler.user
+                    childpath = join(filepath, child)
+                    dirdict['children'].append(stat_reader(childpath, user))
+                request_handler.wfile.write(dumps(dirdict))
                 break
-            # path, directories, files = walk(filepath).next()
-            dirdict = stat_reader(path, request_handler.user)
-            dirdict['children'] = []
-            for child in directories + files:
-                childpath = join(filepath, child)
-                dirdict['children'].append(stat_reader(childpath,
-                                                       request_handler.user))
-            request_handler.wfile.write(dumps(dirdict))
         else:
             filedescriptor = open(filepath, 'rb')
             request_handler.wfile.write(filedescriptor.read())
@@ -288,7 +299,7 @@ def exec_user(request_handler):
     @param request_handler the object which has the body to extract as json
     """
     # TODO: this is the function to SEND encryption keys, dummy!
-    print ("running exec user")
+    print("running exec user")
     sql = "select public_key, private_key from users where name = ?"
     result = database_execute(sql, (request_handler.user,))[0]
     result_dictionary = {'user': request_handler.user, 'public_key': result[0],
@@ -326,6 +337,8 @@ def exec_user_username(request_handler):
 
 def exec_create_share(request_handler):
     """
+    Creates a 'share' within localbox. Comes down to creating a symlink next
+    to a few database records to give the share an identifier
     @param request_handler the object which has the body to extract as json
     """
     length = int(request_handler.headers.get('content-length'))
@@ -364,8 +377,8 @@ def exec_key(request_handler):
     """
     localbox_path = request_handler.path.replace('/lox_api/key/', '', 1)
     if request_handler.command == "GET":
-        key, iv = get_key_and_iv(localbox_path, request_handler.user)
-        request_handler.wfile.write(dumps({'key': key, 'iv': iv}))
+        key, initvector = get_key_and_iv(localbox_path, request_handler.user)
+        request_handler.wfile.write(dumps({'key': key, 'iv': initvector}))
     elif request_handler.command == "POST":
         length = int(request_handler.headers.get('content-length'))
         data = request_handler.rfile.read(length)
@@ -470,7 +483,7 @@ def fake_register_app(request_handler):
               "access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
               "token_type": "Bearer", "expires_in": 600,
               "refresh_token": "tNXAVVo2QE7c5MKgFCB1mKuAPsu4xL", "scope": "all"
-              }
+             }
     request_handler.send_response(200)
     request_handler.send_header('PHPSESSID', 'padding')
     request_handler.send_header('Domain', '10.42.0.1')

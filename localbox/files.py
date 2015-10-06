@@ -22,6 +22,10 @@ def get_filesystem_path(localbox_path, user):
     """
     Given a LocalBox path (e.g. '/file_name'), return the corresponding
     filesystem path (e.g. '/var/localbox/data/user/file_name')
+    @param localbox_path the path relative to localbox' view
+    @param user the user for which to translate the path (the username is part
+           of the path and hence cannot be ommitted.
+    @return a filesystem path to the resource pointed to by the localbox path
     """
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, user, localbox_path)
@@ -32,6 +36,9 @@ def stat_reader(filesystem_path, user):
     """
     Return metadata for the given (filesystem) path based on information
     provided by the stat system call.
+    @param filesystem_path a path referring to the file to stat
+    @param user the user for which to reutrn the info
+    @return a dictionary of metadata for the filesystem path given
     """
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     bindpath = abspath(join(bindpoint, user))
@@ -76,7 +83,8 @@ class SymlinkCache(object):
 
     def remove(self, absolute_filename):
         """
-        removes links to and from filename
+        removes links to and from filename (from the cache)
+        @param absolute_filename the file to remove from the cache
         """
         if absolute_filename in self.cache.keys():
             self.cache.pop(absolute_filename)
@@ -89,10 +97,16 @@ class SymlinkCache(object):
         """
         Check whether absolute_file_name is in the cache, and thus a
         destination of a symlink and thus a 'share' folder
+        @param absolute_file_name name of the file to check in the cache
         """
         return absolute_file_name in self.cache
 
     def get(self, path):
+        """
+        Returns a list of sources of a symlink destination from the cache
+        @param path a file which is symlinked to
+        @return a list of symlinks to that file
+        """
         return self.cache[path]
 
     def __init__(self):
@@ -105,7 +119,8 @@ class SymlinkCache(object):
     def build_cache(self):
         """
         Build the reverse symlink cache by walking through the filesystem and
-        finding all symlinks.
+        finding all symlinks and put them into a cache dictionary for reference
+        later.
         """
         working_directory = getcwd()
         bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')

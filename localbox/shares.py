@@ -19,7 +19,8 @@ class User(object):
 
     def to_json(self):
         """
-        Method to turn an object into JSON.
+        Method to turn this object into JSON.
+        @return JSON representation of this User
         """
         return {'id': self.name, 'title': self.name, 'type': 'user'}
 
@@ -35,7 +36,8 @@ class Group(object):
 
     def to_json(self):
         """
-        Method to turn an object into JSON.
+        Method to turn this object into JSON.
+        @return JSON representation of this Group
         """
         return {'id': self.name, 'title': self.name, 'type': 'group'}
 
@@ -60,11 +62,15 @@ class Invitation(object):
         """
         This creates a JSON serialisation of the Invitation. This serialisation
         is primarily for returning values and not a complete serialisation.
+        @return json representing this Invitation
         """
         return {'id': self.identifier, 'share': self.share,
                 'item': self.share.item}
 
     def save_to_database(self):
+        """
+        Saves the Invitation to the database
+        """
         params = (self.sender, self.receiver, self.share.identifier,
                   self.state)
         if self.identifier is None:
@@ -84,6 +90,12 @@ class Invitation(object):
 
 
 def get_database_invitations(user):
+    """
+    returns all (relevant) invitations from the database for a specific user
+    @param user the user for who to return invitations
+    @return the invitations for this user
+    """
+    # TODO: where state is not accepted
     sql = "select id, sender, receiver, share_id, state from invitations " \
           "where receiver = ?"
     result = database_execute(sql, (user,))
@@ -115,6 +127,7 @@ class ShareItem(object):
         """
         Create a JSON encoded string out of this ShareItem. This is used by the
         LocalBoxJSONEncoder to create JSON responses.
+        @return JSON representation of the ShareItem
         """
         return {'icon': self.icon, 'path': self.path,
                 'has_keys': self.has_keys,
@@ -124,6 +137,12 @@ class ShareItem(object):
 
 
 def get_shareitem_by_path(localbox_path, user):
+    """
+    returns a ShareItem as defined by the given path.
+    @param localbox_path localbox specific filepath
+    @param user name of the user for who to do this
+    @return the metadata for the share on the supplied path
+    """
     return stat_reader(get_filesystem_path(localbox_path), user)
 
 
@@ -137,10 +156,18 @@ class Share(object):
         self.item = item
 
     def to_json(self):
+        """
+        returns a json representation of this Share
+        @return a json representation of this Share
+        """
         return {'identities': self.users, 'id': self.identifier,
                 'item': self.item}
 
     def save_to_database(self):
+        """
+        saves the current share to the database, either updating record 'id',
+        or creating a new one if this Share has no ID yet.
+        """
         params = (self.users, self.item.path)
         if self.identifier is None:
             sql = 'insert into shares (user, path) values (?, ?)'
@@ -151,6 +178,11 @@ class Share(object):
 
 
 def get_share_by_id(identifier):
+    """
+    returns the share with the supplied identifier
+    @param identifier the number identifying the share in question
+    @return the Share identified by the identifier
+    """
     sharesql = 'select user, path from shares where id = ?'
     sharedata = database_execute(sharesql, (identifier,))[0]
     itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at,'\
@@ -165,6 +197,8 @@ def list_share_items(path=None):
     """
     returns a list of ShareItems. If 'path' is given, only ShareItems for said
     path are returned.
+    @param path a path for which to return the ShareItems
+    @return list of shareitems
     """
     if path is None:
         data = database_execute('select shareitem.icon, shareitem.path, '
@@ -196,6 +230,11 @@ def list_share_items(path=None):
 
 
 def toggle_invite_state(request_handler, newstate):
+    """
+    sets the state of an invite to newstate.
+    @param request_handler the request_handler with all required information
+    @param newstate the new state for the invite
+    """
     invite_identifier = int(request_handler.path.split('/')[3])
     user = request_handler.user
     readsql = "select 1 from invitations where state!=? and receiver = ? and "\
