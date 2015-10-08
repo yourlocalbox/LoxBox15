@@ -2,6 +2,9 @@
 LocalBox main initialization class.
 """
 from ssl import wrap_socket
+from logging import getLogger
+from sys import argv
+
 try:
     halter = raw_input  # pylint: disable=E0602
 except NameError:
@@ -36,25 +39,42 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
     in do_POST and do_GET (which in their turn forward said requests to
     do_request)
     """
+    def __init__(self, request, client_address, server):
+        self.user = None
+        self.new_headers = []
+        self.body = None
+        self.status = 500
+        BaseHTTPRequestHandler.__init__(self, request, client_address, server)
+
+    def send_request(self):
+        self.send_response(self.status)
+        for header in self.new_headers:
+            self.send_header(header[0], header[1])
+        self.end_headers()
+        if self.body is not None:
+            self.wfile.write(self.body)
+
     def do_request(self):
         """
         Handle a request (do_POST and do_GET both forward to this function).
         """
-        print("processing " + self.path)
+        log = getLogger('api')
+        log.critical("processing " + self.path)
         self.user = authentication_dummy()  # pylint: disable=W0201
         if not self.user:
-            print("authentication problem")
+            log.debug("authentication problem")
             return
         match_found = False
-        print("Finding " + self.path)
         for regex, function in ROUTING_LIST:
             if regex.match(self.path):
-                print("Matching " + self.path + " to " + regex.pattern)
+                log.debug("Running " + function.__name__ + " on " + self.path +
+                          " for " + self.user)
                 match_found = True
                 function(self)
+                self.send_request()
                 break
         if not match_found:
-            print("Could not match the path: " + self.path)
+            log.debug("Could not match the path: " + self.path)
 
     def do_POST(self):
         """
@@ -84,12 +104,16 @@ def main():
         print("WARNING: Running Insecure HTTP.")
         print("WARNING: Therefore, SSL has not been enabled.")
         print("WARNING: Therefore, THIS SERVER IS NOT SECURE!!!.")
-        halter("Press a key to continue.")
+        if "--test-single-call" not in argv:
+            halter("Press a key to continue.")
     else:
         certfile = configparser.get('httpd', 'certfile')
         keyfile = configparser.get('httpd', 'keyfile')
         httpd.socket = wrap_socket(httpd.socket, server_side=True,
                                    certfile=certfile, keyfile=keyfile)
     print("ready")
-    httpd.handle_request()
-    # httpd.serve_forever()
+ 
+    if "--test-single-call" in argv:
+        httpd.handle_request()
+    else:
+        httpd.serve_forever()

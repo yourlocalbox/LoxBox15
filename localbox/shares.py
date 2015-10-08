@@ -3,6 +3,7 @@ LocalBox shares module.
 """
 from json import dumps
 
+from .files import SymlinkCache
 from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
 from .files import stat_reader
@@ -93,7 +94,7 @@ def get_database_invitations(user):
     @return the invitations for this user
     """
     sql = "select id, sender, receiver, share_id, state from invitations " \
-          "where receiver = ? where state != 'accepted'"
+          "where receiver = ? and state != 'accepted'"
     result = database_execute(sql, (user,))
     invitation_list = []
     for entry in result:
@@ -151,6 +152,16 @@ class Share(object):
         self.identifier = identifier
         self.item = item
 
+    def add_user(self, user):
+        """
+        Adds a user to the Share object
+        @param user the user to add
+        """
+        if self.users is not None:
+            self.users.append(user)
+        else:
+            self.users = [user]
+
     def to_json(self):
         """
         returns a json representation of this Share
@@ -196,32 +207,24 @@ def list_share_items(path=None):
     @param path a path for which to return the ShareItems
     @return list of shareitems
     """
-    if path is None:
-        data = database_execute('select shareitem.icon, shareitem.path, '
-                                'shareitem.has_keys, shareitem.is_share, '
-                                'shareitem.is_shared, shareitem.modified_at, '
-                                'shareitem.title, shareitem.is_dir, shares.id '
-                                'from shareitem,'
-                                'shares where shares.path = shareitem.path')
+    results = []
+    symlinks = SymlinkCache()
+    if path is not None:
+        if symlinks.exists(path):
+            results = symlinks.get(path)
     else:
-        data = database_execute('select shareitem.icon, shareitem.path, '
-                                'shareitem.has_keys, shareitem.is_share, '
-                                'shareitem.is_shared, shareitem.modified_at, '
-                                'shareitem.title, shareitem.is_dir, shares.id'
-                                'from shareitem, shares where '
-                                'shares.path = shareitem.path and '
-                                'shareitem.path = ?', (path,))
-    returndata = []
-    for entry in data:
-        shareid = entry[8]
-        item = ShareItem(entry[0], entry[1], entry[2], entry[3], entry[4],
-                         entry[5], entry[6], entry[7])
-        users = []
-        userentries = database_execute('select shares.user from shares where' +
-                                       ' shares.id = ?', (shareid,))
-        for userentry in userentries:
-            users.append(User(userentry[0]))
-        returndata.append(Share(users, shareid, item))
+        for value in symlinks.cache.values():
+            results = results + value
+
+    returndata = {}
+    for entry in results:
+        sql = "SELECT shares.id, shares.user from shares where shares.path = ?"
+        shareinfo = database_execute(sql, (entry.path,))
+        shareitem = get_shareitem_by_path(entry.path, shareinfo[1])
+        if entry[0] in returndata:
+            returndata[entry[0]].adduser(shareinfo[1])
+        else:
+            returndata[entry[0]] = Share(shareinfo[1], shareinfo[0], shareitem)
     return dumps(returndata, cls=LocalBoxJSONEncoder)
 
 
@@ -239,6 +242,5 @@ def toggle_invite_state(request_handler, newstate):
     if len(readresult) != 0:
         sql = "update invitations set state=? where receiver = ? and id = ?;"
         database_execute(sql, (newstate, user, invite_identifier))
-        request_handler.send_response(200)
-        request_handler.end_headers()
+        request_handler.status = 200
     return len(readresult) != 0

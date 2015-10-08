@@ -2,6 +2,8 @@
 Module holding configuration and configparser related functions
 """
 
+from logging import getLogger
+from logging import StreamHandler
 try:
     from ConfigParser import ConfigParser
     from ConfigParser import NoOptionError, NoSectionError
@@ -9,6 +11,13 @@ except ImportError:
     from configparser import ConfigParser  # pylint: disable=F0401
     # pylint: disable=F0401
     from configparser import NoOptionError, NoSectionError
+
+
+def prepare_logger(name, loglevel=None, handlers=[StreamHandler()]):
+    log = getLogger(name)
+    log.setLevel(loglevel)
+    for handler in handlers:
+        log.addHandler(handler)
 
 
 class ConfigSingleton(object):

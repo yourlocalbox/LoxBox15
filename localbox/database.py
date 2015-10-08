@@ -8,9 +8,13 @@ try:
 except ImportError:
     from configparser import NoSectionError  # pylint: disable=F0401
 
-from MySQLdb import connect as mysql_connect
+try:
+    from MySQLdb import connect as mysql_connect
+    from MySQLdb import Error as MySQLError
+except:
+    mysql_connect = None
+    
 from sqlite3 import connect as sqlite_connect
-from MySQLdb import Error
 
 
 from .config import ConfigSingleton
@@ -29,9 +33,13 @@ def database_execute(command, params=None):
                                 str(params) + ")")
     parser = ConfigSingleton()
     dbtype = parser.get('database', 'type')
+
     if dbtype == "mysql":
+        if mysql_execute == None:
+            exit("Trying to use a MySQL database without python-MySQL module.")
         command = command.replace('?', '%s')
         return mysql_execute(command, params)
+
     elif (dbtype == "sqlite3") or (dbtype == "sqlite"):
         return sqlite_execute(command, params)
     else:
@@ -103,7 +111,7 @@ def mysql_execute(command, params=None):
         cursor.execute(command, params)
         connection.commit()
         return cursor.fetchall()
-    except Error as mysqlerror:
+    except MySQLError as mysqlerror:
         print("MySQL Error: %d: %s" % (mysqlerror.args[0], mysqlerror.args[1]))
     finally:
         try:

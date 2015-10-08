@@ -18,7 +18,10 @@ from os.path import isdir
 from os.path import basename
 from shutil import copyfile
 from shutil import move
-
+try:
+    from Cookie import SimpleCookie  # pylintL disable=F0401
+except ImportError:
+    from http.cookies import SimpleCookie  # pylint: disable=F0401
 from .database import get_key_and_iv
 from .database import database_execute
 from .files import get_filesystem_path
@@ -31,6 +34,16 @@ from .shares import get_database_invitations
 from .encoding import localbox_path_decoder
 from .shares import toggle_invite_state
 from .config import ConfigSingleton
+
+
+def ready_cookie(request_handler):
+    host = request_handler.headers.get('Host')
+    cookie = SimpleCookie()
+    cookie['PHPSESSID'] = "onzinvandebovensterichel"
+    cookie['PHPSESSID']['Domain'] = host
+    cookie['PHPSESSID']['path'] = "/"
+    cookie['PHPSESSID']['version'] = "1"
+    request_handler.new_headers.append(('Set-Cookie', cookie.output(header=''),))
 
 
 def prepare_string(string, encoding="UTF-8"):
@@ -74,11 +87,9 @@ def exec_leave_share(request_handler):
     linkpath = join(bindpoint, request_handler.user, path)
     if islink(linkpath):
         remove(linkpath)
-        request_handler.send_response(200)
-        request_handler.end_headers()
+        request_handler.status = 200
     else:
-        request_handler.send_response(404)
-        request_handler.end_headers()
+        request_handler.status = 404
 
 
 def exec_remove_shares(request_handler):
@@ -91,8 +102,7 @@ def exec_remove_shares(request_handler):
     shareid = int(share_start.replace('/revoke', '', 1))
     sql = 'remove from shares where id = ?'
     database_execute(sql, (shareid))
-    request_handler.send_response(200)
-    request_handler.end_headers()
+    request_handler.status = 200
 
 
 def exec_edit_shares(request_handler):
@@ -128,12 +138,9 @@ def exec_shares(request_handler):
     @param request_handler the object which has the body to extract as json
     """
     path2 = request_handler.path.replace('/lox_api/shares/', '', 1)
-
-    request_handler.send_response(200)
-    request_handler.end_headers()
-
     data = list_share_items(path2)
-    request_handler.wfile.write(data)
+    request_handler.body = data
+    request_handler.status = 200
 
 
 def exec_invitations(request_handler):
@@ -141,9 +148,8 @@ def exec_invitations(request_handler):
     Returns a list of all (pending) invitations
     @param request_handler the object which has the body to extract as json
     """
-    request_handler.send_response(200)
-    request_handler.end_headers()
-    request_handler.wfile.write(get_database_invitations(request_handler.user))
+    request_handler.status = 200
+    request_handler.body = get_database_invitations(request_handler.user)
 
 
 def exec_invite_accept(request_handler):
@@ -153,10 +159,9 @@ def exec_invite_accept(request_handler):
     """
     result = toggle_invite_state(request_handler, 'accepted')
     if result:
-        request_handler.send_response(200)
+        request_handler.status = 200
     else:
-        request_handler.send_response(404)
-    request_handler.end_headers()
+        request_handler.status = 404
 
 
 def exec_invite_reject(request_handler):
@@ -166,11 +171,9 @@ def exec_invite_reject(request_handler):
     """
     result = toggle_invite_state(request_handler, 'rejected')
     if result:
-        request_handler.send_response(200)
+        request_handler.status = 200
     else:
-        request_handler.send_response(404)
-
-    request_handler.end_headers()
+        request_handler.status = 404
 
 
 def exec_files_path(request_handler):
@@ -202,11 +205,14 @@ def exec_files_path(request_handler):
                     user = request_handler.user
                     childpath = join(filepath, child)
                     dirdict['children'].append(stat_reader(childpath, user))
-                request_handler.wfile.write(dumps(dirdict))
+                request_handler.body = dumps(dirdict)
                 break
-        else:
+        elif exists(filepath):
             filedescriptor = open(filepath, 'rb')
-            request_handler.wfile.write(filedescriptor.read())
+            request_handler.body = filedescriptor.read()
+            request_handler.status = 200
+        else:
+            request_handler.status = 404
 
 
 def exec_operations_create_folder(request_handler):
@@ -219,9 +225,8 @@ def exec_operations_create_folder(request_handler):
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, request_handler.user, json_object['path'])
     if lexists(filepath):
-        request_handler.send_response(404)
-        request_handler.end_headers()
-        request_handler.wfile.write("Error: Something already exits at path")
+        request_handler.status = 404
+        request_handler.body = "Error: Something already exits at path"
         return
     mkdir(filepath)
 
@@ -236,9 +241,8 @@ def exec_operations_delete(request_handler):
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, request_handler.user, json_object['path'])
     if not exists(filepath):
-        request_handler.send_response(404)
-        request_handler.end_headers()
-        request_handler.wfile.write("Error: No file exits at path")
+        request_handler.status = 404
+        request_handler.body = "Error: No file exits at path"
         return
     remove(filepath)
     SymlinkCache().remove(filepath)
@@ -255,14 +259,12 @@ def exec_operations_move(request_handler):
     move_from = join(bindpoint, request_handler.user, json_object['from_path'])
     move_to = join(bindpoint, request_handler.user, json_object['to_path'])
     if not isfile(move_from):
-        request_handler.send_response(404)
-        request_handler.end_headers()
-        request_handler.wfile.write("Error: No file exits at from_path")
+        request_handler.status = 404
+        request_handler.body = "Error: No file exits at from_path"
         return
     if lexists(move_to):
-        request_handler.send_response(404)
-        request_handler.end_headers()
-        request_handler.wfile.write("Error: A file already exists at to_path")
+        request_handler.status = 404
+        request_handler.body = "Error: A file already exists at to_path"
         return
     move(move_from, move_to)
 
@@ -278,19 +280,16 @@ def exec_operations_copy(request_handler):
     copy_from = join(bindpoint, request_handler.user, json_object['from_path'])
     copy_to = join(bindpoint, request_handler.user, json_object['to_path'])
     if not exists(copy_from):
-        request_handler.send_response(404)
-        request_handler.end_headers()
-        request_handler.wfile.write("Error: No file exits at from_path")
+        request_handler.status = 404
+        request_handler.body = "Error: No file exits at from_path"
         return
     if lexists(copy_to):
-        request_handler.send_response(404)
-        request_handler.end_headers()
-        request_handler.wfile.write("Error: A file already exists at to_path")
+        request_handler.status = 404
+        request_handler.body = "Error: A file already exists at to_path"
         return
     copyfile(copy_from, copy_to)
 
-    request_handler.send_response(200)
-    request_handler.end_headers()
+    request_handler.status = 200
 
 
 def exec_user(request_handler):
@@ -303,7 +302,7 @@ def exec_user(request_handler):
     result = database_execute(sql, (request_handler.user,))[0]
     result_dictionary = {'user': request_handler.user, 'public_key': result[0],
                          'private_key': result[1]}
-    request_handler.wfile.write(dumps(result_dictionary))
+    request_handler.body = dumps(result_dictionary)
 
 
 def exec_user_username(request_handler):
@@ -320,18 +319,16 @@ def exec_user_username(request_handler):
 
     result = database_execute(sql, (username,))
     if result == []:
-        request_handler.send_response(404)
-        request_handler.end_headers()
-        request_handler.wfile.write("Unknown user")
+        request_handler.status = 404
+        request_handler.body = "Unknown user"
         return
     else:
-        request_handler.send_response(200)
-        request_handler.end_headers()
+        request_handler.status = 200
 
     info = {'name': username, 'public_key': result[0]}
     if username == request_handler.user:
         info['private_key'] = result[1]
-    request_handler.wfile.write(dumps(info))
+    request_handler.body = dumps(info)
 
 
 def exec_create_share(request_handler):
@@ -356,16 +353,16 @@ def exec_create_share(request_handler):
             to_file = join(bindpoint, receiver, path2)
             if exists(to_file):
                 print("destination " + to_file + " exists.")
-                request_handler.send_response(500)
+                request_handler.status = 500
                 return
             if not exists(from_file):
                 print("source " + from_file + "does not exist.")
-                request_handler.send_response(500)
+                request_handler.status = 500
                 return
             symlink(from_file, to_file)
             invite = Invitation(None, 'pending', share, sender, receiver)
             invite.save_to_database()
-    request_handler.send_response(200)
+    request_handler.status = 200
 
 
 def exec_key(request_handler):
@@ -377,7 +374,7 @@ def exec_key(request_handler):
     localbox_path = request_handler.path.replace('/lox_api/key/', '', 1)
     if request_handler.command == "GET":
         key, initvector = get_key_and_iv(localbox_path, request_handler.user)
-        request_handler.wfile.write(dumps({'key': key, 'iv': initvector}))
+        request_handler.body = dumps({'key': key, 'iv': initvector})
     elif request_handler.command == "POST":
         length = int(request_handler.headers.get('content-length'))
         data = request_handler.rfile.read(length)
@@ -403,7 +400,7 @@ def exec_key_revoke(request_handler):
         # Let's either not allow users to add a username or not have the
         # restriction that they cannot get the data back next time
         if user != request_handler.user:
-            request_handler.send_response(403)
+            request_handler.status = 403
     sql = 'remove from keys where user = ? and path = ?;'
     database_execute(sql, (user, path))
 
@@ -416,9 +413,8 @@ def exec_meta(request_handler):
     path = request_handler.path.replace('/lox_api/meta/', '', 1)
     result = stat_reader(get_filesystem_path(path, request_handler.user),
                          request_handler.user)
-    request_handler.wfile.write(dumps(result))
-    request_handler.send_response(200)
-    request_handler.end_headers()
+    request_handler.body = dumps(result)
+    request_handler.status = 200
 
 
 def fake_login(request_handler):
@@ -428,9 +424,8 @@ def fake_login(request_handler):
     """
     form = '<form action="login_check" method="POST">'\
            '<input type="submit" value="signin"> </form>'
-    request_handler.wfile.write(form)
-    request_handler.send_response(200)
-    request_handler.end_headers()
+    request_handler.body = form
+    request_handler.status = 200
 
 
 def fake_login_check(request_handler):
@@ -441,9 +436,9 @@ def fake_login_check(request_handler):
     html = '<meta http-equiv="refresh" content="1,url=/register_app />'\
            '<a href="/register_app">next</a>'
     request_handler.send_header('Location', '/register_app')
-    request_handler.send_response(302)
-    request_handler.end_headers()
-    request_handler.wfile.write(html)
+    ready_cookie(request_handler)
+    request_handler.status = 302
+    request_handler.body = html
 
 
 def fake_register_app(request_handler):
@@ -482,11 +477,9 @@ def fake_register_app(request_handler):
               "access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
               "token_type": "Bearer", "expires_in": 600,
               "refresh_token": "tNXAVVo2QE7c5MKgFB1mKuAPsu4xL", "scope": "all"}
-    request_handler.send_response(200)
-    request_handler.send_header('PHPSESSID', 'padding')
-    request_handler.send_header('Domain', '10.42.0.1')
-    request_handler.end_headers()
-    request_handler.wfile.write(dumps(result))
+    request_handler.status = 200
+    ready_cookie(request_handler)
+    request_handler.body = dumps(result)
 
 
 def fake_oauth(request_handler):
@@ -498,19 +491,19 @@ def fake_oauth(request_handler):
         html = '<html><head></head><body><form action="/oauth2/v2/auth" '\
                'method="POST"><input type="submit" value="allow"></form>'\
                '</body></html>'
-        request_handler.send_response(200)
+        request_handler.status = 200
+        ready_cookie(request_handler)
         request_handler.send_header('Content-type', 'text/html')
-        request_handler.end_headers()
-        request_handler.wfile.write(html)
+        request_handler.body = html
     else:
-        request_handler.send_response(302)
+        request_handler.status = 302
         request_handler.send_header('Location', 'lbox://oauth-return?code=pny')
-        request_handler.end_headers()
+        ready_cookie(request_handler)
         result = {"access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
                   "token_type": "Bearer", "expires_in": 600,
                   "refresh_token": "tNXAVVo2QE7c5MKgFCB1mKuAPsu4xL",
                   "scope": "all"}
-        request_handler.wfile.write(result)
+        request_handler.body = result
 
 
 def exec_identities(request_handler):
@@ -523,7 +516,12 @@ def exec_identities(request_handler):
     outputlist = []
     for entry in result:
         outputlist.append({'id': entry[0], 'name': entry[0], 'type': 'user'})
-    request_handler.wfile.write(dumps(outputlist))
+    request_handler.body = dumps(outputlist)
+
+
+def fake_set_cookies(request_handler):
+    request_handler.status = 404
+    ready_cookie(request_handler)
 
 ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/files\/.*"), exec_files_path),
@@ -551,4 +549,5 @@ ROUTING_LIST = [
     (regex_compile(r"\/login_check"), fake_login_check),
     (regex_compile(r"\/register_app"), fake_register_app),
     (regex_compile(r"\/oauth.*"), fake_oauth),
+    (regex_compile(r"\/.*"), fake_set_cookies),
 ]
