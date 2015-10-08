@@ -6,5 +6,11 @@ do
 done 
 for x in pychecker
 do
-    bash /usr/bin/$x localbox
+    /usr/bin/$x localbox
 done 
+
+pyreverse localbox
+for x in *.dot
+do
+    dot -Tpdf -O "$x"
+done
