@@ -8,7 +8,7 @@ from logging.handlers import  SysLogHandler
 from .config import prepare_logger
 from .config import ConfigSingleton
 
-if __name__ == '__main__':
+def run():
     config = ConfigSingleton()
     logfile = config.get('logging', 'logfile')
     loghandlers = []
@@ -18,7 +18,10 @@ if __name__ == '__main__':
         loghandlers.append(StreamHandler())
     syslog = config.get('logging', 'syslog', None)
     if syslog is not None:
-        loghandlers.append(SysLogHandler(address=syslog))
+        loghandlers.append(SysLogHandler())
     prepare_logger('database', DEBUG, loghandlers)
     prepare_logger('api', DEBUG, loghandlers)
     main()
+
+if __name__ == '__main__':
+    run()

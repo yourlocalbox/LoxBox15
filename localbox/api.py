@@ -39,7 +39,7 @@ from .config import ConfigSingleton
 def ready_cookie(request_handler):
     host = request_handler.headers.get('Host')
     cookie = SimpleCookie()
-    cookie['PHPSESSID'] = "onzinvandebovensterichel"
+    cookie['PHPSESSID'] = "21345"
     cookie['PHPSESSID']['Domain'] = host
     cookie['PHPSESSID']['path'] = "/"
     cookie['PHPSESSID']['version'] = "1"
@@ -493,11 +493,11 @@ def fake_oauth(request_handler):
                '</body></html>'
         request_handler.status = 200
         ready_cookie(request_handler)
-        request_handler.send_header('Content-type', 'text/html')
+        request_handler.new_headers.append(('Content-type', 'text/html',))
         request_handler.body = html
     else:
         request_handler.status = 302
-        request_handler.send_header('Location', 'lbox://oauth-return?code=pny')
+        request_handler.new_headers.append('Location', 'lbox://oauth-return?code=pny')
         ready_cookie(request_handler)
         result = {"access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
                   "token_type": "Bearer", "expires_in": 600,
