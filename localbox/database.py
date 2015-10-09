@@ -11,9 +11,9 @@ except ImportError:
 try:
     from MySQLdb import connect as mysql_connect
     from MySQLdb import Error as MySQLError
-except:
+except ImportError:
     mysql_connect = None
-    
+
 from sqlite3 import connect as sqlite_connect
 
 
@@ -35,7 +35,7 @@ def database_execute(command, params=None):
     dbtype = parser.get('database', 'type')
 
     if dbtype == "mysql":
-        if mysql_execute == None:
+        if mysql_execute is None:
             exit("Trying to use a MySQL database without python-MySQL module.")
         command = command.replace('?', '%s')
         return mysql_execute(command, params)
@@ -75,7 +75,7 @@ def sqlite_execute(command, params=None):
             cursor.execute(command)
         connection.commit()
         return cursor.fetchall()
-    except Error as mysqlerror:
+    except MySQLError as mysqlerror:
         print("MySQL Error: %d: %s" % (mysqlerror.args[0], mysqlerror.args[1]))
     except NoSectionError:
         print("Please configure the database")

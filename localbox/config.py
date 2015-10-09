@@ -13,7 +13,9 @@ except ImportError:
     from configparser import NoOptionError, NoSectionError
 
 
-def prepare_logger(name, loglevel=None, handlers=[StreamHandler()]):
+def prepare_logger(name, loglevel=None, handlers=None):
+    if handlers is None:
+        handlers = [StreamHandler()]
     log = getLogger(name)
     log.setLevel(loglevel)
     for handler in handlers:

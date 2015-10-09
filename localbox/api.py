@@ -43,7 +43,8 @@ def ready_cookie(request_handler):
     cookie['PHPSESSID']['Domain'] = host
     cookie['PHPSESSID']['path'] = "/"
     cookie['PHPSESSID']['version'] = "1"
-    request_handler.new_headers.append(('Set-Cookie', cookie.output(header=''),))
+    request_handler.new_headers.append(('Set-Cookie',
+                                        cookie.output(header=''),))
 
 
 def prepare_string(string, encoding="UTF-8"):
@@ -497,7 +498,8 @@ def fake_oauth(request_handler):
         request_handler.body = html
     else:
         request_handler.status = 302
-        request_handler.new_headers.append('Location', 'lbox://oauth-return?code=pny')
+        request_handler.new_headers.append('Location',
+                                           'lbox://oauth-return?code=xkcd')
         ready_cookie(request_handler)
         result = {"access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
                   "token_type": "Bearer", "expires_in": 600,

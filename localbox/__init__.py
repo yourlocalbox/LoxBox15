@@ -62,7 +62,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         log.critical("processing " + self.path)
         for key in self.headers:
             value = self.headers[key]
-            print(key + ": " + value);
+            log.debug("Header: " + key + ": " + value)
         self.user = authentication_dummy()  # pylint: disable=W0201
         if not self.user:
             log.debug("authentication problem")
@@ -115,7 +115,7 @@ def main():
         httpd.socket = wrap_socket(httpd.socket, server_side=True,
                                    certfile=certfile, keyfile=keyfile)
     print("ready")
- 
+
     if "--test-single-call" in argv:
         httpd.handle_request()
     else:
