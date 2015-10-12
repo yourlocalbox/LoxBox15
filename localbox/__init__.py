@@ -4,11 +4,16 @@ LocalBox main initialization class.
 from ssl import wrap_socket
 from logging import getLogger
 from sys import argv
-from urllib2 import Request
-from urllib2 import urlopen
-from urllib2 import HTTPError
+try:
+    from urllib2 import Request
+    from urllib2 import urlopen
+    from urllib2 import HTTPError
+except ImportError:
+    from urllib.request import Request  # pylint: disable=E0611,F0401
+    from urllib.request import urlopen  # pylint: disable=E0611,F0401
+    from urllib.error import HTTPError  # pylint: disable=E0611,F0401
 
-from cache import TimedCache
+from .cache import TimedCache
 
 try:
     halter = raw_input  # pylint: disable=E0602
@@ -66,13 +71,16 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             name = response.read()
         except HTTPError as e:
             if e.code == 403:
-                getLogger('auth').debug("Wrong/expired code", extra=self.get_log_dict())
+                getLogger('auth').debug("Wrong/expired code",
+                                        extra=self.get_log_dict())
             name = ''
         if name == '':
             name = None
-            getLogger('auth').debug('authentication failed', extra=self.get_log_dict())
+            getLogger('auth').debug('authentication failed',
+                                    extra=self.get_log_dict())
         else:
-            getLogger('auth').debug('Authenticated ' + name, extra=self.get_log_dict())
+            getLogger('auth').debug('Authenticated ' + name,
+                                    extra=self.get_log_dict())
             cache.add(auth_header, name)
             return name
 
@@ -86,9 +94,11 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def get_log_dict(self):
         """
-        returns a dictionary of `extra' information from the request for the logger
+        returns a dictionary of `extra' information from the request for the
+        logger
         """
-        extra = {'user': self.user, 'ip': self.client_address[0], 'path': self.path}
+        extra = {'user': self.user, 'ip': self.client_address[0],
+                 'path': self.path}
         return extra
 
     def do_request(self):
@@ -96,16 +106,16 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         Handle a request (do_POST and do_GET both forward to this function).
         """
         # self.user = authentication_dummy()
-        from pprint import pprint
-        log = getLogger('api')
         self.user = self.check_authorization()
+        log = getLogger('api')
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
             return
         log.critical("processing " + self.path, user=self.user)
         for key in self.headers:
             value = self.headers[key]
-            log.debug("Header: " + key + ": " + value, extra=self.get_log_dict())
+            log.debug("Header: " + key + ": " + value,
+                      extra=self.get_log_dict())
         match_found = False
         for regex, function in ROUTING_LIST:
             if regex.match(self.path):
@@ -116,7 +126,8 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.send_request()
                 break
         if not match_found:
-            log.debug("Could not match the path: " + self.path, extra=self.get_log_dict())
+            log.debug("Could not match the path: " + self.path,
+                      extra=self.get_log_dict())
 
     def do_POST(self):
         """

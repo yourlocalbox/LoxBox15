@@ -1,5 +1,6 @@
 from time import time
 
+
 class TimedCache(object):
     """
     TimedCache is a dictionary with a timeout. The class is initalised with a
@@ -18,7 +19,6 @@ class TimedCache(object):
     def __init__(self, timeout=600):
         self.cache = {}
         self.timeout = timeout
-        print self.cache
 
     def invalidate(self, key):
         """
@@ -30,7 +30,7 @@ class TimedCache(object):
         """
         Adds an key and value pair to the cache.
         """
-        store = (value, time() + timeout)
+        store = (value, time() + self.timeout)
         self.cache[key] = store
 
     def get(self, key):
@@ -43,15 +43,14 @@ class TimedCache(object):
             (value, date) = self.cache[key]
             if date > time():
                 return value
-            del cache[key]
+            del self.cache[key]
         return None
-    
+
     def clean(self):
         """
         check every key-value pair in the database and remove expired pairs.
         """
         for key, store in self.cache:
-            value, date = store
+            date = store[1]
             if date < time():
-                del cache[key]
-
+                del self.cache[key]

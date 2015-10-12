@@ -30,7 +30,8 @@ def database_execute(command, params=None):
     @returns a list of dictionaries representing the sql result
     """
     getLogger("database").debug("database_execute(" + command + ", " +
-                                str(params) + ")", extra={'ip': '127.0.0.1', 'name': 'database'})
+                                str(params) + ")", extra={'ip': '127.0.0.1',
+                                                          'name': 'database'})
     parser = ConfigSingleton()
     dbtype = parser.get('database', 'type')
 
@@ -57,7 +58,8 @@ def sqlite_execute(command, params=None):
     """
     # NOTE mostly copypasta'd from mysql_execute, may be a better way
     getLogger("database").debug("sqlite_execute(" + command + ", " +
-                                str(params) + ")", extra={'ip': '127.0.0.1', 'name': 'database'})
+                                str(params) + ")", extra={'ip': '127.0.0.1',
+                                                          'name': 'database'})
     try:
         parser = ConfigSingleton()
         filename = parser.get('database', 'filename')
@@ -97,7 +99,8 @@ def mysql_execute(command, params=None):
     @returns a list of dictionaries representing the sql result
     """
     getLogger("database").debug("mysql_execute(" + command + ", " + str(params)
-                                + ")", extra={'ip': '127.0.0.1', 'name': 'database'})
+                                + ")", extra={'ip': '127.0.0.1',
+                                              'name': 'database'})
     parser = ConfigSingleton()
     try:
         host = parser.get('database', 'hostname')
