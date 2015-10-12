@@ -4,6 +4,11 @@ LocalBox main initialization class.
 from ssl import wrap_socket
 from logging import getLogger
 from sys import argv
+from urllib2 import Request
+from urllib2 import urlopen
+from urllib2 import HTTPError
+
+from cache import TimedCache
 
 try:
     halter = raw_input  # pylint: disable=E0602
@@ -46,6 +51,31 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         self.status = 500
         BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
+    def check_authorization(self):
+        auth_header = self.headers.getheader('Authorization')
+        config = ConfigSingleton()
+        auth_url = config.get('loauth', 'verify_url')
+        time_out = config.get('cache', 'timeout')
+        cache = TimedCache(timeout=time_out)
+        name = cache.get(auth_header)
+        if name is not None:
+            return name
+        request = Request(auth_url, None, {'Authorization': auth_header})
+        try:
+            response = urlopen(request)
+            name = response.read()
+        except HTTPError as e:
+            if e.code == 403:
+                getLogger('auth').debug("Wrong/expired code", extra=self.get_log_dict())
+            name = ''
+        if name == '':
+            name = None
+            getLogger('auth').debug('authentication failed', extra=self.get_log_dict())
+        else:
+            getLogger('auth').debug('Authenticated ' + name, extra=self.get_log_dict())
+            cache.add(auth_header, name)
+            return name
+
     def send_request(self):
         self.send_response(self.status)
         for header in self.new_headers:
@@ -54,30 +84,39 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         if self.body is not None:
             self.wfile.write(self.body)
 
+    def get_log_dict(self):
+        """
+        returns a dictionary of `extra' information from the request for the logger
+        """
+        extra = {'user': self.user, 'ip': self.client_address[0], 'path': self.path}
+        return extra
+
     def do_request(self):
         """
         Handle a request (do_POST and do_GET both forward to this function).
         """
+        # self.user = authentication_dummy()
+        from pprint import pprint
         log = getLogger('api')
-        log.critical("processing " + self.path)
+        self.user = self.check_authorization()
+        if not self.user:
+            log.debug("authentication problem", extra=self.get_log_dict())
+            return
+        log.critical("processing " + self.path, user=self.user)
         for key in self.headers:
             value = self.headers[key]
-            log.debug("Header: " + key + ": " + value)
-        self.user = authentication_dummy()  # pylint: disable=W0201
-        if not self.user:
-            log.debug("authentication problem")
-            return
+            log.debug("Header: " + key + ": " + value, extra=self.get_log_dict())
         match_found = False
         for regex, function in ROUTING_LIST:
             if regex.match(self.path):
                 log.debug("Running " + function.__name__ + " on " + self.path +
-                          " for " + self.user)
+                          " for " + self.user, extra=self.get_log_dict())
                 match_found = True
                 function(self)
                 self.send_request()
                 break
         if not match_found:
-            log.debug("Could not match the path: " + self.path)
+            log.debug("Could not match the path: " + self.path, extra=self.get_log_dict())
 
     def do_POST(self):
         """
