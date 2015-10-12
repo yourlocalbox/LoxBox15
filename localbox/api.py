@@ -479,7 +479,6 @@ def fake_register_app(request_handler):
               "token_type": "Bearer", "expires_in": 600,
               "refresh_token": "tNXAVVo2QE7c5MKgFB1mKuAPsu4xL", "scope": "all"}
     request_handler.status = 200
-    ready_cookie(request_handler)
     request_handler.body = dumps(result)
 
 
@@ -493,14 +492,12 @@ def fake_oauth(request_handler):
                'method="POST"><input type="submit" value="allow"></form>'\
                '</body></html>'
         request_handler.status = 200
-        ready_cookie(request_handler)
         request_handler.new_headers.append(('Content-type', 'text/html',))
         request_handler.body = html
     else:
         request_handler.status = 302
         request_handler.new_headers.append('Location',
                                            'lbox://oauth-return?code=xkcd')
-        ready_cookie(request_handler)
         result = {"access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
                   "token_type": "Bearer", "expires_in": 600,
                   "refresh_token": "tNXAVVo2QE7c5MKgFCB1mKuAPsu4xL",
@@ -523,7 +520,6 @@ def exec_identities(request_handler):
 
 def fake_set_cookies(request_handler):
     request_handler.status = 404
-    ready_cookie(request_handler)
 
 ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/files\/.*"), exec_files_path),

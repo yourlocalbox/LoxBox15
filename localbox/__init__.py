@@ -13,7 +13,6 @@ except ImportError:
     from urllib.request import urlopen  # pylint: disable=E0611,F0401
     from urllib.error import HTTPError  # pylint: disable=E0611,F0401
 
-from .cache import TimedCache
 
 try:
     halter = raw_input  # pylint: disable=E0602
@@ -29,7 +28,11 @@ try:
 except ImportError:
     from http.server import BaseHTTPRequestHandler  # pylint: disable=F0401
     from http.server import HTTPServer  # pylint: disable=F0401
+
+
+from .api import ready_cookie
 from .api import ROUTING_LIST
+from .cache import TimedCache
 from .config import ConfigSingleton
 from .files import SymlinkCache
 
@@ -105,13 +108,14 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         """
         Handle a request (do_POST and do_GET both forward to this function).
         """
-        # self.user = authentication_dummy()
-        self.user = self.check_authorization()
+        self.user = authentication_dummy()
+        #self.user = self.check_authorization()
+        ready_cookie(self)
         log = getLogger('api')
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
             return
-        log.critical("processing " + self.path, user=self.user)
+        log.critical("processing " + self.path, extra=self.get_log_dict())
         for key in self.headers:
             value = self.headers[key]
             log.debug("Header: " + key + ": " + value,
