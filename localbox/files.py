@@ -124,6 +124,10 @@ class SymlinkCache(object):
         """
         working_directory = getcwd()
         bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+        if bindpoint is None:
+            getLogger('files').error("No bindpoint found in the filesystem "
+                                     "section of the configuration file, exiting")
+            sysexit(1)
         for dirname, directories, files in walk(bindpoint):
             for entry in directories + files:
                 linkpath = abspath(join(dirname, entry))
