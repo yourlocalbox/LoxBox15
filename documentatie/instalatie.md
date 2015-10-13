@@ -17,13 +17,14 @@ rijkt tot ./usr/lib/python2.7/site-packages/localbox/. kopieer deze localbox
 directory naar de site-packages directory van uw systeem (bijvoorbeeld
 /usr/lib64/python/site-packages) en de instalatie van puur localbox is klaar.
 
-instalatie egg pacakge
+instalatie egg package
 ----------------------
 
 Het 'egg' installatiepakket wordt gedistribueerd met een bestandsnaam als
 'localbox-1.8.0-py2.7.egg'. De naam impliceert dat het python-2.7 specifiek
 is, maar deze code is ook bruikbaar onder python3. Gebruik dit file als argument
-voor eazy_install. e.g.: 'easy-install /path/to/localbox-1.8.0-py2.7.egg'. 
+voor eazy_install. e.g.: 'easy_install /path/to/localbox-1.8.0-py2.7.egg'. 
+Voor meer informatie over easy_install, zie http://peak.telecommunity.com/DevCenter/EasyInstall
 
 instalatie rpm package
 ----------------------
@@ -45,7 +46,7 @@ wat je doet is het ten strengste aan te raden localbox op een unixlike systeem
 te instaleren.
 
 Het windows instalatiepakket wordt gedistribueert met een bestandsnaam als
-'localbox-1.8.0.linux-x86_65.exe'. Ondanks dat deze filename doet vermoeden dat
+'localbox-1.8.0.linux-x86_64.exe'. Ondanks dat deze filename doet vermoeden dat
 dit een linux installer is gaat het hier toch echt om de windows installer.
 Uitvoeren van deze file start een InstallShield Wizard. Na enkele keren op
 'next' te hebben gedrukt en het pythonpath (normaal iets van "C:\python34\")
