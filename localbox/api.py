@@ -22,6 +22,7 @@ try:
     from Cookie import SimpleCookie  # pylintL disable=F0401
 except ImportError:
     from http.cookies import SimpleCookie  # pylint: disable=F0401
+
 from .database import get_key_and_iv
 from .database import database_execute
 from .files import get_filesystem_path
