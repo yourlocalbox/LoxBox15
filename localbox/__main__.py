@@ -16,8 +16,9 @@ from .config import ConfigSingleton
 def sig_handler(signum, frame):
     if signum == SIGINT:
         getLogger('api').info('SIGINT received, shutting down')
-        #TODO: Graceful shutdown that lets people finish their things
+        # TODO: Graceful shutdown that lets people finish their things
         sysexit(1)
+
 
 def run():
     signal(SIGINT, sig_handler)

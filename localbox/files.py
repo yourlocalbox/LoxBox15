@@ -8,6 +8,8 @@ from os.path import abspath
 from os.path import relpath
 from os.path import isdir
 from os.path import islink
+from logging import getLogger
+from sys import exit as sysexit
 from os import chdir
 from os import getcwd
 from os import stat
