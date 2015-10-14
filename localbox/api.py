@@ -38,6 +38,9 @@ from .config import ConfigSingleton
 
 
 def ready_cookie(request_handler):
+    """
+    Readies a PHP-like cookie - not to be part of the final codebase
+    """
     host = request_handler.headers.get('Host')
     cookie = SimpleCookie()
     cookie['PHPSESSID'] = "21345"
@@ -67,7 +70,7 @@ def prepare_string(string, encoding="UTF-8"):
 
 def get_body_json(request_handler):
     """
-    Extracts a json element from the requests' body
+    Reads the request handlers bode and parses it as a JSON object.
     @param request_handler the object which has the body to extract as json
     @returns json-parsed version of the requests' body.
     """
@@ -79,8 +82,9 @@ def get_body_json(request_handler):
 def exec_leave_share(request_handler):
     """
     Handle the leave_share call. Removes the share with the specified path for
-    the current user.
-    @param request_handler the object which has the body to extract as json
+    the current user. Returns 200 if succesful, 404 on failure. Called via the
+    routing list.
+    @param request_handler object holding the path of the share to leave
     """
     pathstart = request_handler.path.replace('/lox_api/shares/', '', 1)
     path = pathstart.replace('/leave', '', 1)
@@ -97,8 +101,9 @@ def exec_leave_share(request_handler):
 def exec_remove_shares(request_handler):
     """
     Removes a share from being shared. Everyones access to this share, except
-    for that of the owner, is irrevokably removed by this call.
-    @param request_handler the object which has the body to extract as json
+    for that of the owner, is irrevokably removed by this call. Called via the
+    routing list.
+    @param request_handler the object which contains the path to remove
     """
     share_start = request_handler.path.replace('/lox_api/shares/', '', 1)
     shareid = int(share_start.replace('/revoke', '', 1))
@@ -111,8 +116,9 @@ def exec_edit_shares(request_handler):
     """
     Edits the list of people who can access a certain share object. A list of
     json encoded identities is in the body to represent the new list of people
-    with access to said share.
-    @param request_handler the object which has the body to extract as json
+    with access to said share. Called via the routing list
+    @param request_handler the object which contains the share id in its path
+                           and list of users json-encoded in its body.
     """
     share_start = request_handler.path.replace('/lox_api/shares/', '', 1)
     shareid = share_start.replace('/edit', '', 1)
@@ -136,8 +142,9 @@ def exec_edit_shares(request_handler):
 
 def exec_shares(request_handler):
     """
-    Handle share information for a path given in the request
-    @param request_handler the object which has the body to extract as json
+    Handle share information for a path given in the request. Returns a list
+    of shares containing the provided path. Called via the routing list.
+    @param request_handler the object with the path encoded in its path
     """
     path2 = request_handler.path.replace('/lox_api/shares/', '', 1)
     data = list_share_items(path2)
@@ -147,8 +154,9 @@ def exec_shares(request_handler):
 
 def exec_invitations(request_handler):
     """
-    Returns a list of all (pending) invitations
-    @param request_handler the object which has the body to extract as json
+    Returns a list of all (pending) invitations for an user. Called via the
+    routing list
+    @param request_handler object though which to return the values
     """
     request_handler.status = 200
     request_handler.body = get_database_invitations(request_handler.user)
@@ -156,8 +164,8 @@ def exec_invitations(request_handler):
 
 def exec_invite_accept(request_handler):
     """
-    Accepts/reopens an invitation to filesharing.
-    @param request_handler the object which has the body to extract as json
+    Accepts/reopens an invitation to filesharing. called from the routing list.
+    @param request_handler the object containing invite identifier in its path
     """
     result = toggle_invite_state(request_handler, 'accepted')
     if result:
@@ -168,8 +176,8 @@ def exec_invite_accept(request_handler):
 
 def exec_invite_reject(request_handler):
     """
-    Rejects/cancels an invitation to filesharing.
-    @param request_handler the object which has the body to extract as json
+    Rejects/cancels an invitation to filesharing. Called from the routing list
+    @param request_handler object with the invite identifier in its path
     """
     result = toggle_invite_state(request_handler, 'rejected')
     if result:
@@ -181,8 +189,8 @@ def exec_invite_reject(request_handler):
 def exec_files_path(request_handler):
     """
     Allows for the up- and downloading of (encrypted) files to and from the
-    localbox server.
-    @param request_handler the object which has the body to extract as json
+    localbox server. called from the routing list
+    @param request_handler the object which contains the files path in its path
     """
     path = request_handler.path.replace('/lox_api/files/', '', 1)
     if path != '':
@@ -219,8 +227,9 @@ def exec_files_path(request_handler):
 
 def exec_operations_create_folder(request_handler):
     """
-    Creates a new folder in the localbox directory structure
-    @param request_handler the object which has the body to extract as json
+    Creates a new folder in the localbox directory structure. Called from the routing list
+    @param request_handler the object which has the path json-encoded in its
+                           body
     """
     length = int(request_handler.headers.get('content-length'))
     json_object = loads(request_handler.rfile.read(length))
@@ -235,8 +244,10 @@ def exec_operations_create_folder(request_handler):
 
 def exec_operations_delete(request_handler):
     """
-    removes a file or folder from the localbox directory structure
-    @param request_handler the object which has the body to extract as json
+    Removes a file or folder from the localbox directory structure. called from
+    the routing list
+    @param request_handler the object which has the file path json-encoded in
+                           its body
     """
     length = int(request_handler.headers.get('content-length'))
     json_object = loads(request_handler.rfile.read(length))
@@ -252,8 +263,8 @@ def exec_operations_delete(request_handler):
 
 def exec_operations_move(request_handler):
     """
-    moves a file within the localbox directory structure
-    @param request_handler the object which has the body to extract as json
+    Moves a file within the localbox directory structure. Called from the routing list
+    @param request_handler the object which has the to_path and from_path json-encoded in its body
     """
     length = int(request_handler.headers.get('content-length'))
     json_object = loads(request_handler.rfile.read(length))
@@ -273,8 +284,8 @@ def exec_operations_move(request_handler):
 
 def exec_operations_copy(request_handler):
     """
-    copies a file within the localbox filesystem
-    @param request_handler the object which has the body to extract as json
+    copies a file within the localbox filesystem. Called from the routing list
+    @param request_handler object with to_path and from_path json-encoded in its body
     """
     length = int(request_handler.headers.get('content-length'))
     json_object = loads(request_handler.rfile.read(length))
@@ -296,14 +307,17 @@ def exec_operations_copy(request_handler):
 
 def exec_user(request_handler):
     """
-    returns public- and private key information about the current user
-    @param request_handler the object which has the body to extract as json
+    returns public- and private key information about the current user. Called from the routing list
+    @param request_handler object holding the user for which to return data
     """
     print("running exec user")
+
     sql = "select public_key, private_key from users where name = ?"
     result = database_execute(sql, (request_handler.user,))[0]
+
     result_dictionary = {'user': request_handler.user, 'public_key': result[0],
                          'private_key': result[1]}
+
     request_handler.body = dumps(result_dictionary)
 
 
@@ -311,7 +325,7 @@ def exec_user_username(request_handler):
     """
     returns information about a certain user as specified in the url. Also
     return private key data if this is that user making the request
-    @param request_handler the object which has the body to extract as json
+    @param request_handler object containing the user for which to return data
     """
     username = request_handler.path.replace('/lox_api/user/', '', 1)
     if username == request_handler.user:
@@ -336,8 +350,8 @@ def exec_user_username(request_handler):
 def exec_create_share(request_handler):
     """
     Creates a 'share' within localbox. Comes down to creating a symlink next
-    to a few database records to give the share an identifier
-    @param request_handler the object which has the body to extract as json
+    to a few database records to give the share an identifier.
+    @param request_handler object with the share filepath encoded in its path
     """
     length = int(request_handler.headers.get('content-length'))
     body = request_handler.rfile.read(length)
@@ -371,7 +385,7 @@ def exec_key(request_handler):
     """
     returns rsa encrypted key and initialization vector for decoding the file
     in the specified path
-    @param request_handler the object which has the body to extract as json
+    @param request_handler object containing the file path encoded in its path
     """
     localbox_path = request_handler.path.replace('/lox_api/key/', '', 1)
     if request_handler.command == "GET":
@@ -390,7 +404,8 @@ def exec_key_revoke(request_handler):
     """
     revoke/remove an encrypted key from the database so said user cannot access
     said key anymore.
-    @param request_handler the object which has the body to extract as json
+    @param request_handler object containing the path to the file in its path
+                           and json encoded name of the user whoes key to revoke
     """
     path = request_handler.path.replace('/lox_api/key_revoke/', '', 1)
     lengthstring = request_handler.headers.get('content-length')
@@ -410,7 +425,7 @@ def exec_key_revoke(request_handler):
 def exec_meta(request_handler):
     """
     returns metadata for a given file/directory
-    @param request_handler the object which has the body to extract as json
+    @param request_handler object with path encoded in its path
     """
     path = request_handler.path.replace('/lox_api/meta/', '', 1)
     result = stat_reader(get_filesystem_path(path, request_handler.user),
@@ -421,7 +436,7 @@ def exec_meta(request_handler):
 
 def fake_login(request_handler):
     """
-    part of the fake login process
+    part of the fake login process, not part of the final codebase
     @param request_handler the object which has the body to extract as json
     """
     form = '<form action="login_check" method="POST">'\
@@ -432,7 +447,7 @@ def fake_login(request_handler):
 
 def fake_login_check(request_handler):
     """
-    part of the fake login process
+    part of the fake login process, not part of the final codebase
     @param request_handler the object which has the body to extract as json
     """
     html = '<meta http-equiv="refresh" content="1,url=/register_app />'\
@@ -445,7 +460,7 @@ def fake_login_check(request_handler):
 
 def fake_register_app(request_handler):
     """
-    part of the fake login process
+    part of the fake login process, most definitely not part of the final codebase
     @param request_handler the object which has the body to extract as json
     """
     result = {'baseurl': 'https://localhost:8000/', 'name': 'schimmelpenning',
@@ -485,7 +500,7 @@ def fake_register_app(request_handler):
 
 def fake_oauth(request_handler):
     """
-    part of the fake login process
+    part of the fake login process, not part of the final codebase
     @param request_handler the object which has the body to extract as json
     """
     if request_handler.command != "POST":
@@ -508,8 +523,8 @@ def fake_oauth(request_handler):
 
 def exec_identities(request_handler):
     """
-    returns a list of all users
-    @param request_handler the object which has the body to extract as json
+    returns a list of all (known) users
+    @param request_handler object in which to return the userlist
     """
     sql = 'select name from users;'
     result = database_execute(sql)
@@ -520,8 +535,17 @@ def exec_identities(request_handler):
 
 
 def fake_set_cookies(request_handler):
+    """
+    not part of final codebase
+    """
     request_handler.status = 404
 
+
+"""
+list with regex: function pairs. The regex is to be matched with the url
+requested. When the regex matches, the function is called with the
+request_handler as argument.
+"""
 ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/files\/.*"), exec_files_path),
     (regex_compile(r"\/lox_api\/invitations"), exec_invitations),

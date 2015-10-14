@@ -231,7 +231,8 @@ def list_share_items(path=None):
 def toggle_invite_state(request_handler, newstate):
     """
     sets the state of an invite to newstate.
-    @param request_handler the request_handler with all required information
+    @param request_handler the request_handler with all required information to
+                           extract the invite from.
     @param newstate the new state for the invite
     """
     invite_identifier = int(request_handler.path.split('/')[3])

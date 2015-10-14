@@ -23,14 +23,20 @@ class TimedCache(object):
     def invalidate(self, key):
         """
         Invalidates an entry in the cache by removing it
+        @param key entry to invalidate from the cache
         """
         del self.cache[key]
 
-    def add(self, key, value):
+    def add(self, key, value, timeout=None):
         """
         Adds an key and value pair to the cache.
+        @param key key for the entry
+        @param value value to return when key is requested
+        @param timeout number of seconds this information is valid
         """
-        store = (value, time() + self.timeout)
+        if timeout is None:
+            timeout = self.timeout
+        store = (value, time() + timeout)
         self.cache[key] = store
 
     def get(self, key):
@@ -38,6 +44,7 @@ class TimedCache(object):
         Returns the value of a certain key in the cache. Returns None when key
         is not found or if the timeout has expired. Also cleans the entry in
         the latter case
+        @param key the key to find the value for
         """
         if key in self.cache:
             (value, date) = self.cache[key]
@@ -48,7 +55,8 @@ class TimedCache(object):
 
     def clean(self):
         """
-        check every key-value pair in the database and remove expired pairs.
+        Check every key-value pair in the database and remove expired pairs.
+        Removes stale entries in the cache
         """
         for key, store in self.cache:
             date = store[1]

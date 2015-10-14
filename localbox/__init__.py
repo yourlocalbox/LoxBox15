@@ -40,7 +40,7 @@ from .files import SymlinkCache
 def authentication_dummy():
     """
     return the string 'user' and pretend authentication happened. To be
-    replaced with actual authentication before delivery.
+    replaced with actual authentication before delivery. Not part of the final codebase
     @return "user"
     """
     return "user"
@@ -60,9 +60,14 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
     def check_authorization(self):
+        """
+        assert whether the authorization header is valid by checking it against
+        the cache first and if unsuccesful, the oauth server. Sets the 'user'
+        field when succesful and returns said name. returns None on failure
+        """
         auth_header = self.headers.getheader('Authorization')
         config = ConfigSingleton()
-        auth_url = config.get('loauth', 'verify_url')
+        auth_url = config.get('oauth', 'verify_url')
         time_out = config.get('cache', 'timeout')
         cache = TimedCache(timeout=time_out)
         name = cache.get(auth_header)
@@ -85,9 +90,14 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             getLogger('auth').debug('Authenticated ' + name,
                                     extra=self.get_log_dict())
             cache.add(auth_header, name)
-            return name
+        return name
 
     def send_request(self):
+        """
+        Returns an answer to an HTTPRequest in the proper order of status,
+        new_headers, body. Other functions can set these values and this
+        function will send it over the line properly.
+        """
         self.send_response(self.status)
         for header in self.new_headers:
             self.send_header(header[0], header[1])
@@ -98,7 +108,8 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
     def get_log_dict(self):
         """
         returns a dictionary of `extra' information from the request for the
-        logger
+        logger. Extra information consists of 'user', 'ip' and 'path', or None
+        where this information does not make sense.
         """
         extra = {'user': self.user, 'ip': self.client_address[0],
                  'path': self.path}
@@ -107,6 +118,10 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_request(self):
         """
         Handle a request (do_POST and do_GET both forward to this function).
+        Handling of a requests is done in three phases. First, the authorization
+        is checked. When this is in order, the ROUTING_LIST is consulted to find
+        the function to do the actual work. After this function has executed,
+        the request is responded tousing send_request.
         """
         self.user = authentication_dummy()
         #self.user = self.check_authorization()
@@ -115,8 +130,9 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
             self.status = 403
-            self.body = """<h1>403: Forbidden.</h1>
-                           <p>authentication failed</p>"""
+            self.body = "<h1>403: Forbidden.</h1>" \
+                        "<p>Authorization failed. Please authenticate at" \
+                        "%s</p>" % ConfigSingleton().get('oauth', 'redirect_url')
             return
         log.critical("processing " + self.path, extra=self.get_log_dict())
         for key in self.headers:
@@ -151,7 +167,9 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
 
 def main():
     """
-    run the actual LocalBox Server
+    run the actual LocalBox Server. Initialises the symlink cache, starts a
+    HTTPServer and serves requests forever, unless '--test-single-call' has been
+    specified as command line argument
     """
     configparser = ConfigSingleton()
     SymlinkCache()

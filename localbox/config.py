@@ -80,7 +80,6 @@ class ConfigSingleton(object):
         configuration, cast to an int.
         @param section the [section] in which to look for the information
         @param field the name of the configuration item to read
-        @param default Value to return when the config option can't be found
         @return the integer value of said configuration item
         """
         return self.configparser.getint(section, field)

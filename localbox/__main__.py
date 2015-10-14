@@ -14,13 +14,24 @@ from .config import ConfigSingleton
 
 
 def sig_handler(signum, frame):
+    """
+    Handle POSIX signal signum. Frame is ignored.
+    """
     if signum == SIGINT:
-        getLogger('api').info('SIGINT received, shutting down')
+        getLogger('api').info('SIGINT received, shutting down',
+                              extra={'user': None, 'ip': None, 'path': None})
         # TODO: Graceful shutdown that lets people finish their things
         sysexit(1)
+    else:
+        getLogger('api').info('Verbosely ignoring signal ' + str(signum),
+                              extra={'user': None, 'ip': None, 'path': None})
 
 
 def run():
+    """
+    readies the signal handler, configures the logging and starts the
+    HTTPServer component of LocalBox
+    """
     signal(SIGINT, sig_handler)
     config = ConfigSingleton()
     formatter = Formatter('%(asctime)s %(ip)s %(user)s: %(message)s')
