@@ -114,6 +114,9 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         log = getLogger('api')
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
+            self.status = 403
+            self.body = """<h1>403: Forbidden.</h1>
+                           <p>authentication failed</p>"""
             return
         log.critical("processing " + self.path, extra=self.get_log_dict())
         for key in self.headers:
