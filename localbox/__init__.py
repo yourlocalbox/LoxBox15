@@ -8,10 +8,12 @@ try:
     from urllib2 import Request
     from urllib2 import urlopen
     from urllib2 import HTTPError
+    from urllib import urlencode
 except ImportError:
     from urllib.request import Request  # pylint: disable=E0611,F0401
     from urllib.request import urlopen  # pylint: disable=E0611,F0401
     from urllib.error import HTTPError  # pylint: disable=E0611,F0401
+    from urllib.parse import urlencode  # pylint: disable=E0611,F0401
 
 
 try:
@@ -40,7 +42,8 @@ from .files import SymlinkCache
 def authentication_dummy():
     """
     return the string 'user' and pretend authentication happened. To be
-    replaced with actual authentication before delivery. Not part of the final codebase
+    replaced with actual authentication before delivery. Not part of the final
+    codebase
     @return "user"
     """
     return "user"
@@ -118,21 +121,32 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_request(self):
         """
         Handle a request (do_POST and do_GET both forward to this function).
-        Handling of a requests is done in three phases. First, the authorization
-        is checked. When this is in order, the ROUTING_LIST is consulted to find
-        the function to do the actual work. After this function has executed,
-        the request is responded tousing send_request.
+        Handling of a requests is done in three phases. First, the
+        authorization is checked. When this is in order, the ROUTING_LIST is
+        consulted to find the function to do the actual work. After this
+        function has executed, the request is responded tousing send_request.
         """
-        self.user = authentication_dummy()
-        #self.user = self.check_authorization()
+        config = ConfigSingleton()
+        protocol = "https://"
+        if config.getboolean('http', 'insecure-http', False):
+            protocol = "http://"
+        querystring = urlencode({'redirect_uri': protocol +
+                                self.headers['Host'] + self.path})
+        #self.user = authentication_dummy()
+        self.user = self.check_authorization()
         ready_cookie(self)
         log = getLogger('api')
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
             self.status = 403
+            redirect_url = config.get('oauth', 'redirect_url') + "?" + \
+                querystring
+            self.headers['Location'] = redirect_url
             self.body = "<h1>403: Forbidden.</h1>" \
                         "<p>Authorization failed. Please authenticate at" \
-                        "%s</p>" % ConfigSingleton().get('oauth', 'redirect_url')
+                        '<a href="%s">%s</a></p>' % (redirect_url,
+                                                     redirect_url)
+            self.send_request()
             return
         log.critical("processing " + self.path, extra=self.get_log_dict())
         for key in self.headers:
@@ -168,8 +182,8 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
 def main():
     """
     run the actual LocalBox Server. Initialises the symlink cache, starts a
-    HTTPServer and serves requests forever, unless '--test-single-call' has been
-    specified as command line argument
+    HTTPServer and serves requests forever, unless '--test-single-call' has
+    been specified as command line argument
     """
     configparser = ConfigSingleton()
     SymlinkCache()

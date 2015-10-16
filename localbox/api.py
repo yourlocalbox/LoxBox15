@@ -227,7 +227,8 @@ def exec_files_path(request_handler):
 
 def exec_operations_create_folder(request_handler):
     """
-    Creates a new folder in the localbox directory structure. Called from the routing list
+    Creates a new folder in the localbox directory structure. Called from the
+    routing list
     @param request_handler the object which has the path json-encoded in its
                            body
     """
@@ -263,8 +264,10 @@ def exec_operations_delete(request_handler):
 
 def exec_operations_move(request_handler):
     """
-    Moves a file within the localbox directory structure. Called from the routing list
-    @param request_handler the object which has the to_path and from_path json-encoded in its body
+    Moves a file within the localbox directory structure. Called from the
+    routing list
+    @param request_handler the object which has the to_path and from_path
+                           json-encoded in its body
     """
     length = int(request_handler.headers.get('content-length'))
     json_object = loads(request_handler.rfile.read(length))
@@ -285,7 +288,8 @@ def exec_operations_move(request_handler):
 def exec_operations_copy(request_handler):
     """
     copies a file within the localbox filesystem. Called from the routing list
-    @param request_handler object with to_path and from_path json-encoded in its body
+    @param request_handler object with to_path and from_path json-encoded in
+                           its body
     """
     length = int(request_handler.headers.get('content-length'))
     json_object = loads(request_handler.rfile.read(length))
@@ -307,7 +311,8 @@ def exec_operations_copy(request_handler):
 
 def exec_user(request_handler):
     """
-    returns public- and private key information about the current user. Called from the routing list
+    returns public- and private key information about the current user. Called
+    from the routing list
     @param request_handler object holding the user for which to return data
     """
     print("running exec user")
@@ -405,7 +410,8 @@ def exec_key_revoke(request_handler):
     revoke/remove an encrypted key from the database so said user cannot access
     said key anymore.
     @param request_handler object containing the path to the file in its path
-                           and json encoded name of the user whoes key to revoke
+                           and json encoded name of the user whoes key to
+                           revoke
     """
     path = request_handler.path.replace('/lox_api/key_revoke/', '', 1)
     lengthstring = request_handler.headers.get('content-length')
@@ -460,7 +466,8 @@ def fake_login_check(request_handler):
 
 def fake_register_app(request_handler):
     """
-    part of the fake login process, most definitely not part of the final codebase
+    part of the fake login process, most definitely not part of the final
+    codebase
     @param request_handler the object which has the body to extract as json
     """
     result = {'baseurl': 'https://localhost:8000/', 'name': 'schimmelpenning',
@@ -541,11 +548,9 @@ def fake_set_cookies(request_handler):
     request_handler.status = 404
 
 
-"""
-list with regex: function pairs. The regex is to be matched with the url
-requested. When the regex matches, the function is called with the
-request_handler as argument.
-"""
+# list with regex: function pairs. The regex is to be matched with the url
+# requested. When the regex matches, the function is called with the
+# request_handler as argument.
 ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/files\/.*"), exec_files_path),
     (regex_compile(r"\/lox_api\/invitations"), exec_invitations),
