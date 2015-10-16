@@ -107,11 +107,16 @@ timeout = hoe lang (in secondes) succesvolle authenticatie wordt gecached.
 Gebruik
 =======
 Het programma is te starten door de localbox module in python te laden. De
-makkelijkste mannier is het commando 'python -m localbox'.
-TODO: We kunnen/moeten ook nog init-scripts voor localbox maken zodat men
-'service start localbox' kan draaien en dat het dan "gewoon werkt" zoals alle
-andere services op een unixsysteem.
+makkelijkste mannier is het commando 'python -m localbox'. In het geval dat
+het RPM package is geinstalleerd is er ook een init script mee gekopieerd.
+Localbox kan in dat geval als service draaien door het commando
+'service localbox start' te draaien. Het commando 'chkconfig localbox on'
+kan worden gedraaid om localbox bij het booten van het systeem op te starten.
 
+Let in het geval dat localbox als een service draait op dat insecure-http niet
+geactiveert is en dat de key en certifikaat niet met een passphrase beveiligd
+zijn. In beide gevallen zal localbox op standaard input vragen aan de, welk
+bij het starten als service niet kan worden ingevoerd. 
 
 dependencies
 ============
