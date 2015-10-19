@@ -1,0 +1,18 @@
+1 en 2, 3 en 4, 6 en 7 zijn requests/responses behorende bij dezelfde aanvraag. De eerste is het request, de tweede is het response. Misschien is het handig om ze hierom '1a' en '1b' etc. te noemen om dit explicieter te maken
+
+
+2: Client_id en client_secret zijn de (case sensitive) naam van de credentials die ontvangen worden.  "De oauth server stuurt een nieuw client_id en client_secret op naar de client en slaat deze op in de database"
+
+
+3: Deze stap is binnen oauth authenticatie met 'Resource Owner Password Credentials'. Misschien moeten we ook noemen dat met deze stap de client_id (welk een apparaat vertegenwoordigd) aan de 'user' (welk een mens/gebruiker vertegenwoordigd), zodat in de toekomst 'client credentials' authenticatie gebruikt kan worden en deze nog steeds aan de 'user' is gekoppeld, zonder dat de gebruikers' username/password worden uitgewisseld.
+"De client voert Resource Owner Password Credentials authenticatie uit. Hiervoor wordt de client_id, client_credentials, username en password opgestuurd.  client_id en client_secret zijn credentials uit stap 1, username en password zijn credentials van de gebruiker"
+
+4: De 'goedkeuring' is enkel en alleen afhankelijk van de correctheid van de geleverde client_id/client_secret username/password credentials.  "De Oauth server controleert de correctheid van de geleverde credentials en geeft een 'bearer token' terug aan de client als deze correct zijn."
+
+5: Deze stap is deel van 'echt' localbox gebruik. In plaats dat je eerst de bearer token opstuurt en daarna de requests gebruik de de bearer token bij elk request. In die zin is het vergelijkbaar met een cookie.  "De client doet een request naar localbox en voegt het bearer token toe in de authorization header"
+
+7: Een belangrijk onderdeel van deze response is ook dat de username wordt meegegeven. Deze stap is de stap die er voor zorgt dat LocalBox weet dat client '2f!U7e<Nj8#5OKI=AJuxbrbi&O#nlp' hoort bij user 'ivo'.
+
+8 (5a): (van localbox naar de client) "LocalBox geeft een response aan de client of heeft hem een redirect naar de authetnciatieserver (als de credentials incorrect/verlopen zijn)"
+
+Ook niet onbelangrijk, een bearer token is slechts voor een beperkte tijd houdbaar (default 10 minuten). Als het bearer token verloopt is het ongeldig en zal een nieuw token moeten worden gehaald. Voor deze vernieuwing is echter alleen het client_id/client_secret nodig en niet de username/password combinatie. Voordat het token verlopen is kan het ook vernieuwd worden met alleen het 'refresh_token' wat een onderdeel is van het bearer token.
