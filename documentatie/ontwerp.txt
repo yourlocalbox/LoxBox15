@@ -1,0 +1,33 @@
+Ontwerp LocalBox server
+
+De localbox server is op het hoogste niveau gezien een python BaseHTTPServer.
+Deze HTTPServer ontvangt http requests van de buitenwereld via een instelbare
+poort. Binnen de LocalBoxHTTP[Request]Handler, wordt vervolgens iedere call
+verwezen naar de do_request() functie.
+
+De do_request() functie heeft drie verantwoordelijkheden: Authorizatie
+controleren, routeren, en reageren.
+
+- authorizatie
+
+Ten eerste moet deze authorizatie controleren en hierbij de gebruikersnaam te
+achterhalen. Indien dit niet lukt wordt direct de aanvraag geweigerd met een
+HTTP status 403.
+
+- routing
+
+Als authenticatie succesvol is wordt de routing list aangesproken. De routing
+list is een lijst van reguliere expressies gekoppeld aan functies. De functie
+behorende bij de eerste matchende reguliere expressie wordt vervolgens
+uitgevoerd en afgehandeld.
+Dit ontwerp kan garanderen dat er authorizatie heeft plaatsgevonden voor iedere
+call terwijl elke call afzonderlijk een eigen codeblok heeft.
+
+- response
+
+Deze codeblokken stellen waardes in binnen het request object (body, headers,
+returncode). Vervolgens worden vervolgens door do_request in de juiste volgorde
+verstuurd, samen met standaard headers die altijd mee gestuurd horen te worden.
+Dit garandeert dat elke call correct zijn data retouneert en dat elke response
+van bepaalde headers (denk bijvoorbeeld aan Strict-Transport-Security) wordt
+voorzien.
