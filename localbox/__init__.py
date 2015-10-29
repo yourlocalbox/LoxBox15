@@ -32,7 +32,6 @@ except ImportError:
     from http.server import HTTPServer  # pylint: disable=F0401
 
 
-from .api import ready_cookie
 from .api import ROUTING_LIST
 from .cache import TimedCache
 from .config import ConfigSingleton
@@ -59,6 +58,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         self.user = None
         self.new_headers = []
         self.body = None
+        self.old_body = None
         self.status = 500
         self.protocol=""
         BaseHTTPRequestHandler.__init__(self, request, client_address, server)
@@ -141,7 +141,6 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
                                  self.headers['Host'] + self.path})
         self.user = authentication_dummy()
         # self.user = self.check_authorization()
-        #ready_cookie(self)
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
             self.status = 403

@@ -182,7 +182,9 @@ class Share(object):
             sql = 'update shares set user = ?, path = ? where id = ?'
             params = params + (self.identifier,)
         database_execute(sql, params)
-
+        if self.identifier is None:
+            sql = 'select id from shares where user = ? and path = ?'
+            self.identifier = database_execute(sql, params)[0]
 
 def get_share_by_id(identifier):
     """
@@ -191,7 +193,10 @@ def get_share_by_id(identifier):
     @return the Share identified by the identifier
     """
     sharesql = 'select user, path from shares where id = ?'
-    sharedata = database_execute(sharesql, (identifier,))[0]
+    packedsharedata = database_execute(sharesql, (identifier,))
+    if packedsharedata == []:
+        return None
+    sharedata =packedsharedata[0]
     itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at,'\
               'title, is_dir from shareitem where path = ?'
     itemdata = database_execute(itemsql, (sharedata[1],))[0]

@@ -21,11 +21,11 @@ from shutil import copyfile
 from shutil import move
 from logging import getLogger
 try:
-    from urllib import unquote
-    from Cookie import SimpleCookie  # pylintL disable=F0401
+    from urllib import unquote  # pylint: disable=F0401
+    from Cookie import SimpleCookie  # pylint: disable=F0401
 except ImportError:
-    from http.cookies import SimpleCookie  # pylint: disable=F0401
-    from urllib.parse import unquote
+    from http.cookies import SimpleCookie  # pylint: disable=F0401,E0611,
+    from urllib.parse import unquote  # pylint: disable=F0401,E0611
 
 
 from .database import get_key_and_iv
@@ -79,7 +79,6 @@ def get_body_json(request_handler):
     @param request_handler the object which has the body to extract as json
     @returns json-parsed version of the requests' body.
     """
-    length = int(request_handler.headers.get('content-length', 0))
     return loads(request_handler.old_body)
 
 
@@ -205,8 +204,12 @@ def exec_files_path(request_handler):
         path = localbox_path_decoder(path)
     filepath = get_filesystem_path(path, request_handler.user)
     if request_handler.command == "POST":
-        filedescriptor = open(filepath, 'wb')
-        filedescriptor.write(request_handler.old_body)
+        self.status = 200
+        try:
+            filedescriptor = open(filepath, 'wb')
+            filedescriptor.write(request_handler.old_body)
+        except IOError:
+            self.status = 500
 
     if request_handler.command == "GET":
         if isdir(filepath):
@@ -403,7 +406,7 @@ def exec_create_share(request_handler):
                 #symlink(to_file, from_file)
             except OSError:
                 getLogger('api').debug("Error making symlink from " + from_file + "to "+ to_file, extra=request_handler.get_log_dict())
-                request_Handler.status = 500
+                request_handler.status = 500
             invite = Invitation(None, 'pending', share, sender, receiver)
             invite.save_to_database()
 
