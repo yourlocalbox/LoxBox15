@@ -8,7 +8,7 @@ try:
     from urllib2 import Request
     from urllib2 import urlopen
     from urllib2 import HTTPError
-    from urllib import urlencode
+    from urllib import urlencode  # pylint: disable=E0611
 except ImportError:
     from urllib.request import Request  # pylint: disable=E0611,F0401
     from urllib.request import urlopen  # pylint: disable=E0611,F0401
@@ -17,11 +17,11 @@ except ImportError:
 
 
 try:
-    halter = raw_input  # pylint: disable=E0602
+    HALTER = raw_input  # pylint: disable=E0602
 except NameError:
     # raw_input does not exist in python3, but input does, so in both python2
     # and python3 we are now able to use the 'input()' funcion.
-    halter = input
+    HALTER = input
 
 
 try:
@@ -60,6 +60,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         self.new_headers = []
         self.body = None
         self.status = 500
+        self.protocol=""
         BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
     def check_authorization(self):
@@ -80,8 +81,8 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         try:
             response = urlopen(request)
             name = response.read()
-        except HTTPError as e:
-            if e.code == 403:
+        except HTTPError as error:
+            if error.code == 403:
                 getLogger('auth').debug("Wrong/expired code",
                                         extra=self.get_log_dict())
             name = ''
@@ -126,16 +127,21 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         consulted to find the function to do the actual work. After this
         function has executed, the request is responded tousing send_request.
         """
-        config = ConfigSingleton()
-        protocol = "https://"
-        if config.getboolean('http', 'insecure-http', False):
-            protocol = "http://"
-        querystring = urlencode({'redirect_uri': protocol +
-                                self.headers['Host'] + self.path})
-        #self.user = authentication_dummy()
-        self.user = self.check_authorization()
-        ready_cookie(self)
         log = getLogger('api')
+        length = int(self.headers.get('content-length', 0))
+        self.old_body = self.rfile.read(length)
+        if self.body is None:
+            self.body = ""
+        log.debug(self.command + " " + self.path + "\n" + str(self.headers) + "\n\n" + self.old_body, extra=self.get_log_dict())
+        config = ConfigSingleton()
+        self.protocol = "https://"
+        if config.getboolean('http', 'insecure-http', True):
+            self.protocol = "http://"
+        querystring = urlencode({'redirect_uri': self.protocol +
+                                 self.headers['Host'] + self.path})
+        self.user = authentication_dummy()
+        # self.user = self.check_authorization()
+        #ready_cookie(self)
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
             self.status = 403
@@ -165,6 +171,8 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         if not match_found:
             log.debug("Could not match the path: " + self.path,
                       extra=self.get_log_dict())
+        log.debug(str(self.status) + " " +  str(self.new_headers) + "\n\n" + str(self.body), extra=self.get_log_dict())
+
 
     def do_POST(self):
         """
@@ -197,7 +205,7 @@ def main():
         print("WARNING: Therefore, SSL has not been enabled.")
         print("WARNING: Therefore, THIS SERVER IS NOT SECURE!!!.")
         if "--test-single-call" not in argv:
-            halter("Press a key to continue.")
+            HALTER("Press a key to continue.")
     else:
         certfile = configparser.get('httpd', 'certfile')
         keyfile = configparser.get('httpd', 'keyfile')

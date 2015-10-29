@@ -13,7 +13,7 @@ from .config import prepare_logger
 from .config import ConfigSingleton
 
 
-def sig_handler(signum, frame):
+def sig_handler(signum, frame):  # pylint: disable=W0613
     """
     Handle POSIX signal signum. Frame is ignored.
     """

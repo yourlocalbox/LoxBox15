@@ -1,3 +1,6 @@
+"""
+Caching framework for authentication caching.
+"""
 from time import time
 
 

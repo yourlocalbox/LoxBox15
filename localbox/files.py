@@ -19,7 +19,6 @@ from os import sep
 
 from .config import ConfigSingleton
 
-
 def get_filesystem_path(localbox_path, user):
     """
     Given a LocalBox path (e.g. '/file_name'), return the corresponding
@@ -59,15 +58,15 @@ def stat_reader(filesystem_path, user):
         'modified_at': datetime.fromtimestamp(statstruct.st_mtime).isoformat(),
         'is_share': SymlinkCache().exists(abspath(filesystem_path)),
         'is_shared': islink(abspath(filesystem_path)),
-        'has_keys': True,
+        'has_keys': False,
         'path': localboxpath,
     }
     if statdict['is_dir']:
         statdict['icon'] = 'Folder'
     else:
         statdict['icon'] = 'File'
-    if isdir(filesystem_path):
-        statdict['hash'] = 'TODO'
+    #if isdir(filesystem_path):
+    #    statdict['hash'] = 'TODO'
     return statdict
 
 
