@@ -4,6 +4,9 @@ LocalBox main initialization class.
 from ssl import wrap_socket
 from logging import getLogger
 from sys import argv
+from os import mkdir
+from os.path import join
+from os.path import exists
 try:
     from urllib2 import Request
     from urllib2 import urlopen
@@ -141,6 +144,10 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
                                  self.headers['Host'] + self.path})
         self.user = authentication_dummy()
         # self.user = self.check_authorization()
+        user_folder = join(ConfigSingleton().get('filesystem', 'bindpoint'), self.user)
+        if not exists(user_folder):
+            mkdir(user_folder)
+        
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
             self.status = 403

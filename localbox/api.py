@@ -204,7 +204,7 @@ def exec_files_path(request_handler):
         path = localbox_path_decoder(path)
     filepath = get_filesystem_path(path, request_handler.user)
     if request_handler.command == "POST":
-        self.status = 200
+        request_handler.status = 200
         try:
             filedescriptor = open(filepath, 'wb')
             filedescriptor.write(request_handler.old_body)
@@ -251,7 +251,7 @@ def exec_operations_create_folder(request_handler):
         request_handler.body = "Error: Something already exits at path"
         return
     log = getLogger('api')
-    log.debug("creating directory " + filepath, extra=request_handler.get_log_dict())
+    log.info("creating directory " + filepath, extra=request_handler.get_log_dict())
     mkdir(filepath)
     request_handler.body = stat_reader(filepath, request_handler.user)
     
@@ -405,7 +405,7 @@ def exec_create_share(request_handler):
                 symlink(from_file, to_file)
                 #symlink(to_file, from_file)
             except OSError:
-                getLogger('api').debug("Error making symlink from " + from_file + "to "+ to_file, extra=request_handler.get_log_dict())
+                getLogger('api').info("Error making symlink from " + from_file + "to "+ to_file, extra=request_handler.get_log_dict())
                 request_handler.status = 500
             invite = Invitation(None, 'pending', share, sender, receiver)
             invite.save_to_database()
@@ -610,7 +610,7 @@ def fake_register_app(request_handler):
     else:
         result = {'baseurl': request_handler.protocol + request_handler.headers['Host'] + "/" , 'name': 'schimmelpenning',
               'user': 'user', 'logourl': 'http://8ch.net/static/logo_33.svg',
-              'BackColor': '#0000FF', 'FontColor': '#FF0000', 'APIKeys':
+              'BackColor': '#00FF00', 'FontColor': '#0000FF', 'APIKeys':
               [{'Name': 'LocalBox iOS', 'Key': 'keystring',
                 'Secret': 'secretstring'}],
               'pin_cert': 'MIIDVzCCAj+gAwIBAgIJAKn6Bcf2mTH+MA0GCSqGSIb3DQEBCwU'

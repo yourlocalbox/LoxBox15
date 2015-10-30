@@ -37,7 +37,7 @@ def database_execute(command, params=None):
     @param params a list of tuple of values to substitute in command
     @returns a list of dictionaries representing the sql result
     """
-    getLogger("database").debug("database_execute(" + command + ", " +
+    getLogger("database").info("database_execute(" + command + ", " +
                                 str(params) + ")", extra=get_sql_log_dict())
     parser = ConfigSingleton()
     dbtype = parser.get('database', 'type')
