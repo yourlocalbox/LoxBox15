@@ -10,5 +10,8 @@ IH  (Installatie Handleiding)
 IP  (ImplementatiePlan)
 TP  (TestPlan)
 
+Programmatuur staat in de LocalBox submap op de GitHub. 
+
+
 TODO: Integriteit geuploade files
 
