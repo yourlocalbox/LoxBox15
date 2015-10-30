@@ -405,7 +405,7 @@ def exec_create_share(request_handler):
                 symlink(from_file, to_file)
                 #symlink(to_file, from_file)
             except OSError:
-                getLogger('api').info("Error making symlink from " + from_file + "to "+ to_file, extra=request_handler.get_log_dict())
+                getLogger('api').info("Error making symlink from " + from_file + " to "+ to_file, extra=request_handler.get_log_dict())
                 request_handler.status = 500
             invite = Invitation(None, 'pending', share, sender, receiver)
             invite.save_to_database()

@@ -98,7 +98,7 @@ def get_database_invitations(user):
     result = database_execute(sql, (user,))
     invitation_list = []
     for entry in result:
-        share = get_share_by_id(entry[3])
+        share = get_share_by_id(entry[3])[0]
         invitation_list.append(Invitation(entry[0], entry[4], share, entry[1],
                                           entry[2]))
     return dumps(invitation_list, cls=LocalBoxJSONEncoder)
@@ -182,9 +182,12 @@ class Share(object):
             sql = 'update shares set user = ?, path = ? where id = ?'
             params = params + (self.identifier,)
         database_execute(sql, params)
+
         if self.identifier is None:
             sql = 'select id from shares where user = ? and path = ?'
-            self.identifier = database_execute(sql, params)[0]
+            self.identifier = database_execute(sql, params)[0][0]
+        from pprint import pprint
+        pprint(self.__dict__)
 
 def get_share_by_id(identifier):
     """
