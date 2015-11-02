@@ -1,6 +1,7 @@
 """
 LocalBox shares module.
 """
+from os.path import join
 from json import dumps
 
 from .files import SymlinkCache
@@ -8,6 +9,8 @@ from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
 from .files import stat_reader
 from .files import get_filesystem_path
+from .config import ConfigSingleton
+
 
 
 class User(object):
@@ -62,8 +65,9 @@ class Invitation(object):
         is primarily for returning values and not a complete serialisation.
         @return json representing this Invitation
         """
+        #TODO: Add dates in database
         return {'id': self.identifier, 'share': self.share,
-                'item': self.share.item}
+                'item': self.share.item, 'state': self.state, 'created_at': '2915-09-11T15:31:27+0200'}
 
     def save_to_database(self):
         """
@@ -98,7 +102,7 @@ def get_database_invitations(user):
     result = database_execute(sql, (user,))
     invitation_list = []
     for entry in result:
-        share = get_share_by_id(entry[3])[0]
+        share = get_share_by_id(entry[3])
         invitation_list.append(Invitation(entry[0], entry[4], share, entry[1],
                                           entry[2]))
     return dumps(invitation_list, cls=LocalBoxJSONEncoder)
@@ -162,12 +166,18 @@ class Share(object):
         else:
             self.users = [user]
 
+    def get_identities_json(self):
+        result = "["
+        for user in self.users:
+            result = result +  dumps({'id': user, 'title': user, 'type': 'user'})
+        result = result + "]"
+
     def to_json(self):
         """
         returns a json representation of this Share
         @return a json representation of this Share
         """
-        return {'identities': self.users, 'id': self.identifier,
+        return {'identities': self.get_identities_json(), 'id': self.identifier,
                 'item': self.item}
 
     def save_to_database(self):
@@ -195,16 +205,21 @@ def get_share_by_id(identifier):
     @param identifier the number identifying the share in question
     @return the Share identified by the identifier
     """
+    from pprint import pprint
     sharesql = 'select user, path from shares where id = ?'
     packedsharedata = database_execute(sharesql, (identifier,))
     if packedsharedata == []:
         return None
-    sharedata =packedsharedata[0]
+    sharedata = packedsharedata[0]
     itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at,'\
               'title, is_dir from shareitem where path = ?'
-    itemdata = database_execute(itemsql, (sharedata[1],))[0]
-    shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3],
-                          itemdata[4], itemdata[5], itemdata[6], itemdata[7])
+
+    #itemdata = database_execte(itemsql, (sharedata[1],))
+    bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+    shareitem = stat_reader(join(bindpoint, sharedata[0], sharedata[1]), sharedata[1])
+
+    #shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3],
+    #                      itemdata[4], itemdata[5], itemdata[6], itemdata[7])
     return Share(sharedata[0], identifier, shareitem)
 
 

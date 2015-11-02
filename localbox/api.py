@@ -253,7 +253,7 @@ def exec_operations_create_folder(request_handler):
     log = getLogger('api')
     log.info("creating directory " + filepath, extra=request_handler.get_log_dict())
     mkdir(filepath)
-    request_handler.body = stat_reader(filepath, request_handler.user)
+    request_handler.body = dumps(stat_reader(filepath, request_handler.user))
     
 
 
@@ -344,8 +344,8 @@ def exec_user(request_handler):
         pubkey = json_object['public_key']
         sql = 'insert into users (public_key, private_key, name) values (?, ?, ?)'
         result = database_execute(sql, (pubkey, privkey, request_handler.user,))
-        request_handler.status = 200
         request_handler.body = dumps({'name': request_handler.user, 'publib_key': pubkey, 'private_key': privkey})
+    request_handler.status = 200
 
 def exec_user_username(request_handler):
     """
