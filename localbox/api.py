@@ -153,7 +153,6 @@ def exec_shares(request_handler):
     data = list_share_items(path2)
     request_handler.body = data
     request_handler.status = 200
-    print data
     if data == "{}":
         request_handler.status = 404
         request_handler.body = None
@@ -209,7 +208,7 @@ def exec_files_path(request_handler):
             filedescriptor = open(filepath, 'wb')
             filedescriptor.write(request_handler.old_body)
         except IOError:
-            self.status = 500
+            request_handler.status = 500
 
     if request_handler.command == "GET":
         if isdir(filepath):
@@ -244,6 +243,7 @@ def exec_operations_create_folder(request_handler):
     """
     request_handler.status = 200
     path = unquote(request_handler.old_body).replace("path=/", "", 1)
+    print path
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, request_handler.user, path)
     if lexists(filepath):
@@ -333,10 +333,12 @@ def exec_user(request_handler):
     print("running exec user")
     if request_handler.command == "GET":
         sql = "select public_key, private_key from users where name = ?"
-        result = database_execute(sql, (request_handler.user,))[0]
-
-        result_dictionary = {'user': request_handler.user, 'public_key': result[0],
+        result = database_execute(sql, (request_handler.user,))
+        try:
+           result_dictionary = {'user': request_handler.user, 'public_key': result[0],
                              'private_key': result[1]}
+        except IndexError:
+            result_dictionary = {'user': request_handler.user}
         request_handler.body = dumps(result_dictionary)
     else:
         json_object = loads(request_handler.old_body)
@@ -464,17 +466,19 @@ def exec_meta(request_handler):
     if (request_handler.path == '/lox_api/meta') or (request_handler.path == '/lox_api/meta/'):
         path = '.'
     else:
-        path = request_handler.path.replace('/lox_api/meta/', '', 1)
-    print path
-    filepath = get_filesystem_path(path, request_handler.user)
-    result = stat_reader(filepath, request_handler.user)
-    result['children'] = []
-    for path, directories, files in walk(filepath):
-        for child in directories + files:
-            user = request_handler.user
-            childpath = join(filepath, child)
-            result['children'].append(stat_reader(childpath, user))
-        break
+        path = unquote(request_handler.path.replace('/lox_api/meta/', '', 1))
+    try:
+        filepath = get_filesystem_path(path, request_handler.user)
+        result = stat_reader(filepath, request_handler.user)
+        result['children'] = []
+        for path, directories, files in walk(filepath):
+            for child in directories + files:
+                user = request_handler.user
+                childpath = join(filepath, child)
+                result['children'].append(stat_reader(childpath, user))
+            break
+    except OSError:
+        request_Handler.status = 404
     request_handler.body = dumps(result)
     request_handler.status = 200
 

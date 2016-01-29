@@ -51,7 +51,10 @@ def stat_reader(filesystem_path, user):
                                       bindpath)).replace(sep, '/')
     if localboxpath == '/.':
         localboxpath = '/'
-    statstruct = stat(filesystem_path)
+    try:
+        statstruct = stat(filesystem_path)
+    except OSError:
+        return None
     statdict = {
         'title': title,
         'is_dir': isdir(filesystem_path),

@@ -196,8 +196,6 @@ class Share(object):
         if self.identifier is None:
             sql = 'select id from shares where user = ? and path = ?'
             self.identifier = database_execute(sql, params)[0][0]
-        from pprint import pprint
-        pprint(self.__dict__)
 
 def get_share_by_id(identifier):
     """
@@ -205,7 +203,6 @@ def get_share_by_id(identifier):
     @param identifier the number identifying the share in question
     @return the Share identified by the identifier
     """
-    from pprint import pprint
     sharesql = 'select user, path from shares where id = ?'
     packedsharedata = database_execute(sharesql, (identifier,))
     if packedsharedata == []:

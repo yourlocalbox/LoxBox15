@@ -39,7 +39,7 @@ class TimedCache(object):
         """
         if timeout is None:
             timeout = self.timeout
-        store = (value, time() + timeout)
+        store = (value, time() + int(timeout))
         self.cache[key] = store
 
     def get(self, key):

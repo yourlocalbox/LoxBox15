@@ -1,6 +1,7 @@
 """
 LocalBox main initialization class.
 """
+from cStringIO import StringIO
 from ssl import wrap_socket
 from logging import getLogger
 from sys import argv
@@ -41,16 +42,6 @@ from .config import ConfigSingleton
 from .files import SymlinkCache
 
 
-def authentication_dummy():
-    """
-    return the string 'user' and pretend authentication happened. To be
-    replaced with actual authentication before delivery. Not part of the final
-    codebase
-    @return "user"
-    """
-    return "user"
-
-
 class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
     """
     class extending the BaseHTTPRequestHandler and handling the HTTP requests
@@ -59,7 +50,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
     """
     def __init__(self, request, client_address, server):
         self.user = None
-        self.new_headers = []
+        self.new_headers = {}
         self.body = None
         self.old_body = None
         self.status = 500
@@ -107,7 +98,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         """
         self.send_response(self.status)
         for header in self.new_headers:
-            self.send_header(header[0], header[1])
+            self.send_header(header, self.new_headers[header])
         self.end_headers()
         if self.body is not None:
             self.wfile.write(self.body)
@@ -130,36 +121,51 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         consulted to find the function to do the actual work. After this
         function has executed, the request is responded tousing send_request.
         """
+        print "DoingRequest"
+        max_read_size = 65536
         log = getLogger('api')
         length = int(self.headers.get('content-length', 0))
-        self.old_body = self.rfile.read(length)
+        self.old_body = ""
+        file_str = StringIO()
+        while length > 0:
+            read_size = min(max_read_size, length)
+            print(str(max_read_size) + "\t" + str(length) + "\t" + str(read_size))
+            file_str.write(self.rfile.read(read_size))
+            length -= read_size
+        print "done"
+        self.old_body = file_str.getvalue()
+        print "copied"
         if self.body is None:
             self.body = ""
-        log.debug(self.command + " " + self.path + "\n" + str(self.headers) + "\n\n" + self.old_body, extra=self.get_log_dict())
+        #log.debug(self.command + " " + self.path + "\n" + str(self.headers) + "\n\n" + self.old_body, extra=self.get_log_dict())
         config = ConfigSingleton()
         self.protocol = "https://"
         if config.getboolean('http', 'insecure-http', True):
             self.protocol = "http://"
-        querystring = urlencode({'redirect_uri': self.protocol +
+        back_url = config.get('oauth', 'direct_back_url')
+        if back_url:
+            querystring = urlencode({'redirect_uri': back_url})
+        else:
+            querystring = urlencode({'redirect_uri': self.protocol +
                                  self.headers['Host'] + self.path})
-        self.user = authentication_dummy()
-        # self.user = self.check_authorization()
-        user_folder = join(ConfigSingleton().get('filesystem', 'bindpoint'), self.user)
-        if not exists(user_folder):
-            mkdir(user_folder)
+        #self.user = authentication_dummy()
+        self.user = self.check_authorization()
         
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
-            self.status = 403
+            self.status = 401
             redirect_url = config.get('oauth', 'redirect_url') + "?" + \
                 querystring
-            self.headers['Location'] = redirect_url
-            self.body = "<h1>403: Forbidden.</h1>" \
+            self.new_headers['WWW-Authenticate'] = 'Bearer domain="' + redirect_url + '"'
+            self.body = "<h1>401: Forbidden.</h1>" \
                         "<p>Authorization failed. Please authenticate at" \
                         '<a href="%s">%s</a></p>' % (redirect_url,
                                                      redirect_url)
             self.send_request()
             return
+        user_folder = join(ConfigSingleton().get('filesystem', 'bindpoint'), self.user)
+        if not exists(user_folder):
+            mkdir(user_folder)
         log.critical("processing " + self.path, extra=self.get_log_dict())
         for key in self.headers:
             value = self.headers[key]
@@ -177,7 +183,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         if not match_found:
             log.debug("Could not match the path: " + self.path,
                       extra=self.get_log_dict())
-        log.debug(str(self.status) + " " +  str(self.new_headers) + "\n\n" + str(self.body), extra=self.get_log_dict())
+        #log.debug(str(self.status) + " " +  str(self.new_headers) + "\n\n" + str(self.body), extra=self.get_log_dict())
 
 
     def do_POST(self):
