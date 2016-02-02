@@ -6,7 +6,6 @@ from json import dumps
 from json import loads
 from re import compile as regex_compile
 from os import remove
-from os import symlink
 from os import walk
 from os import mkdir
 from os import rmdir
@@ -27,6 +26,25 @@ except ImportError:
     from http.cookies import SimpleCookie  # pylint: disable=F0401,E0611,
     from urllib.parse import unquote  # pylint: disable=F0401,E0611
 
+try:
+    from os import symlink
+except ImportError:
+    # python26/windows fix for symlinking:
+    # Origined from http://stackoverflow.com/questions/6260149/os-symlink-support-in-windows
+    # As reported by Erik Renes, with minor changes
+    def symlink(source, link_name):
+        import os
+        os_symlink = getattr(os, "symlink", None)
+        if callable(os_symlink):
+            os_symlink(source, link_name)
+        else:
+            import ctypes
+            csl = ctypes.windll.kernel32.CreateSymbolicLinkW
+            csl.argtypes = (ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32)
+            csl.restype = ctypes.c_ubyte
+            flags = 1 if os.path.isdir(source) else 0
+            if csl(link_name, source, flags) == 0:
+                raise ctypes.WinError()
 
 from .database import get_key_and_iv
 from .database import database_execute
