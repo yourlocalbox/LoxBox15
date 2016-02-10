@@ -12,12 +12,13 @@ from .files import get_filesystem_path
 from .config import ConfigSingleton
 
 
-
 class User(object):
+
     """
     User object, limited to more or less the 'name' only, given how the actual
     user administration is done by the authentication mechanism.
     """
+
     def __init__(self, name=None):
         self.name = name
 
@@ -30,10 +31,12 @@ class User(object):
 
 
 class Group(object):
+
     """
     Underdefined group object which due to lack of user administration will
     probably be removed at a later stage.
     """
+
     def __init__(self, name=None, users=None):
         self.name = name
         self.users = users
@@ -47,6 +50,7 @@ class Group(object):
 
 
 class Invitation(object):
+
     """
     The state of being asked to join in sharing a file.
     """
@@ -65,7 +69,7 @@ class Invitation(object):
         is primarily for returning values and not a complete serialisation.
         @return json representing this Invitation
         """
-        #TODO: Add dates in database
+        # TODO: Add dates in database
         return {'id': self.identifier, 'share': self.share,
                 'item': self.share.item, 'state': self.state, 'created_at': '2915-09-11T15:31:27+0200'}
 
@@ -109,10 +113,12 @@ def get_database_invitations(user):
 
 
 class ShareItem(object):
+
     """
     Item that signifies a 'share'. Sharing a folder allows a different user to
     access yor file/folder. A ShareItem is the representation of that folder
     """
+
     def __init__(self, icon=None, path=None, has_keys=False, is_share=False,
                  is_shared=False, modified_at=None, title=None, is_dir=False):
         self.icon = icon
@@ -148,9 +154,11 @@ def get_shareitem_by_path(localbox_path, user):
 
 
 class Share(object):
+
     """
     THe state of sharing a folder.
     """
+
     def __init__(self, users=None, identifier=None, item=None):
         self.users = users
         self.identifier = identifier
@@ -169,7 +177,8 @@ class Share(object):
     def get_identities_json(self):
         result = "["
         for user in self.users:
-            result = result +  dumps({'id': user, 'title': user, 'type': 'user'})
+            result = result + \
+                dumps({'id': user, 'title': user, 'type': 'user'})
         result = result + "]"
 
     def to_json(self):
@@ -197,6 +206,7 @@ class Share(object):
             sql = 'select id from shares where user = ? and path = ?'
             self.identifier = database_execute(sql, params)[0][0]
 
+
 def get_share_by_id(identifier):
     """
     returns the share with the supplied identifier
@@ -213,9 +223,10 @@ def get_share_by_id(identifier):
 
     #itemdata = database_execte(itemsql, (sharedata[1],))
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-    shareitem = stat_reader(join(bindpoint, sharedata[0], sharedata[1]), sharedata[1])
+    shareitem = stat_reader(
+        join(bindpoint, sharedata[0], sharedata[1]), sharedata[1])
 
-    #shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3],
+    # shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3],
     #                      itemdata[4], itemdata[5], itemdata[6], itemdata[7])
     return Share(sharedata[0], identifier, shareitem)
 

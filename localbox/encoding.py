@@ -10,9 +10,11 @@ except ImportError:
 
 
 class LocalBoxJSONEncoder(JSONEncoder):
+
     """
     JSONEncoder for localbox classes. Used to JSON encode localbox classes.
     """
+
     def default(self, o):  # pylint: disable=E0202
         """
         The way objects are usually encoded into JSON.

@@ -5,6 +5,7 @@ from time import time
 
 
 class TimedCache(object):
+
     """
     TimedCache is a dictionary with a timeout. The class is initalised with a
     timeout, and data will be invalid after the timeout has expired. Invalid

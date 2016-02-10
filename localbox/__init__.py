@@ -6,6 +6,7 @@ from ssl import wrap_socket
 from logging import getLogger
 from sys import argv
 from os import mkdir
+from os import remove
 from os.path import join
 from os.path import exists
 try:
@@ -40,21 +41,24 @@ from .api import ROUTING_LIST
 from .cache import TimedCache
 from .config import ConfigSingleton
 from .files import SymlinkCache
+from .database import database_execute
 
 
 class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
+
     """
     class extending the BaseHTTPRequestHandler and handling the HTTP requests
     in do_POST and do_GET (which in their turn forward said requests to
     do_request)
     """
+
     def __init__(self, request, client_address, server):
         self.user = None
         self.new_headers = {}
         self.body = None
         self.old_body = None
         self.status = 500
-        self.protocol=""
+        self.protocol = ""
         BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
     def check_authorization(self):
@@ -64,10 +68,12 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         field when succesful and returns said name. returns None on failure
         """
         auth_header = self.headers.getheader('Authorization')
+        if auth_header is None:
+            return None
         config = ConfigSingleton()
         auth_url = config.get('oauth', 'verify_url')
         time_out = config.get('cache', 'timeout')
-        cache = TimedCache(timeout=time_out)
+        cache = TimedCache(timeout=0)  # Cache is broken
         name = cache.get(auth_header)
         if name is not None:
             return name
@@ -129,7 +135,8 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         file_str = StringIO()
         while length > 0:
             read_size = min(max_read_size, length)
-            print(str(max_read_size) + "\t" + str(length) + "\t" + str(read_size))
+            print(
+                str(max_read_size) + "\t" + str(length) + "\t" + str(read_size))
             file_str.write(self.rfile.read(read_size))
             length -= read_size
         print "done"
@@ -147,23 +154,25 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             querystring = urlencode({'redirect_uri': back_url})
         else:
             querystring = urlencode({'redirect_uri': self.protocol +
-                                 self.headers['Host'] + self.path})
+                                     self.headers['Host'] + self.path})
         #self.user = authentication_dummy()
         self.user = self.check_authorization()
-        
+
         if not self.user:
             log.debug("authentication problem", extra=self.get_log_dict())
             self.status = 401
             redirect_url = config.get('oauth', 'redirect_url') + "?" + \
                 querystring
-            self.new_headers['WWW-Authenticate'] = 'Bearer domain="' + redirect_url + '"'
+            self.new_headers[
+                'WWW-Authenticate'] = 'Bearer domain="' + redirect_url + '"'
             self.body = "<h1>401: Forbidden.</h1>" \
                         "<p>Authorization failed. Please authenticate at" \
-                        '<a href="%s">%s</a></p>' % (redirect_url,
-                                                     redirect_url)
+                        '<a href="?">?</a></p>' % (redirect_url,
+                                                   redirect_url)
             self.send_request()
             return
-        user_folder = join(ConfigSingleton().get('filesystem', 'bindpoint'), self.user)
+        user_folder = join(
+            ConfigSingleton().get('filesystem', 'bindpoint'), self.user)
         if not exists(user_folder):
             mkdir(user_folder)
         log.critical("processing " + self.path, extra=self.get_log_dict())
@@ -185,7 +194,6 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
                       extra=self.get_log_dict())
         #log.debug(str(self.status) + " " +  str(self.new_headers) + "\n\n" + str(self.body), extra=self.get_log_dict())
 
-
     def do_POST(self):
         """
         handle a POST request (by forwarding it to do_request)
@@ -206,26 +214,43 @@ def main():
     been specified as command line argument
     """
     configparser = ConfigSingleton()
-    SymlinkCache()
-    port = int(configparser.get('httpd', 'port', 443))
-    insecure_mode = configparser.getboolean('httpd', 'insecure-http',
-                                            default=False)
-    server_address = ('', port)
-    httpd = HTTPServer(server_address, LocalBoxHTTPRequestHandler)
-    if insecure_mode:
-        print("WARNING: Running Insecure HTTP.")
-        print("WARNING: Therefore, SSL has not been enabled.")
-        print("WARNING: Therefore, THIS SERVER IS NOT SECURE!!!.")
-        if "--test-single-call" not in argv:
-            HALTER("Press a key to continue.")
-    else:
-        certfile = configparser.get('httpd', 'certfile')
-        keyfile = configparser.get('httpd', 'keyfile')
-        httpd.socket = wrap_socket(httpd.socket, server_side=True,
-                                   certfile=certfile, keyfile=keyfile)
-    print("ready")
+    symlinkcache = SymlinkCache()
+    try:
+        position = argv.index("--clear-user")
+        user = argv[position + 1]
+        user_folder = join(configparser.get('filesystem', 'bindpoint'), user)
+        log = getLogger('api').info(
+            "Deleting info for user " + user, extra={'ip': 'cli', 'user': user})
+        for sqlstring in 'delete from users where name = ?', 'delete from keys where user = ?', 'delete from invitations where sender = ?',  'delete from invitations where receiver = ?', 'delete from shares where user = ?':
+            database_execute(sqlstring, (user,))
+        for symlinkdest in symlinkcache:
+            if symlink.startswith(user_folder):
+                symlinks = symlinkcache.get(symlinkdest)
+                for symlink in symlinks:
+                    remove(symlink)
+        rmtree(user_folder)
+        return
+    except (ValueError, IndexError):
+        pass
+        port = int(configparser.get('httpd', 'port', 443))
+        insecure_mode = configparser.getboolean('httpd', 'insecure-http',
+                                                default=False)
+        server_address = ('', port)
+        httpd = HTTPServer(server_address, LocalBoxHTTPRequestHandler)
+        if insecure_mode:
+            print("WARNING: Running Insecure HTTP.")
+            print("WARNING: Therefore, SSL has not been enabled.")
+            print("WARNING: Therefore, THIS SERVER IS NOT SECURE!!!.")
+            if "--test-single-call" not in argv:
+                HALTER("Press a key to continue.")
+        else:
+            certfile = configparser.get('httpd', 'certfile')
+            keyfile = configparser.get('httpd', 'keyfile')
+            httpd.socket = wrap_socket(httpd.socket, server_side=True,
+                                       certfile=certfile, keyfile=keyfile)
+        print("ready")
 
-    if "--test-single-call" in argv:
-        httpd.handle_request()
-    else:
-        httpd.serve_forever()
+        if "--test-single-call" in argv:
+            httpd.handle_request()
+        else:
+            httpd.serve_forever()

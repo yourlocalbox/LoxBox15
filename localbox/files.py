@@ -19,6 +19,7 @@ from os import sep
 
 from .config import ConfigSingleton
 
+
 def get_filesystem_path(localbox_path, user):
     """
     Given a LocalBox path (e.g. '/file_name'), return the corresponding
@@ -68,12 +69,13 @@ def stat_reader(filesystem_path, user):
         statdict['icon'] = 'Folder'
     else:
         statdict['icon'] = 'File'
-    #if isdir(filesystem_path):
+    # if isdir(filesystem_path):
     #    statdict['hash'] = 'TODO'
     return statdict
 
 
 class SymlinkCache(object):
+
     """
     Singleton keeping track of all symlinks (shares)
     """
@@ -113,26 +115,33 @@ class SymlinkCache(object):
         """
         return self.cache[path]
 
-    def __init__(self):
+    def __init__(self, path=None):
         if not hasattr(self, 'cache'):
             print("initialising SymlinkCache")
             self.cache = {}
-            self.build_cache()
+            self.build_cache(path)
             print("initialised SymlinkCache")
 
-    def build_cache(self):
+    def __iter__(self):
+        for entry in set(self.cache.keys()):
+            yield entry
+
+    def build_cache(self, path=None):
         """
         Build the reverse symlink cache by walking through the filesystem and
         finding all symlinks and put them into a cache dictionary for reference
         later.
         """
         working_directory = getcwd()
-        bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-        if bindpoint is None:
-            getLogger('files').error("No bindpoint found in the filesystem "
-                                     "section of the configuration file, "
-                                     "exiting")
-            sysexit(1)
+        if path is None:
+            bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+            if bindpoint is None:
+                getLogger('files').error("No bindpoint found in the filesystem "
+                                         "section of the configuration file, "
+                                         "exiting")
+                sysexit(1)
+        else:
+            bindpoint = path
         for dirname, directories, files in walk(bindpoint):
             for entry in directories + files:
                 linkpath = abspath(join(dirname, entry))

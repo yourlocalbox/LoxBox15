@@ -40,7 +40,8 @@ except ImportError:
         else:
             import ctypes
             csl = ctypes.windll.kernel32.CreateSymbolicLinkW
-            csl.argtypes = (ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32)
+            csl.argtypes = (
+                ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32)
             csl.restype = ctypes.c_ubyte
             flags = 1 if os.path.isdir(source) else 0
             if csl(link_name, source, flags) == 0:
@@ -269,10 +270,10 @@ def exec_operations_create_folder(request_handler):
         request_handler.body = "Error: Something already exits at path"
         return
     log = getLogger('api')
-    log.info("creating directory " + filepath, extra=request_handler.get_log_dict())
+    log.info("creating directory " + filepath,
+             extra=request_handler.get_log_dict())
     mkdir(filepath)
     request_handler.body = dumps(stat_reader(filepath, request_handler.user))
-    
 
 
 def exec_operations_delete(request_handler):
@@ -353,8 +354,8 @@ def exec_user(request_handler):
         sql = "select public_key, private_key from users where name = ?"
         result = database_execute(sql, (request_handler.user,))
         try:
-           result_dictionary = {'user': request_handler.user, 'public_key': result[0],
-                             'private_key': result[1]}
+            result_dictionary = {'user': request_handler.user, 'public_key': result[0],
+                                 'private_key': result[1]}
         except IndexError:
             result_dictionary = {'user': request_handler.user}
         request_handler.body = dumps(result_dictionary)
@@ -363,9 +364,12 @@ def exec_user(request_handler):
         privkey = json_object['private_key']
         pubkey = json_object['public_key']
         sql = 'insert into users (public_key, private_key, name) values (?, ?, ?)'
-        result = database_execute(sql, (pubkey, privkey, request_handler.user,))
-        request_handler.body = dumps({'name': request_handler.user, 'publib_key': pubkey, 'private_key': privkey})
+        result = database_execute(
+            sql, (pubkey, privkey, request_handler.user,))
+        request_handler.body = dumps(
+            {'name': request_handler.user, 'publib_key': pubkey, 'private_key': privkey})
     request_handler.status = 200
+
 
 def exec_user_username(request_handler):
     """
@@ -425,7 +429,8 @@ def exec_create_share(request_handler):
                 symlink(from_file, to_file)
                 #symlink(to_file, from_file)
             except OSError:
-                getLogger('api').info("Error making symlink from " + from_file + " to "+ to_file, extra=request_handler.get_log_dict())
+                getLogger('api').info("Error making symlink from " + from_file +
+                                      " to " + to_file, extra=request_handler.get_log_dict())
                 request_handler.status = 500
             invite = Invitation(None, 'pending', share, sender, receiver)
             invite.save_to_database()
@@ -507,17 +512,17 @@ def fake_login(request_handler):
     @param request_handler the object which has the body to extract as json
     """
     request_handler.new_headers = {"Date": "Mon, 26 Oct 2015 16:06:08 GMT",
-                               "Server": "Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14",
-                               "X-Powered-By": "PHP/5.6.14",
-                               "Set-Cookie": "PHPSESSID=ft41ihtl7uptocchfb1cj2ko95; expires=Tue, 27-Oct-2015 16:06:09 GMT; Max-Age=86400; path=/",
-                               "Cache-Control": "no-cache",
-                               "Access-Control-Allow-Origin": "*",
-                               "x-frame-options": "DENY",
-                               "Strict-Transport-Security": "max-age=86400",
-                               "Keep-Alive": "timeout=5, max=100",
-                               "Connection": "Keep-Alive",
-                               "Transfer-Encoding": "chunked",
-                               "Content-Type": "text/html; charset=UTF8"}
+                                   "Server": "Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14",
+                                   "X-Powered-By": "PHP/5.6.14",
+                                   "Set-Cookie": "PHPSESSID=ft41ihtl7uptocchfb1cj2ko95; expires=Tue, 27-Oct-2015 16:06:09 GMT; Max-Age=86400; path=/",
+                                   "Cache-Control": "no-cache",
+                                   "Access-Control-Allow-Origin": "*",
+                                   "x-frame-options": "DENY",
+                                   "Strict-Transport-Security": "max-age=86400",
+                                   "Keep-Alive": "timeout=5, max=100",
+                                   "Connection": "Keep-Alive",
+                                   "Transfer-Encoding": "chunked",
+                                   "Content-Type": "text/html; charset=UTF8"}
     form = """<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
@@ -564,20 +569,21 @@ def fake_login_check(request_handler):
     part of the fake login process, not part of the final codebase
     @param request_handler the object which has the body to extract as json
     """
-    url = request_handler.protocol + request_handler.headers['Host'] + request_handler.path
+    url = request_handler.protocol + \
+        request_handler.headers['Host'] + request_handler.path
     request_handler.new_headers = {"Date": "Mon, 26 Oct 2015 16:06:08 GMT",
-                               "Server": "Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14",
-                               "X-Powered-By": "PHP/5.6.14",
-                               "Set-Cookie": "PHPSESSID=rjcc3p0uila4qcu9btvf75ihd5; expires=Tue, 27-Oct-2015 16:06:30 GMT; Max-Age=86400; path=/",
-                               "Cache-Control": "no-cache",
-                               "Location": url + "/register_app",
-                               "Access-Control-Allow-Origin": "*",
-                               "x-frame-options": "DENY",
-                               "Strict-Transport-Security": "max-age=86400",
-                               "Keep-Alive": "timeout=5, max=100",
-                               "Connection": "Keep-Alive",
-                               "Transfer-Encoding": "chunked",
-                               "Content-Type": "text/html; charset=UTF8"}
+                                   "Server": "Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14",
+                                   "X-Powered-By": "PHP/5.6.14",
+                                   "Set-Cookie": "PHPSESSID=rjcc3p0uila4qcu9btvf75ihd5; expires=Tue, 27-Oct-2015 16:06:30 GMT; Max-Age=86400; path=/",
+                                   "Cache-Control": "no-cache",
+                                   "Location": url + "/register_app",
+                                   "Access-Control-Allow-Origin": "*",
+                                   "x-frame-options": "DENY",
+                                   "Strict-Transport-Security": "max-age=86400",
+                                   "Keep-Alive": "timeout=5, max=100",
+                                   "Connection": "Keep-Alive",
+                                   "Transfer-Encoding": "chunked",
+                                   "Content-Type": "text/html; charset=UTF8"}
     html = """<!DOCTYPE html>
 <html>
     <head>
@@ -590,7 +596,7 @@ def fake_login_check(request_handler):
         Redirecting to <a href=\"""" + url + """ /register_app">http://192.168.178.25/localbox/web/app.php/register_app</a>.
     </body>
 </html>"""
-    #ready_cookie(request_handler)
+    # ready_cookie(request_handler)
     request_handler.status = 302
     request_handler.body = html
 
@@ -603,20 +609,21 @@ def fake_register_app(request_handler):
     """
     if not request_handler.headers.get('Cookie'):
         request_handler.status = 302
-        url = request_handler.protocol + request_handler.headers['Host'] + request_handler.path
+        url = request_handler.protocol + \
+            request_handler.headers['Host'] + request_handler.path
         request_handler.new_headers = {"Date": "Mon, 26 Oct 2015 16:06:08 GMT",
-                               "Server": "Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14",
-                               "X-Powered-By": "PHP/5.6.14",
-                               "Set-Cookie": "PHPSESSID=ft41ihtl7uptocchfb1cj2ko95; expires=Tue, 27-Oct-2015 16:06:09 GMT; Max-Age=86400; path=/",
-                               "Cache-Control": "no-cache",
-                               "Location": request_handler.protocol + request_handler.headers['Host'] + "/login",
-                               "Access-Control-Allow-Origin": "*",
-                               "x-frame-options": "DENY",
-                               "Strict-Transport-Security": "max-age=86400",
-                               "Keep-Alive": "timeout=5, max=100",
-                               "Connection": "Keep-Alive",
-                               "Transfer-Encoding": "chunked",
-                               "Content-Type": "text/html; charset=UTF8"}
+                                       "Server": "Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14",
+                                       "X-Powered-By": "PHP/5.6.14",
+                                       "Set-Cookie": "PHPSESSID=ft41ihtl7uptocchfb1cj2ko95; expires=Tue, 27-Oct-2015 16:06:09 GMT; Max-Age=86400; path=/",
+                                       "Cache-Control": "no-cache",
+                                       "Location": request_handler.protocol + request_handler.headers['Host'] + "/login",
+                                       "Access-Control-Allow-Origin": "*",
+                                       "x-frame-options": "DENY",
+                                       "Strict-Transport-Security": "max-age=86400",
+                                       "Keep-Alive": "timeout=5, max=100",
+                                       "Connection": "Keep-Alive",
+                                       "Transfer-Encoding": "chunked",
+                                       "Content-Type": "text/html; charset=UTF8"}
         request_handler.body = """<!DOCTYPE html>
 <html>
     <head>
@@ -630,37 +637,37 @@ def fake_register_app(request_handler):
     </body>
 </html>"""
     else:
-        result = {'baseurl': request_handler.protocol + request_handler.headers['Host'] + "/" , 'name': 'schimmelpenning',
-              'user': 'user', 'logourl': 'http://8ch.net/static/logo_33.svg',
-              'BackColor': '#00FF00', 'FontColor': '#0000FF', 'APIKeys':
-              [{'Name': 'LocalBox iOS', 'Key': 'keystring',
-                'Secret': 'secretstring'}],
-              'pin_cert': 'MIIDVzCCAj+gAwIBAgIJAKn6Bcf2mTH+MA0GCSqGSIb3DQEBCwU'
-                          'AMEIxCzAJBgNVBAYTAlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdH'
-                          'kxHDAaBgNVBAoME0RlZmF1bHQgQ29tcGFueSBMdGQwHhcNMTUwO'
-                          'TE1MTAyODM3WhcNMTYwOTE0MTAyODM3WjBCMQswCQYDVQQGEwJY'
-                          'WDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZ'
-                          'hdWx0IENvbXBhbnkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ'
-                          '8AMIIBCgKCAQEAuhdfwhBc0pIaRxeq4+xv6WZVIb0PSbW8G6kJ7'
-                          'kbw+NL0s+FS+Au0JQNtOqauiYdi09ejqfHHUW+cLoX3qMeH2Wgr'
-                          '9TuIbRamLOJw/twstq0LqKOjaiLgq/xRNcUrqptgDfXSbBQXRcG'
-                          'sdB+6E6pKGfViDIZzhdgImXKqROfa6Yv5aGHuz204sKovu2/gSH'
-                          'Pz2IDXSdAehpNbJ5ORFP3+Gkb1z6VoZvJ5QAp/+Ri3th8ms6o/D'
-                          'XRhwSCtetKQshyRjYXpea3v/Oq9lbzBm43LhzyH24ThwKKX8p1J'
-                          'tCJcMfHzpa9OHgLNpDDp4AKCcq5KcDRWJxoTDs45Noj/j3PtlQI'
-                          'DAQABo1AwTjAdBgNVHQ4EFgQUibXrIXzSfhlh/ndNG4cMjIHg3v'
-                          '8wHwYDVR0jBBgwFoAUibXrIXzSfhlh/ndNG4cMjIHg3v8wDAYDV'
-                          'R0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEALEzFqDhRgiRW'
-                          'xJJx3CwG41VadNYJxxgvVos0sVc4y7fTWG2Rq42mMVbMGBvqxtz'
-                          '69KwcHGAvfC1DteEdTSHmEuhsR4DiX0mChfNQrWvrbDTnKaa00a'
-                          'aWArVMUGa+vbDFxsW+r0Z+hzBneQI9Qiy8dexUD3etV7EIumijE'
-                          'faPDvMDNnwwVGj17D7EXY/aDgFQqwTiPGlzOE73kcFTzkMMRzkN'
-                          'hurcNbhp/Z92ToL92LgetAVIrMNysWrgCJrI/gh7nPZIX6LH5TD'
-                          '0Erlx/NEP5IKcsVUnIxH+aXQD4sHjreiUxdPpuqsAy3u4ThMI+o'
-                          '5Rj6Iq1M5L8sPjJ6WzkEXblw==',
-              "access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
-              "token_type": "Bearer", "expires_in": 600,
-              "refresh_token": "tNXAVVo2QE7c5MKgFB1mKuAPsu4xL", "scope": "all"}
+        result = {'baseurl': request_handler.protocol + request_handler.headers['Host'] + "/", 'name': 'schimmelpenning',
+                  'user': 'user', 'logourl': 'http://8ch.net/static/logo_33.svg',
+                  'BackColor': '#00FF00', 'FontColor': '#0000FF', 'APIKeys':
+                  [{'Name': 'LocalBox iOS', 'Key': 'keystring',
+                    'Secret': 'secretstring'}],
+                  'pin_cert': 'MIIDVzCCAj+gAwIBAgIJAKn6Bcf2mTH+MA0GCSqGSIb3DQEBCwU'
+                  'AMEIxCzAJBgNVBAYTAlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdH'
+                  'kxHDAaBgNVBAoME0RlZmF1bHQgQ29tcGFueSBMdGQwHhcNMTUwO'
+                  'TE1MTAyODM3WhcNMTYwOTE0MTAyODM3WjBCMQswCQYDVQQGEwJY'
+                  'WDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZ'
+                  'hdWx0IENvbXBhbnkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ'
+                  '8AMIIBCgKCAQEAuhdfwhBc0pIaRxeq4+xv6WZVIb0PSbW8G6kJ7'
+                  'kbw+NL0s+FS+Au0JQNtOqauiYdi09ejqfHHUW+cLoX3qMeH2Wgr'
+                  '9TuIbRamLOJw/twstq0LqKOjaiLgq/xRNcUrqptgDfXSbBQXRcG'
+                  'sdB+6E6pKGfViDIZzhdgImXKqROfa6Yv5aGHuz204sKovu2/gSH'
+                  'Pz2IDXSdAehpNbJ5ORFP3+Gkb1z6VoZvJ5QAp/+Ri3th8ms6o/D'
+                  'XRhwSCtetKQshyRjYXpea3v/Oq9lbzBm43LhzyH24ThwKKX8p1J'
+                  'tCJcMfHzpa9OHgLNpDDp4AKCcq5KcDRWJxoTDs45Noj/j3PtlQI'
+                  'DAQABo1AwTjAdBgNVHQ4EFgQUibXrIXzSfhlh/ndNG4cMjIHg3v'
+                  '8wHwYDVR0jBBgwFoAUibXrIXzSfhlh/ndNG4cMjIHg3v8wDAYDV'
+                  'R0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEALEzFqDhRgiRW'
+                  'xJJx3CwG41VadNYJxxgvVos0sVc4y7fTWG2Rq42mMVbMGBvqxtz'
+                  '69KwcHGAvfC1DteEdTSHmEuhsR4DiX0mChfNQrWvrbDTnKaa00a'
+                  'aWArVMUGa+vbDFxsW+r0Z+hzBneQI9Qiy8dexUD3etV7EIumijE'
+                  'faPDvMDNnwwVGj17D7EXY/aDgFQqwTiPGlzOE73kcFTzkMMRzkN'
+                  'hurcNbhp/Z92ToL92LgetAVIrMNysWrgCJrI/gh7nPZIX6LH5TD'
+                  '0Erlx/NEP5IKcsVUnIxH+aXQD4sHjreiUxdPpuqsAy3u4ThMI+o'
+                  '5Rj6Iq1M5L8sPjJ6WzkEXblw==',
+                  "access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
+                  "token_type": "Bearer", "expires_in": 600,
+                  "refresh_token": "tNXAVVo2QE7c5MKgFB1mKuAPsu4xL", "scope": "all"}
         request_handler.status = 200
         request_handler.body = dumps(result)
 
@@ -690,7 +697,7 @@ def fake_oauth(request_handler):
         print("============================================ FAKE OAUTH PART 2")
         request_handler.status = 302
         request_handler.new_headers.append(('Location',
-                                           'lbox://oauth-return?code=yay'))
+                                            'lbox://oauth-return?code=yay'))
 
 
 def exec_identities(request_handler):
@@ -702,7 +709,8 @@ def exec_identities(request_handler):
     result = database_execute(sql)
     outputlist = []
     for entry in result:
-        outputlist.append({'id': entry[0], 'title': entry[0], 'username': entry[0], 'type': 'user', 'has_keys': bool(entry[1])})
+        outputlist.append({'id': entry[0], 'title': entry[0], 'username': entry[
+                          0], 'type': 'user', 'has_keys': bool(entry[1])})
     if outputlist == []:
         request_handler.status = 404
     else:

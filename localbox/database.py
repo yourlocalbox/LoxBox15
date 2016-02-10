@@ -19,6 +19,7 @@ from sqlite3 import connect as sqlite_connect
 
 from .config import ConfigSingleton
 
+
 def get_sql_log_dict():
     parser = ConfigSingleton()
     dbtype = parser.get('database', 'type')
@@ -26,7 +27,8 @@ def get_sql_log_dict():
         ip = parser.get('database', 'filename')
     else:
         ip = parser.get('database', 'hostname')
-    return { 'ip': ip, 'user': '', 'path': 'database/' }
+    return {'ip': ip, 'user': '', 'path': 'database/'}
+
 
 def database_execute(command, params=None):
     """
@@ -38,7 +40,7 @@ def database_execute(command, params=None):
     @returns a list of dictionaries representing the sql result
     """
     getLogger("database").info("database_execute(" + command + ", " +
-                                str(params) + ")", extra=get_sql_log_dict())
+                               str(params) + ")", extra=get_sql_log_dict())
     parser = ConfigSingleton()
     dbtype = parser.get('database', 'type')
 
@@ -140,6 +142,7 @@ def get_key_and_iv(localbox_path, user):
     try:
         result = database_execute(sql, (localbox_path, user))[0]
     except(IndexError):
-        getLogger("database").debug("cannot find key", extra={'ip': '', 'user': user, 'path': localbox_path})
+        getLogger("database").debug(
+            "cannot find key", extra={'ip': '', 'user': user, 'path': localbox_path})
         result = None
     return result
