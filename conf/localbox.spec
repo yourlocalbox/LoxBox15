@@ -49,20 +49,27 @@ python setup.py build
 
 %install
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p /usr/share/localbox
 cat %{SOURCE1} | sed "s/python/python3/g" > $RPM_BUILD_ROOT/etc/init.d/localbox.python3
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/init.d/localbox.python
 python3 setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 python setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
+%pre
+getent group localbox || groupadd -r localbox
+getent passwd localbox || useradd -r -g localbox -d /usr/share/localbox -s /sbin/nologin -c "Localbox server user account"
+
 %post
 
 %files python
+%attr(0755, localbox, localbox) /usr/share/localbox
 %attr(0644, root, root) /etc/init.d/localbox.python
 %attr(0644, root, root) /usr/lib/python2.7/site-packages/localbox-%{version}-py2.7.egg-info/*
 %attr(0644, root, root) /usr/lib/python2.7/site-packages/localbox/*.py
 %attr(0644, root, root) /usr/lib/python2.7/site-packages/localbox/*.pyc
 %attr(0644, root, root) /usr/lib/python2.7/site-packages/localbox/*.pyo
 %files python3
+%attr(0755, localbox, localbox) /usr/share/localbox
 %attr(0644, root, root) /etc/init.d/localbox.python3
 %attr(0644, root, root) /usr/lib/python3.4/site-packages/localbox-%{version}-py3.4.egg-info/*
 %attr(0644, root, root) /usr/lib/python3.4/site-packages/localbox/*.py
