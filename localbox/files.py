@@ -14,7 +14,11 @@ from os import chdir
 from os import getcwd
 from os import stat
 from os import walk
-from os import readlink
+try:
+  from os import readlink
+except ImportError:
+  def readlink(var):
+     pass
 from os import sep
 
 from .config import ConfigSingleton

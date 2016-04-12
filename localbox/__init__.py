@@ -127,7 +127,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         consulted to find the function to do the actual work. After this
         function has executed, the request is responded tousing send_request.
         """
-        print "DoingRequest"
+        print("DoingRequest")
         max_read_size = 65536
         log = getLogger('api')
         length = int(self.headers.get('content-length', 0))
@@ -139,9 +139,9 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
                 str(max_read_size) + "\t" + str(length) + "\t" + str(read_size))
             file_str.write(self.rfile.read(read_size))
             length -= read_size
-        print "done"
+        print("done")
         self.old_body = file_str.getvalue()
-        print "copied"
+        print("copied")
         if self.body is None:
             self.body = ""
         #log.debug(self.command + " " + self.path + "\n" + str(self.headers) + "\n\n" + self.old_body, extra=self.get_log_dict())

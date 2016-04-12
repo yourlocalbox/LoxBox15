@@ -262,7 +262,7 @@ def exec_operations_create_folder(request_handler):
     """
     request_handler.status = 200
     path = unquote(request_handler.old_body).replace("path=/", "", 1)
-    print path
+    print(path)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, request_handler.user, path)
     if lexists(filepath):
