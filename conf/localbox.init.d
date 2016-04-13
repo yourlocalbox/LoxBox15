@@ -13,7 +13,7 @@
 
 dir=""
 cmd="python -m localbox"
-user=""
+user="localbox"
 
 name=`basename $0`
 pid_file="/var/run/$name.pid"
