@@ -163,12 +163,12 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             self.status = 401
             redirect_url = config.get('oauth', 'redirect_url') + "?" + \
                 querystring
+            print redirect_url
             self.new_headers[
                 'WWW-Authenticate'] = 'Bearer domain="' + redirect_url + '"'
             self.body = "<h1>401: Forbidden.</h1>" \
                         "<p>Authorization failed. Please authenticate at" \
-                        '<a href="?">?</a></p>' % (redirect_url,
-                                                   redirect_url)
+                        "<a href=\"{0}\">{1}</a></p>".format(redirect_url, redirect_url)
             self.send_request()
             return
         user_folder = join(

@@ -7,7 +7,7 @@ from json import loads
 from re import compile as regex_compile
 from os import remove
 from os import walk
-from os import mkdir
+from os import makedirs
 from os import rmdir
 from os.path import islink
 from os.path import join
@@ -227,6 +227,7 @@ def exec_files_path(request_handler):
             filedescriptor = open(filepath, 'wb')
             filedescriptor.write(request_handler.old_body)
         except IOError:
+            getLogger('api').log('Could not write to file %s' % path)
             request_handler.status = 500
 
     if request_handler.command == "GET":
@@ -272,7 +273,7 @@ def exec_operations_create_folder(request_handler):
     log = getLogger('api')
     log.info("creating directory " + filepath,
              extra=request_handler.get_log_dict())
-    mkdir(filepath)
+    makedirs(filepath)
     request_handler.body = dumps(stat_reader(filepath, request_handler.user))
 
 
@@ -493,6 +494,9 @@ def exec_meta(request_handler):
     try:
         filepath = get_filesystem_path(path, request_handler.user)
         result = stat_reader(filepath, request_handler.user)
+        if result is None:
+            request_handler.status = 404
+            return
         result['children'] = []
         for path, directories, files in walk(filepath):
             for child in directories + files:
@@ -501,7 +505,7 @@ def exec_meta(request_handler):
                 result['children'].append(stat_reader(childpath, user))
             break
     except OSError:
-        request_Handler.status = 404
+        request_handler.status = 404
     request_handler.body = dumps(result)
     request_handler.status = 200
 
