@@ -15,10 +15,10 @@ from os import getcwd
 from os import stat
 from os import walk
 try:
-  from os import readlink
+    from os import readlink
 except ImportError:
-  def readlink(var):
-     pass
+    def readlink(var):
+        pass
 from os import sep
 
 from .config import ConfigSingleton
