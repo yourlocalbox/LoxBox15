@@ -1,7 +1,6 @@
 """
 LocalBox main initialization class.
 """
-from cStringIO import StringIO
 from ssl import wrap_socket
 from logging import getLogger
 from sys import argv
@@ -9,12 +8,15 @@ from os import mkdir
 from os import remove
 from os.path import join
 from os.path import exists
+from shutil import rmtree
 try:
+    from cStringIO import StringIO
     from urllib2 import Request
     from urllib2 import urlopen
     from urllib2 import HTTPError
     from urllib import urlencode  # pylint: disable=E0611
 except ImportError:
+    from io import StringIO
     from urllib.request import Request  # pylint: disable=E0611,F0401
     from urllib.request import urlopen  # pylint: disable=E0611,F0401
     from urllib.error import HTTPError  # pylint: disable=E0611,F0401
@@ -59,7 +61,8 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         self.old_body = None
         self.status = 500
         self.protocol = ""
-        BaseHTTPRequestHandler.__init__(self, request, client_address, server)
+        BaseHTTPRequestHandler.__init__(
+            self, request, client_address, server)
 
     def check_authorization(self):
         """
@@ -72,12 +75,12 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             return None
         config = ConfigSingleton()
         auth_url = config.get('oauth', 'verify_url')
-        time_out = config.get('cache', 'timeout')
         cache = TimedCache(timeout=0)  # Cache is broken
         name = cache.get(auth_header)
         if name is not None:
             return name
-        request = Request(auth_url, None, {'Authorization': auth_header})
+        request = Request(
+            auth_url, None, {'Authorization': auth_header})
         try:
             response = urlopen(request)
             name = response.read()
@@ -139,12 +142,10 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
                 str(max_read_size) + "\t" + str(length) + "\t" + str(read_size))
             file_str.write(self.rfile.read(read_size))
             length -= read_size
-        print("done")
         self.old_body = file_str.getvalue()
-        print("copied")
         if self.body is None:
             self.body = ""
-        #log.debug(self.command + " " + self.path + "\n" + str(self.headers) + "\n\n" + self.old_body, extra=self.get_log_dict())
+        # log.debug(self.command + " " + self.path + "\n" + str(self.headers) + "\n\n" + self.old_body, extra=self.get_log_dict())
         config = ConfigSingleton()
         self.protocol = "https://"
         if config.getboolean('http', 'insecure-http', True):
@@ -155,15 +156,16 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         else:
             querystring = urlencode({'redirect_uri': self.protocol +
                                      self.headers['Host'] + self.path})
-        #self.user = authentication_dummy()
+        # self.user = authentication_dummy()
         self.user = self.check_authorization()
 
         if not self.user:
-            log.debug("authentication problem", extra=self.get_log_dict())
+            log.debug(
+                "authentication problem", extra=self.get_log_dict())
             self.status = 401
             redirect_url = config.get('oauth', 'redirect_url') + "?" + \
                 querystring
-            print redirect_url
+            print(redirect_url)
             self.new_headers[
                 'WWW-Authenticate'] = 'Bearer domain="' + redirect_url + '"'
             self.body = "<h1>401: Forbidden.</h1>" \
@@ -176,7 +178,8 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             ConfigSingleton().get('filesystem', 'bindpoint'), self.user)
         if not exists(user_folder):
             mkdir(user_folder)
-        log.critical("processing " + self.path, extra=self.get_log_dict())
+        log.critical(
+            "processing " + self.path, extra=self.get_log_dict())
         for key in self.headers:
             value = self.headers[key]
             log.debug("Header: " + key + ": " + value,
@@ -193,7 +196,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         if not match_found:
             log.debug("Could not match the path: " + self.path,
                       extra=self.get_log_dict())
-        #log.debug(str(self.status) + " " +  str(self.new_headers) + "\n\n" + str(self.body), extra=self.get_log_dict())
+        # log.debug(str(self.status) + " " +  str(self.new_headers) + "\n\n" + str(self.body), extra=self.get_log_dict())
 
     def do_POST(self):
         """
@@ -219,20 +222,20 @@ def main():
     try:
         position = argv.index("--clear-user")
         user = argv[position + 1]
-        user_folder = join(configparser.get('filesystem', 'bindpoint'), user)
-        log = getLogger('api').info(
+        user_folder = join(
+            configparser.get('filesystem', 'bindpoint'), user)
+        getLogger('api').info(
             "Deleting info for user " + user, extra={'ip': 'cli', 'user': user})
         for sqlstring in 'delete from users where name = ?', 'delete from keys where user = ?', 'delete from invitations where sender = ?',  'delete from invitations where receiver = ?', 'delete from shares where user = ?':
             database_execute(sqlstring, (user,))
         for symlinkdest in symlinkcache:
-            if symlink.startswith(user_folder):
+            if symlinkdest.startswith(user_folder):
                 symlinks = symlinkcache.get(symlinkdest)
                 for symlink in symlinks:
                     remove(symlink)
         rmtree(user_folder)
         return
     except (ValueError, IndexError):
-        pass
         port = int(configparser.get('httpd', 'port', 443))
         insecure_mode = configparser.getboolean('httpd', 'insecure-http',
                                                 default=False)

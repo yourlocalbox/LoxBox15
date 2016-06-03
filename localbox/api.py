@@ -20,10 +20,10 @@ from shutil import copyfile
 from shutil import move
 from logging import getLogger
 try:
-    from urllib import unquote  # pylint: disable=F0401
-    from Cookie import SimpleCookie  # pylint: disable=F0401
+    from urllib import unquote  # pylint: disable=F0401,E0611
+    from Cookie import SimpleCookie  # pylint: disable=F0401,E0611
 except ImportError:
-    from http.cookies import SimpleCookie  # pylint: disable=F0401,E0611,
+    from http.cookies import SimpleCookie  # pylint: disable=F0401,E0611
     from urllib.parse import unquote  # pylint: disable=F0401,E0611
 
 try:
@@ -127,7 +127,8 @@ def exec_remove_shares(request_handler):
     routing list.
     @param request_handler the object which contains the path to remove
     """
-    share_start = request_handler.path.replace('/lox_api/shares/', '', 1)
+    share_start = request_handler.path.replace(
+        '/lox_api/shares/', '', 1)
     shareid = int(share_start.replace('/revoke', '', 1))
     sql = 'remove from shares where id = ?'
     database_execute(sql, (shareid))
@@ -142,7 +143,8 @@ def exec_edit_shares(request_handler):
     @param request_handler the object which contains the share id in its path
                            and list of users json-encoded in its body.
     """
-    share_start = request_handler.path.replace('/lox_api/shares/', '', 1)
+    share_start = request_handler.path.replace(
+        '/lox_api/shares/', '', 1)
     shareid = share_start.replace('/edit', '', 1)
     share = get_share_by_id(shareid)
     json = get_body_json(request_handler)
@@ -184,7 +186,8 @@ def exec_invitations(request_handler):
     @param request_handler object though which to return the values
     """
     request_handler.status = 200
-    request_handler.body = get_database_invitations(request_handler.user)
+    request_handler.body = get_database_invitations(
+        request_handler.user)
 
 
 def exec_invite_accept(request_handler):
@@ -243,7 +246,8 @@ def exec_files_path(request_handler):
                 for child in directories + files:
                     user = request_handler.user
                     childpath = join(filepath, child)
-                    dirdict['children'].append(stat_reader(childpath, user))
+                    dirdict['children'].append(
+                        stat_reader(childpath, user))
                 request_handler.body = dumps(dirdict)
                 break
         elif exists(filepath):
@@ -274,7 +278,8 @@ def exec_operations_create_folder(request_handler):
     log.info("creating directory " + filepath,
              extra=request_handler.get_log_dict())
     makedirs(filepath)
-    request_handler.body = dumps(stat_reader(filepath, request_handler.user))
+    request_handler.body = dumps(
+        stat_reader(filepath, request_handler.user))
 
 
 def exec_operations_delete(request_handler):
@@ -285,7 +290,8 @@ def exec_operations_delete(request_handler):
                            its body
     """
     request_handler.status = 200
-    pathstring = unquote(request_handler.old_body).replace("path=/", "", 1)
+    pathstring = unquote(
+        request_handler.old_body).replace("path=/", "", 1)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, request_handler.user, pathstring)
     if not exists(filepath):
@@ -308,8 +314,10 @@ def exec_operations_move(request_handler):
     """
     json_object = loads(request_handler.old_body)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-    move_from = join(bindpoint, request_handler.user, json_object['from_path'])
-    move_to = join(bindpoint, request_handler.user, json_object['to_path'])
+    move_from = join(
+        bindpoint, request_handler.user, json_object['from_path'])
+    move_to = join(
+        bindpoint, request_handler.user, json_object['to_path'])
     if not isfile(move_from):
         request_handler.status = 404
         request_handler.body = "Error: No file exits at from_path"
@@ -329,8 +337,10 @@ def exec_operations_copy(request_handler):
     """
     json_object = loads(request_handler.old_body)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-    copy_from = join(bindpoint, request_handler.user, json_object['from_path'])
-    copy_to = join(bindpoint, request_handler.user, json_object['to_path'])
+    copy_from = join(
+        bindpoint, request_handler.user, json_object['from_path'])
+    copy_to = join(
+        bindpoint, request_handler.user, json_object['to_path'])
     if not exists(copy_from):
         request_handler.status = 404
         request_handler.body = "Error: No file exits at from_path"
@@ -406,7 +416,8 @@ def exec_create_share(request_handler):
     """
     body = request_handler.old_body
     json_list = loads(body)
-    path2 = request_handler.path.replace('/lox_api/share_create/', '', 1)
+    path2 = request_handler.path.replace(
+        '/lox_api/share_create/', '', 1)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     sender = request_handler.user
     from_file = join(bindpoint, sender, path2)
@@ -428,12 +439,12 @@ def exec_create_share(request_handler):
                 return
             try:
                 symlink(from_file, to_file)
-                #symlink(to_file, from_file)
             except OSError:
                 getLogger('api').info("Error making symlink from " + from_file +
                                       " to " + to_file, extra=request_handler.get_log_dict())
                 request_handler.status = 500
-            invite = Invitation(None, 'pending', share, sender, receiver)
+            invite = Invitation(
+                None, 'pending', share, sender, receiver)
             invite.save_to_database()
 
 
@@ -447,7 +458,7 @@ def exec_key(request_handler):
     if request_handler.command == "GET":
         result = get_key_and_iv(localbox_path, request_handler.user)
         if result is not None:
-            key, initvector = result
+            key, initvector = result  # pylint: disable=W0633
             request_handler.body = dumps({'key': key, 'iv': initvector})
         else:
             request_handler.status = 404
@@ -490,7 +501,8 @@ def exec_meta(request_handler):
     if (request_handler.path == '/lox_api/meta') or (request_handler.path == '/lox_api/meta/'):
         path = '.'
     else:
-        path = unquote(request_handler.path.replace('/lox_api/meta/', '', 1))
+        path = unquote(
+            request_handler.path.replace('/lox_api/meta/', '', 1))
     try:
         filepath = get_filesystem_path(path, request_handler.user)
         result = stat_reader(filepath, request_handler.user)
@@ -682,7 +694,8 @@ def fake_oauth(request_handler):
     @param request_handler the object which has the body to extract as json
     """
     if "token" in request_handler.path:
-        print("============================================ FAKE OAUTH PART 3")
+        print(
+            "============================================ FAKE OAUTH PART 3")
         request_handler.status = 200
         result = {"access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
                   "token_type": "Bearer", "expires_in": 600,
@@ -690,15 +703,18 @@ def fake_oauth(request_handler):
                   "scope": "all"}
         request_handler.body = result
     elif request_handler.command != "POST":
-        print("============================================ FAKE OAUTH PART 1")
+        print(
+            "============================================ FAKE OAUTH PART 1")
         html = '<html><head></head><body><form action="/oauth2/v2/auth" '\
                'method="POST"><input type="submit" value="allow"></form>'\
                '</body></html>'
         request_handler.status = 200
-        request_handler.new_headers.append(('Content-type', 'text/html',))
+        request_handler.new_headers.append(
+            ('Content-type', 'text/html',))
         request_handler.body = html
     else:
-        print("============================================ FAKE OAUTH PART 2")
+        print(
+            "============================================ FAKE OAUTH PART 2")
         request_handler.status = 302
         request_handler.new_headers.append(('Location',
                                             'lbox://oauth-return?code=yay'))
@@ -735,16 +751,22 @@ def fake_set_cookies(request_handler):
 ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/files\/.*"), exec_files_path),
     (regex_compile(r"\/lox_api\/invitations"), exec_invitations),
-    (regex_compile(r"\/lox_api\/invite/[0-9]+/accept"), exec_invite_accept),
-    (regex_compile(r"\/lox_api\/invite/[0-9]+/revoke"), exec_invite_reject),
-    (regex_compile(r"\/lox_api\/operations\/copy"), exec_operations_copy),
-    (regex_compile(r"\/lox_api\/operations\/move"), exec_operations_move),
-    (regex_compile(r"\/lox_api\/operations\/delete"), exec_operations_delete),
+    (regex_compile(
+        r"\/lox_api\/invite/[0-9]+/accept"), exec_invite_accept),
+    (regex_compile(
+        r"\/lox_api\/invite/[0-9]+/revoke"), exec_invite_reject),
+    (regex_compile(r"\/lox_api\/operations\/copy"),
+     exec_operations_copy),
+    (regex_compile(r"\/lox_api\/operations\/move"),
+     exec_operations_move),
+    (regex_compile(r"\/lox_api\/operations\/delete"),
+     exec_operations_delete),
     (regex_compile(r"\/lox_api\/operations\/create_folder"),
      exec_operations_create_folder),
     (regex_compile(r"\/lox_api\/share_create\/.*"), exec_create_share),
     (regex_compile(r"\/lox_api\/shares\/.*\/edit"), exec_edit_shares),
-    (regex_compile(r"\/lox_api\/shares\/.*\/revoke"), exec_remove_shares),
+    (regex_compile(r"\/lox_api\/shares\/.*\/revoke"),
+     exec_remove_shares),
     (regex_compile(r"\/lox_api\/shares\/.*\/leave"), exec_leave_share),
     (regex_compile(r"\/lox_api\/shares\/.*"), exec_shares),
     (regex_compile(r"\/lox_api\/user\/.*"), exec_user_username),

@@ -46,7 +46,8 @@ def database_execute(command, params=None):
 
     if dbtype == "mysql":
         if mysql_execute is None:
-            exit("Trying to use a MySQL database without python-MySQL module.")
+            exit(
+                "Trying to use a MySQL database without python-MySQL module.")
         command = command.replace('?', '%s')
         return mysql_execute(command, params)
 
@@ -86,7 +87,8 @@ def sqlite_execute(command, params=None):
         connection.commit()
         return cursor.fetchall()
     except MySQLError as mysqlerror:
-        print("MySQL Error: %d: %s" % (mysqlerror.args[0], mysqlerror.args[1]))
+        print("MySQL Error: %d: %s" %
+              (mysqlerror.args[0], mysqlerror.args[1]))
     except NoSectionError:
         print("Please configure the database")
     finally:
@@ -122,7 +124,8 @@ def mysql_execute(command, params=None):
         connection.commit()
         return cursor.fetchall()
     except MySQLError as mysqlerror:
-        print("MySQL Error: %d: %s" % (mysqlerror.args[0], mysqlerror.args[1]))
+        print("MySQL Error: %d: %s" %
+              (mysqlerror.args[0], mysqlerror.args[1]))
     finally:
         try:
             if connection:

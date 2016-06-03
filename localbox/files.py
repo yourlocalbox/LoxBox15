@@ -18,7 +18,7 @@ try:
     from os import readlink
 except ImportError:
     def readlink(var):
-        pass
+        raise NotImplementedError(var)
 from os import sep
 
 from .config import ConfigSingleton
@@ -51,7 +51,8 @@ def stat_reader(filesystem_path, user):
     if bindpath == abspath(filesystem_path):
         title = 'Home'
     else:
-        title = [item for item in split(filesystem_path) if item != ''][-1]
+        title = [
+            item for item in split(filesystem_path) if item != ''][-1]
     localboxpath = '/' + join(relpath(filesystem_path,
                                       bindpath)).replace(sep, '/')
     if localboxpath == '/.':
