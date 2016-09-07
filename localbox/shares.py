@@ -1,7 +1,6 @@
 """
 LocalBox shares module.
 """
-from os.path import join
 from json import dumps
 
 from .files import SymlinkCache
@@ -9,16 +8,13 @@ from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
 from .files import stat_reader
 from .files import get_filesystem_path
-from .config import ConfigSingleton
 
 
 class User(object):
-
     """
     User object, limited to more or less the 'name' only, given how the actual
     user administration is done by the authentication mechanism.
     """
-
     def __init__(self, name=None):
         self.name = name
 
@@ -31,12 +27,10 @@ class User(object):
 
 
 class Group(object):
-
     """
     Underdefined group object which due to lack of user administration will
     probably be removed at a later stage.
     """
-
     def __init__(self, name=None, users=None):
         self.name = name
         self.users = users
@@ -50,7 +44,6 @@ class Group(object):
 
 
 class Invitation(object):
-
     """
     The state of being asked to join in sharing a file.
     """
@@ -69,9 +62,8 @@ class Invitation(object):
         is primarily for returning values and not a complete serialisation.
         @return json representing this Invitation
         """
-        # TODO: Add dates in database
         return {'id': self.identifier, 'share': self.share,
-                'item': self.share.item, 'state': self.state, 'created_at': '2915-09-11T15:31:27+0200'}
+                'item': self.share.item}
 
     def save_to_database(self):
         """
@@ -113,12 +105,10 @@ def get_database_invitations(user):
 
 
 class ShareItem(object):
-
     """
     Item that signifies a 'share'. Sharing a folder allows a different user to
     access yor file/folder. A ShareItem is the representation of that folder
     """
-
     def __init__(self, icon=None, path=None, has_keys=False, is_share=False,
                  is_shared=False, modified_at=None, title=None, is_dir=False):
         self.icon = icon
@@ -154,11 +144,9 @@ def get_shareitem_by_path(localbox_path, user):
 
 
 class Share(object):
-
     """
     THe state of sharing a folder.
     """
-
     def __init__(self, users=None, identifier=None, item=None):
         self.users = users
         self.identifier = identifier
@@ -174,19 +162,12 @@ class Share(object):
         else:
             self.users = [user]
 
-    def get_identities_json(self):
-        result = "["
-        for user in self.users:
-            result = result + \
-                dumps({'id': user, 'title': user, 'type': 'user'})
-        result = result + "]"
-
     def to_json(self):
         """
         returns a json representation of this Share
         @return a json representation of this Share
         """
-        return {'identities': self.get_identities_json(), 'id': self.identifier,
+        return {'identities': self.users, 'id': self.identifier,
                 'item': self.item}
 
     def save_to_database(self):
@@ -202,10 +183,6 @@ class Share(object):
             params = params + (self.identifier,)
         database_execute(sql, params)
 
-        if self.identifier is None:
-            sql = 'select id from shares where user = ? and path = ?'
-            self.identifier = database_execute(sql, params)[0][0]
-
 
 def get_share_by_id(identifier):
     """
@@ -214,20 +191,12 @@ def get_share_by_id(identifier):
     @return the Share identified by the identifier
     """
     sharesql = 'select user, path from shares where id = ?'
-    packedsharedata = database_execute(sharesql, (identifier,))
-    if packedsharedata == []:
-        return None
-    sharedata = packedsharedata[0]
-    # itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at,'\
-    #          'title, is_dir from shareitem where path = ?'
-
-    # itemdata = database_execte(itemsql, (sharedata[1],))
-    bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-    shareitem = stat_reader(
-        join(bindpoint, sharedata[0], sharedata[1]), sharedata[1])
-
-    # shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3],
-    # itemdata[4], itemdata[5], itemdata[6], itemdata[7])
+    sharedata = database_execute(sharesql, (identifier,))[0]
+    itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at,'\
+              'title, is_dir from shareitem where path = ?'
+    itemdata = database_execute(itemsql, (sharedata[1],))[0]
+    shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3],
+                          itemdata[4], itemdata[5], itemdata[6], itemdata[7])
     return Share(sharedata[0], identifier, shareitem)
 
 
@@ -255,24 +224,21 @@ def list_share_items(path=None):
         if entry[0] in returndata:
             returndata[entry[0]].adduser(shareinfo[1])
         else:
-            returndata[entry[0]] = Share(
-                shareinfo[1], shareinfo[0], shareitem)
+            returndata[entry[0]] = Share(shareinfo[1], shareinfo[0], shareitem)
     return dumps(returndata, cls=LocalBoxJSONEncoder)
 
 
 def toggle_invite_state(request_handler, newstate):
     """
     sets the state of an invite to newstate.
-    @param request_handler the request_handler with all required information to
-                           extract the invite from.
+    @param request_handler the request_handler with all required information
     @param newstate the new state for the invite
     """
     invite_identifier = int(request_handler.path.split('/')[3])
     user = request_handler.user
     readsql = "select 1 from invitations where state!=? and receiver = ? and "\
               "id = ?"
-    readresult = database_execute(
-        readsql, (newstate, user, invite_identifier))
+    readresult = database_execute(readsql, (newstate, user, invite_identifier))
     if len(readresult) != 0:
         sql = "update invitations set state=? where receiver = ? and id = ?;"
         database_execute(sql, (newstate, user, invite_identifier))

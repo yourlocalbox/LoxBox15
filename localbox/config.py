@@ -13,9 +13,7 @@ except ImportError:
     from configparser import NoOptionError, NoSectionError
 
 
-def prepare_logger(name, loglevel=None, handlers=None):
-    if handlers is None:
-        handlers = [StreamHandler()]
+def prepare_logger(name, loglevel=None, handlers=[StreamHandler()]):
     log = getLogger(name)
     log.setLevel(loglevel)
     for handler in handlers:
@@ -23,7 +21,6 @@ def prepare_logger(name, loglevel=None, handlers=None):
 
 
 class ConfigSingleton(object):
-
     """
     Singleton which has all configruation related info.
     """
@@ -81,6 +78,7 @@ class ConfigSingleton(object):
         configuration, cast to an int.
         @param section the [section] in which to look for the information
         @param field the name of the configuration item to read
+        @param default Value to return when the config option can't be found
         @return the integer value of said configuration item
         """
         return self.configparser.getint(section, field)
