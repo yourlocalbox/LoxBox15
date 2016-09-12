@@ -59,11 +59,12 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         Handle a request (do_POST and do_GET both forward to this function).
         """
         log = getLogger('api')
-        log.critical("processing " + self.path)
+        log.critical("processing call to " + self.path)
         for key in self.headers:
             value = self.headers[key]
             log.debug(key + ": " + value);
-        self.user = authentication_dummy()  # pylint: disable=W0201
+        #self.user = authentication_dummy()  # pylint: disable=W0201
+        self.user = self.check_authorization()
         if not self.user:
             log.debug("authentication problem")
             return
