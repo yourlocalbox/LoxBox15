@@ -167,7 +167,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
                 'WWW-Authenticate'] = 'Bearer domain="' + redirect_url + '"'
             self.body = "<h1>401: Forbidden.</h1>" \
                         "<p>Authorization failed. Please authenticate at" \
-                        '<a href="?">?</a></p>' % (redirect_url,
+                        '<a href="%s">%s</a></p>' % (redirect_url,
                                                    redirect_url)
             self.send_request()
             return
