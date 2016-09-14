@@ -10,9 +10,11 @@ except ImportError:
 
 
 class LocalBoxJSONEncoder(JSONEncoder):
+
     """
-    JSONEncoder for localbox classes
+    JSONEncoder for localbox classes. Used to JSON encode localbox classes.
     """
+
     def default(self, o):  # pylint: disable=E0202
         """
         The way objects are usually encoded into JSON.
@@ -27,6 +29,8 @@ class LocalBoxJSONEncoder(JSONEncoder):
 def localbox_path_decoder(path):
     """
     A 'localbox_path' is a unix filepath with the urlencoded components.
+    This function takes a localbox path and turns it into a (relative) real
+    path 000000000000000
     @param path a 'localbox_path' of which to urldecode the components
     @return the localbox path without urlencoded components
     """

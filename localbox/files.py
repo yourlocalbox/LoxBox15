@@ -8,11 +8,17 @@ from os.path import abspath
 from os.path import relpath
 from os.path import isdir
 from os.path import islink
+from logging import getLogger
+from sys import exit as sysexit
 from os import chdir
 from os import getcwd
 from os import stat
 from os import walk
-from os import readlink
+try:
+    from os import readlink
+except ImportError:
+    def readlink(var):
+        raise NotImplementedError(var)
 from os import sep
 
 from .config import ConfigSingleton
@@ -27,6 +33,10 @@ def get_filesystem_path(localbox_path, user):
            of the path and hence cannot be ommitted.
     @return a filesystem path to the resource pointed to by the localbox path
     """
+    while localbox_path.startswith('/'):
+        localbox_path = localbox_path[1:]
+    if ".." in localbox_path.split('/'):
+        raise ValueError("No relative paths allowed in localbox")
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, user, localbox_path)
     return filepath
@@ -45,12 +55,19 @@ def stat_reader(filesystem_path, user):
     if bindpath == abspath(filesystem_path):
         title = 'Home'
     else:
-        title = [item for item in split(filesystem_path) if item != ''][-1]
+        title = [
+            item for item in split(filesystem_path) if item != ''][-1]
     localboxpath = '/' + join(relpath(filesystem_path,
                                       bindpath)).replace(sep, '/')
+    keypath = localboxpath[1:].split('/')[0]
+    #TODO: return the right answer to has_keys
+    sql = 'select 1 from keys where path=%s;'
     if localboxpath == '/.':
         localboxpath = '/'
-    statstruct = stat(filesystem_path)
+    try:
+        statstruct = stat(filesystem_path)
+    except OSError:
+        return None
     statdict = {
         'title': title,
         'is_dir': isdir(filesystem_path),
@@ -64,12 +81,13 @@ def stat_reader(filesystem_path, user):
         statdict['icon'] = 'Folder'
     else:
         statdict['icon'] = 'File'
-    if isdir(filesystem_path):
-        statdict['hash'] = 'TODO'
+    # if isdir(filesystem_path):
+    #    statdict['hash'] = 'TODO'
     return statdict
 
 
 class SymlinkCache(object):
+
     """
     Singleton keeping track of all symlinks (shares)
     """
@@ -109,21 +127,33 @@ class SymlinkCache(object):
         """
         return self.cache[path]
 
-    def __init__(self):
+    def __init__(self, path=None):
         if not hasattr(self, 'cache'):
             print("initialising SymlinkCache")
             self.cache = {}
-            self.build_cache()
+            self.build_cache(path)
             print("initialised SymlinkCache")
 
-    def build_cache(self):
+    def __iter__(self):
+        for entry in set(self.cache.keys()):
+            yield entry
+
+    def build_cache(self, path=None):
         """
         Build the reverse symlink cache by walking through the filesystem and
         finding all symlinks and put them into a cache dictionary for reference
         later.
         """
         working_directory = getcwd()
-        bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+        if path is None:
+            bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+            if bindpoint is None:
+                getLogger('files').error("No bindpoint found in the filesystem "
+                                         "section of the configuration file, "
+                                         "exiting")
+                sysexit(1)
+        else:
+            bindpoint = path
         for dirname, directories, files in walk(bindpoint):
             for entry in directories + files:
                 linkpath = abspath(join(dirname, entry))
