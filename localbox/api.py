@@ -453,8 +453,8 @@ def exec_key(request_handler):
     elif request_handler.command == "POST":
         data = request_handler.old_body
         json_object = loads(data)
-        sql = "insert into keys (path, user, key, iv) VALUES (?, ?, ?)"
-        database_execute(sql, (localbox_path, json_object['key'],
+        sql = "insert into keys (path, user, key, iv) VALUES (?, ?, ?, ?)"
+        database_execute(sql, (localbox_path, request_handler.user, json_object['key'],
                                json_object['iv']))
 
 
