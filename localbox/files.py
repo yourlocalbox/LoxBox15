@@ -55,6 +55,9 @@ def stat_reader(filesystem_path, user):
             item for item in split(filesystem_path) if item != ''][-1]
     localboxpath = '/' + join(relpath(filesystem_path,
                                       bindpath)).replace(sep, '/')
+    keypath = localboxpath[1:].split('/')[0]
+    #TODO: return the right answer to has_keys
+    sql = 'select 1 from keys where path=%s;'
     if localboxpath == '/.':
         localboxpath = '/'
     try:
@@ -67,7 +70,7 @@ def stat_reader(filesystem_path, user):
         'modified_at': datetime.fromtimestamp(statstruct.st_mtime).isoformat(),
         'is_share': SymlinkCache().exists(abspath(filesystem_path)),
         'is_shared': islink(abspath(filesystem_path)),
-        'has_keys': False,
+        'has_keys': True,
         'path': localboxpath,
     }
     if statdict['is_dir']:

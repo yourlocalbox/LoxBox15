@@ -18,13 +18,14 @@ from os.path import isdir
 from os.path import basename
 from shutil import copyfile
 from shutil import move
+from shutil import rmtree
 from logging import getLogger
 try:
-    from urllib import unquote  # pylint: disable=F0401,E0611
+    from urllib import unquote_plus  # pylint: disable=F0401,E0611
     from Cookie import SimpleCookie  # pylint: disable=F0401,E0611
 except ImportError:
     from http.cookies import SimpleCookie  # pylint: disable=F0401,E0611
-    from urllib.parse import unquote  # pylint: disable=F0401,E0611
+    from urllib.parse import unquote_plus  # pylint: disable=F0401,E0611
 
 try:
     from os import symlink
@@ -238,7 +239,7 @@ def exec_files_path(request_handler):
             # Not really looping but we need the first set of values
             for path, directories, files in walk(filepath):
                 if files is None or directories is None:
-                    print("filesystem related problems")
+                    getLogger(__name__).info("filesystem related problems")
                     return
                 # path, directories, files = walk(filepath).next()
                 dirdict = stat_reader(path, request_handler.user)
@@ -266,8 +267,8 @@ def exec_operations_create_folder(request_handler):
                            body
     """
     request_handler.status = 200
-    path = unquote(request_handler.old_body).replace("path=/", "", 1)
-    print(path)
+    path = unquote_plus(request_handler.old_body).replace("path=/", "", 1)
+    getLogger(__name__).info("creating folder %s" % path)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, request_handler.user, path)
     if lexists(filepath):
@@ -290,16 +291,19 @@ def exec_operations_delete(request_handler):
                            its body
     """
     request_handler.status = 200
-    pathstring = unquote(
+    pathstring = unquote_plus(
         request_handler.old_body).replace("path=/", "", 1)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, request_handler.user, pathstring)
     if not exists(filepath):
         request_handler.status = 404
         request_handler.body = "Error: No file exits at path"
+        getLogger('api').info("failed to delete "+ filepath,
+             extra=request_handler.get_log_dict())
+    
         return
     if isdir(filepath):
-        rmdir(filepath)
+        rmtree(filepath)
     else:
         remove(filepath)
     SymlinkCache().remove(filepath)
@@ -360,13 +364,15 @@ def exec_user(request_handler):
     from the routing list
     @param request_handler object holding the user for which to return data
     """
-    print("running exec user")
+    getLogger(__name__).info("running exec user")
     if request_handler.command == "GET":
         sql = "select public_key, private_key from users where name = ?"
         result = database_execute(sql, (request_handler.user,))
+        print request_handler.user
         try:
-            result_dictionary = {'user': request_handler.user, 'public_key': result[0],
-                                 'private_key': result[1]}
+            print result
+            result_dictionary = {'user': request_handler.user, 'public_key': result[0][0],
+                                 'private_key': result[0][1]}
         except IndexError:
             result_dictionary = {'user': request_handler.user}
         request_handler.body = dumps(result_dictionary)
@@ -460,14 +466,18 @@ def exec_key(request_handler):
         if result is not None:
             key, initvector = result  # pylint: disable=W0633
             request_handler.body = dumps({'key': key, 'iv': initvector})
+            request_handler.status = 200
         else:
             request_handler.status = 404
     elif request_handler.command == "POST":
         data = request_handler.old_body
+        # TODO: not crash on bull
         json_object = loads(data)
-        sql = "insert into keys (path, user, key, iv) VALUES (?, ?, ?)"
-        database_execute(sql, (localbox_path, json_object['key'],
+        sql = "insert into keys (path, user, key, iv) VALUES (?, ?, ?, ?)"
+        database_execute(sql, (localbox_path, json_object['user'], json_object['key'],
                                json_object['iv']))
+        request_handler.status = 200
+        # TODO: recrypt encryped data
 
 
 def exec_key_revoke(request_handler):
@@ -501,7 +511,7 @@ def exec_meta(request_handler):
     if (request_handler.path == '/lox_api/meta') or (request_handler.path == '/lox_api/meta/'):
         path = '.'
     else:
-        path = unquote(
+        path = unquote_plus(
             request_handler.path.replace('/lox_api/meta/', '', 1))
     try:
         filepath = get_filesystem_path(path, request_handler.user)
@@ -623,69 +633,20 @@ def fake_register_app(request_handler):
     codebase
     @param request_handler the object which has the body to extract as json
     """
-    if not request_handler.headers.get('Cookie'):
-        request_handler.status = 302
-        url = request_handler.protocol + \
-            request_handler.headers['Host'] + request_handler.path
-        request_handler.new_headers = {"Date": "Mon, 26 Oct 2015 16:06:08 GMT",
-                                       "Server": "Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14",
-                                       "X-Powered-By": "PHP/5.6.14",
-                                       "Set-Cookie": "PHPSESSID=ft41ihtl7uptocchfb1cj2ko95; expires=Tue, 27-Oct-2015 16:06:09 GMT; Max-Age=86400; path=/",
-                                       "Cache-Control": "no-cache",
-                                       "Location": request_handler.protocol + request_handler.headers['Host'] + "/login",
-                                       "Access-Control-Allow-Origin": "*",
-                                       "x-frame-options": "DENY",
-                                       "Strict-Transport-Security": "max-age=86400",
-                                       "Keep-Alive": "timeout=5, max=100",
-                                       "Connection": "Keep-Alive",
-                                       "Transfer-Encoding": "chunked",
-                                       "Content-Type": "text/html; charset=UTF8"}
-        request_handler.body = """<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="refresh" content="1;url=""" + url + """/login" />
+    configparser = ConfigSingleton()
+    hostcrt = configparser.get('httpd', 'certfile')
 
-        <title>Redirecting to """ + url + """/login</title>
-    </head>
-    <body>
-        Redirecting to <a href=\"""" + url + """/login">""" + url + """/login</a>.
-    </body>
-</html>"""
-    else:
-        result = {'baseurl': request_handler.protocol + request_handler.headers['Host'] + "/", 'name': 'schimmelpenning',
-                  'user': 'user', 'logourl': 'http://8ch.net/static/logo_33.svg',
+    backurl = configparser.get('oauth', 'direct_back_url')
+    y=open('host.crt').read()
+    result = {'baseurl': backurl, 'name': 'schimmelpenning',
+                  'user': request_handler.user, 'logourl': 'http://8ch.net/static/logo_33.svg',
                   'BackColor': '#00FF00', 'FontColor': '#0000FF', 'APIKeys':
                   [{'Name': 'LocalBox iOS', 'Key': 'keystring',
                     'Secret': 'secretstring'}],
-                  'pin_cert': 'MIIDVzCCAj+gAwIBAgIJAKn6Bcf2mTH+MA0GCSqGSIb3DQEBCwU'
-                  'AMEIxCzAJBgNVBAYTAlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdH'
-                  'kxHDAaBgNVBAoME0RlZmF1bHQgQ29tcGFueSBMdGQwHhcNMTUwO'
-                  'TE1MTAyODM3WhcNMTYwOTE0MTAyODM3WjBCMQswCQYDVQQGEwJY'
-                  'WDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZ'
-                  'hdWx0IENvbXBhbnkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ'
-                  '8AMIIBCgKCAQEAuhdfwhBc0pIaRxeq4+xv6WZVIb0PSbW8G6kJ7'
-                  'kbw+NL0s+FS+Au0JQNtOqauiYdi09ejqfHHUW+cLoX3qMeH2Wgr'
-                  '9TuIbRamLOJw/twstq0LqKOjaiLgq/xRNcUrqptgDfXSbBQXRcG'
-                  'sdB+6E6pKGfViDIZzhdgImXKqROfa6Yv5aGHuz204sKovu2/gSH'
-                  'Pz2IDXSdAehpNbJ5ORFP3+Gkb1z6VoZvJ5QAp/+Ri3th8ms6o/D'
-                  'XRhwSCtetKQshyRjYXpea3v/Oq9lbzBm43LhzyH24ThwKKX8p1J'
-                  'tCJcMfHzpa9OHgLNpDDp4AKCcq5KcDRWJxoTDs45Noj/j3PtlQI'
-                  'DAQABo1AwTjAdBgNVHQ4EFgQUibXrIXzSfhlh/ndNG4cMjIHg3v'
-                  '8wHwYDVR0jBBgwFoAUibXrIXzSfhlh/ndNG4cMjIHg3v8wDAYDV'
-                  'R0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEALEzFqDhRgiRW'
-                  'xJJx3CwG41VadNYJxxgvVos0sVc4y7fTWG2Rq42mMVbMGBvqxtz'
-                  '69KwcHGAvfC1DteEdTSHmEuhsR4DiX0mChfNQrWvrbDTnKaa00a'
-                  'aWArVMUGa+vbDFxsW+r0Z+hzBneQI9Qiy8dexUD3etV7EIumijE'
-                  'faPDvMDNnwwVGj17D7EXY/aDgFQqwTiPGlzOE73kcFTzkMMRzkN'
-                  'hurcNbhp/Z92ToL92LgetAVIrMNysWrgCJrI/gh7nPZIX6LH5TD'
-                  '0Erlx/NEP5IKcsVUnIxH+aXQD4sHjreiUxdPpuqsAy3u4ThMI+o'
-                  '5Rj6Iq1M5L8sPjJ6WzkEXblw==',
-                  "access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
-                  "token_type": "Bearer", "expires_in": 600,
-                  "refresh_token": "tNXAVVo2QE7c5MKgFB1mKuAPsu4xL", "scope": "all"}
-        request_handler.status = 200
-        request_handler.body = dumps(result)
+                  'pin_cert':  ''.join(y.split('\n')[1:-2])
+    }
+    request_handler.status = 200
+    request_handler.body = dumps(result)
 
 
 def fake_oauth(request_handler):

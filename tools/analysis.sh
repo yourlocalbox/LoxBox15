@@ -1,12 +1,19 @@
 #!/bin/bash
+if "$1"
+then
+PTH="$1"
+else
+PTH="localbox"
+fi
+
 for x in epylint pyflakes flake8
 do
-    python /usr/bin/$x localbox
-    python3 /usr/bin/$x localbox
+    python /usr/bin/$x "$PTH"
+    python3 /usr/bin/$x "$PTH"
 done 
 for x in pychecker
 do
-    /usr/bin/$x localbox
+    /usr/bin/$x "$PTH"
 done 
 
 pyreverse localbox
