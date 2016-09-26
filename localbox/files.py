@@ -33,6 +33,10 @@ def get_filesystem_path(localbox_path, user):
            of the path and hence cannot be ommitted.
     @return a filesystem path to the resource pointed to by the localbox path
     """
+    while localbox_path.startswith('/'):
+        localbox_path = localbox_path[1:]
+    if ".." in localbox_path.split('/'):
+        raise ValueError("No relative paths allowed in localbox")
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, user, localbox_path)
     return filepath

@@ -224,7 +224,12 @@ def exec_files_path(request_handler):
     path = request_handler.path.replace('/lox_api/files/', '', 1)
     if path != '':
         path = localbox_path_decoder(path)
-    filepath = get_filesystem_path(path, request_handler.user)
+    try:
+        filepath = get_filesystem_path(path, request_handler.user)
+    except ValueError as e:
+        requets_handler.status = 404
+        request_handler.body = e.message
+        return
     if request_handler.command == "POST":
         request_handler.status = 200
         try:
@@ -460,7 +465,11 @@ def exec_key(request_handler):
     in the specified path
     @param request_handler object containing the file path encoded in its path
     """
-    localbox_path = request_handler.path.replace('/lox_api/key/', '', 1)
+    localbox_path = unquote_plus(request_handler.path.replace('/lox_api/key/', '', 1))
+    while localbox_path.startswith('/'):
+        localbox_path = localbox_path[1:]
+    localbox_path = localbox_path.split('/')[1]
+
     if request_handler.command == "GET":
         result = get_key_and_iv(localbox_path, request_handler.user)
         if result is not None:
@@ -514,7 +523,12 @@ def exec_meta(request_handler):
         path = unquote_plus(
             request_handler.path.replace('/lox_api/meta/', '', 1))
     try:
-        filepath = get_filesystem_path(path, request_handler.user)
+        try:
+            filepath = get_filesystem_path(path, request_handler.user)
+        except ValueError as e:
+            requets_handler.status = 404
+            request_handler.body = e.message
+            return
         result = stat_reader(filepath, request_handler.user)
         if result is None:
             request_handler.status = 404
@@ -653,6 +667,8 @@ def fake_oauth(request_handler):
     """
     part of the fake login process, not part of the final codebase
     @param request_handler the object which has the body to extract as json
+
+    NOTE: this was support for the localbox app and is now most likely depricated. Please remove as fast as possible
     """
     if "token" in request_handler.path:
         print(
