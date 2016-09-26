@@ -218,16 +218,16 @@ def get_share_by_id(identifier):
     if packedsharedata == []:
         return None
     sharedata = packedsharedata[0]
-    itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at,'\
-              'title, is_dir from shareitem where path = ?'
+    # itemsql = 'select icon, path, has_keys, is_share, is_shared, modified_at,'\
+    #          'title, is_dir from shareitem where path = ?'
 
-    #itemdata = database_execte(itemsql, (sharedata[1],))
+    # itemdata = database_execte(itemsql, (sharedata[1],))
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     shareitem = stat_reader(
         join(bindpoint, sharedata[0], sharedata[1]), sharedata[1])
 
     # shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3],
-    #                      itemdata[4], itemdata[5], itemdata[6], itemdata[7])
+    # itemdata[4], itemdata[5], itemdata[6], itemdata[7])
     return Share(sharedata[0], identifier, shareitem)
 
 
@@ -255,7 +255,8 @@ def list_share_items(path=None):
         if entry[0] in returndata:
             returndata[entry[0]].adduser(shareinfo[1])
         else:
-            returndata[entry[0]] = Share(shareinfo[1], shareinfo[0], shareitem)
+            returndata[entry[0]] = Share(
+                shareinfo[1], shareinfo[0], shareitem)
     return dumps(returndata, cls=LocalBoxJSONEncoder)
 
 
@@ -270,7 +271,8 @@ def toggle_invite_state(request_handler, newstate):
     user = request_handler.user
     readsql = "select 1 from invitations where state!=? and receiver = ? and "\
               "id = ?"
-    readresult = database_execute(readsql, (newstate, user, invite_identifier))
+    readresult = database_execute(
+        readsql, (newstate, user, invite_identifier))
     if len(readresult) != 0:
         sql = "update invitations set state=? where receiver = ? and id = ?;"
         database_execute(sql, (newstate, user, invite_identifier))

@@ -15,10 +15,10 @@ from os import getcwd
 from os import stat
 from os import walk
 try:
-  from os import readlink
+    from os import readlink
 except ImportError:
-  def readlink(var):
-     pass
+    def readlink(var):
+        raise NotImplementedError(var)
 from os import sep
 
 from .config import ConfigSingleton
@@ -33,6 +33,10 @@ def get_filesystem_path(localbox_path, user):
            of the path and hence cannot be ommitted.
     @return a filesystem path to the resource pointed to by the localbox path
     """
+    while localbox_path.startswith('/'):
+        localbox_path = localbox_path[1:]
+    if ".." in localbox_path.split('/'):
+        raise ValueError("No relative paths allowed in localbox")
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, user, localbox_path)
     return filepath
@@ -51,9 +55,13 @@ def stat_reader(filesystem_path, user):
     if bindpath == abspath(filesystem_path):
         title = 'Home'
     else:
-        title = [item for item in split(filesystem_path) if item != ''][-1]
+        title = [
+            item for item in split(filesystem_path) if item != ''][-1]
     localboxpath = '/' + join(relpath(filesystem_path,
                                       bindpath)).replace(sep, '/')
+    keypath = localboxpath[1:].split('/')[0]
+    #TODO: return the right answer to has_keys
+    sql = 'select 1 from keys where path=%s;'
     if localboxpath == '/.':
         localboxpath = '/'
     try:
@@ -66,7 +74,7 @@ def stat_reader(filesystem_path, user):
         'modified_at': datetime.fromtimestamp(statstruct.st_mtime).isoformat(),
         'is_share': SymlinkCache().exists(abspath(filesystem_path)),
         'is_shared': islink(abspath(filesystem_path)),
-        'has_keys': False,
+        'has_keys': True,
         'path': localboxpath,
     }
     if statdict['is_dir']:

@@ -7,7 +7,7 @@ from json import loads
 from re import compile as regex_compile
 from os import remove
 from os import walk
-from os import mkdir
+from os import makedirs
 from os import rmdir
 from os.path import islink
 from os.path import join
@@ -18,13 +18,14 @@ from os.path import isdir
 from os.path import basename
 from shutil import copyfile
 from shutil import move
+from shutil import rmtree
 from logging import getLogger
 try:
-    from urllib import unquote  # pylint: disable=F0401
-    from Cookie import SimpleCookie  # pylint: disable=F0401
+    from urllib import unquote_plus  # pylint: disable=F0401,E0611
+    from Cookie import SimpleCookie  # pylint: disable=F0401,E0611
 except ImportError:
-    from http.cookies import SimpleCookie  # pylint: disable=F0401,E0611,
-    from urllib.parse import unquote  # pylint: disable=F0401,E0611
+    from http.cookies import SimpleCookie  # pylint: disable=F0401,E0611
+    from urllib.parse import unquote_plus  # pylint: disable=F0401,E0611
 
 try:
     from os import symlink
@@ -127,7 +128,8 @@ def exec_remove_shares(request_handler):
     routing list.
     @param request_handler the object which contains the path to remove
     """
-    share_start = request_handler.path.replace('/lox_api/shares/', '', 1)
+    share_start = request_handler.path.replace(
+        '/lox_api/shares/', '', 1)
     shareid = int(share_start.replace('/revoke', '', 1))
     sql = 'remove from shares where id = ?'
     database_execute(sql, (shareid))
@@ -142,7 +144,8 @@ def exec_edit_shares(request_handler):
     @param request_handler the object which contains the share id in its path
                            and list of users json-encoded in its body.
     """
-    share_start = request_handler.path.replace('/lox_api/shares/', '', 1)
+    share_start = request_handler.path.replace(
+        '/lox_api/shares/', '', 1)
     shareid = share_start.replace('/edit', '', 1)
     share = get_share_by_id(shareid)
     json = get_body_json(request_handler)
@@ -184,7 +187,8 @@ def exec_invitations(request_handler):
     @param request_handler object though which to return the values
     """
     request_handler.status = 200
-    request_handler.body = get_database_invitations(request_handler.user)
+    request_handler.body = get_database_invitations(
+        request_handler.user)
 
 
 def exec_invite_accept(request_handler):
@@ -220,13 +224,19 @@ def exec_files_path(request_handler):
     path = request_handler.path.replace('/lox_api/files/', '', 1)
     if path != '':
         path = localbox_path_decoder(path)
-    filepath = get_filesystem_path(path, request_handler.user)
+    try:
+        filepath = get_filesystem_path(path, request_handler.user)
+    except ValueError as e:
+        requets_handler.status = 404
+        request_handler.body = e.message
+        return
     if request_handler.command == "POST":
         request_handler.status = 200
         try:
             filedescriptor = open(filepath, 'wb')
             filedescriptor.write(request_handler.old_body)
         except IOError:
+            getLogger('api').log('Could not write to file %s' % path)
             request_handler.status = 500
 
     if request_handler.command == "GET":
@@ -234,7 +244,7 @@ def exec_files_path(request_handler):
             # Not really looping but we need the first set of values
             for path, directories, files in walk(filepath):
                 if files is None or directories is None:
-                    print("filesystem related problems")
+                    getLogger(__name__).info("filesystem related problems")
                     return
                 # path, directories, files = walk(filepath).next()
                 dirdict = stat_reader(path, request_handler.user)
@@ -242,7 +252,8 @@ def exec_files_path(request_handler):
                 for child in directories + files:
                     user = request_handler.user
                     childpath = join(filepath, child)
-                    dirdict['children'].append(stat_reader(childpath, user))
+                    dirdict['children'].append(
+                        stat_reader(childpath, user))
                 request_handler.body = dumps(dirdict)
                 break
         elif exists(filepath):
@@ -261,8 +272,8 @@ def exec_operations_create_folder(request_handler):
                            body
     """
     request_handler.status = 200
-    path = unquote(request_handler.old_body).replace("path=/", "", 1)
-    print(path)
+    path = unquote_plus(request_handler.old_body).replace("path=/", "", 1)
+    getLogger(__name__).info("creating folder %s" % path)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, request_handler.user, path)
     if lexists(filepath):
@@ -272,8 +283,9 @@ def exec_operations_create_folder(request_handler):
     log = getLogger('api')
     log.info("creating directory " + filepath,
              extra=request_handler.get_log_dict())
-    mkdir(filepath)
-    request_handler.body = dumps(stat_reader(filepath, request_handler.user))
+    makedirs(filepath)
+    request_handler.body = dumps(
+        stat_reader(filepath, request_handler.user))
 
 
 def exec_operations_delete(request_handler):
@@ -284,15 +296,19 @@ def exec_operations_delete(request_handler):
                            its body
     """
     request_handler.status = 200
-    pathstring = unquote(request_handler.old_body).replace("path=/", "", 1)
+    pathstring = unquote_plus(
+        request_handler.old_body).replace("path=/", "", 1)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     filepath = join(bindpoint, request_handler.user, pathstring)
     if not exists(filepath):
         request_handler.status = 404
         request_handler.body = "Error: No file exits at path"
+        getLogger('api').info("failed to delete "+ filepath,
+             extra=request_handler.get_log_dict())
+    
         return
     if isdir(filepath):
-        rmdir(filepath)
+        rmtree(filepath)
     else:
         remove(filepath)
     SymlinkCache().remove(filepath)
@@ -307,8 +323,10 @@ def exec_operations_move(request_handler):
     """
     json_object = loads(request_handler.old_body)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-    move_from = join(bindpoint, request_handler.user, json_object['from_path'])
-    move_to = join(bindpoint, request_handler.user, json_object['to_path'])
+    move_from = join(
+        bindpoint, request_handler.user, json_object['from_path'])
+    move_to = join(
+        bindpoint, request_handler.user, json_object['to_path'])
     if not isfile(move_from):
         request_handler.status = 404
         request_handler.body = "Error: No file exits at from_path"
@@ -328,8 +346,10 @@ def exec_operations_copy(request_handler):
     """
     json_object = loads(request_handler.old_body)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
-    copy_from = join(bindpoint, request_handler.user, json_object['from_path'])
-    copy_to = join(bindpoint, request_handler.user, json_object['to_path'])
+    copy_from = join(
+        bindpoint, request_handler.user, json_object['from_path'])
+    copy_to = join(
+        bindpoint, request_handler.user, json_object['to_path'])
     if not exists(copy_from):
         request_handler.status = 404
         request_handler.body = "Error: No file exits at from_path"
@@ -349,13 +369,15 @@ def exec_user(request_handler):
     from the routing list
     @param request_handler object holding the user for which to return data
     """
-    print("running exec user")
+    getLogger(__name__).info("running exec user")
     if request_handler.command == "GET":
         sql = "select public_key, private_key from users where name = ?"
         result = database_execute(sql, (request_handler.user,))
+        print request_handler.user
         try:
-            result_dictionary = {'user': request_handler.user, 'public_key': result[0],
-                                 'private_key': result[1]}
+            print result
+            result_dictionary = {'user': request_handler.user, 'public_key': result[0][0],
+                                 'private_key': result[0][1]}
         except IndexError:
             result_dictionary = {'user': request_handler.user}
         request_handler.body = dumps(result_dictionary)
@@ -405,7 +427,8 @@ def exec_create_share(request_handler):
     """
     body = request_handler.old_body
     json_list = loads(body)
-    path2 = request_handler.path.replace('/lox_api/share_create/', '', 1)
+    path2 = request_handler.path.replace(
+        '/lox_api/share_create/', '', 1)
     bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
     sender = request_handler.user
     from_file = join(bindpoint, sender, path2)
@@ -427,12 +450,12 @@ def exec_create_share(request_handler):
                 return
             try:
                 symlink(from_file, to_file)
-                #symlink(to_file, from_file)
             except OSError:
                 getLogger('api').info("Error making symlink from " + from_file +
                                       " to " + to_file, extra=request_handler.get_log_dict())
                 request_handler.status = 500
-            invite = Invitation(None, 'pending', share, sender, receiver)
+            invite = Invitation(
+                None, 'pending', share, sender, receiver)
             invite.save_to_database()
 
 
@@ -442,20 +465,28 @@ def exec_key(request_handler):
     in the specified path
     @param request_handler object containing the file path encoded in its path
     """
-    localbox_path = request_handler.path.replace('/lox_api/key/', '', 1)
+    localbox_path = unquote_plus(request_handler.path.replace('/lox_api/key/', '', 1))
+    while localbox_path.startswith('/'):
+        localbox_path = localbox_path[1:]
+    localbox_path = localbox_path.split('/')[1]
+
     if request_handler.command == "GET":
         result = get_key_and_iv(localbox_path, request_handler.user)
         if result is not None:
-            key, initvector = result
+            key, initvector = result  # pylint: disable=W0633
             request_handler.body = dumps({'key': key, 'iv': initvector})
+            request_handler.status = 200
         else:
             request_handler.status = 404
     elif request_handler.command == "POST":
         data = request_handler.old_body
+        # TODO: not crash on bull
         json_object = loads(data)
         sql = "insert into keys (path, user, key, iv) VALUES (?, ?, ?, ?)"
-        database_execute(sql, (localbox_path, request_handler.user, json_object['key'],
+        database_execute(sql, (localbox_path, json_object['user'], json_object['key'],
                                json_object['iv']))
+        request_handler.status = 200
+        # TODO: recrypt encryped data
 
 
 def exec_key_revoke(request_handler):
@@ -489,10 +520,19 @@ def exec_meta(request_handler):
     if (request_handler.path == '/lox_api/meta') or (request_handler.path == '/lox_api/meta/'):
         path = '.'
     else:
-        path = unquote(request_handler.path.replace('/lox_api/meta/', '', 1))
+        path = unquote_plus(
+            request_handler.path.replace('/lox_api/meta/', '', 1))
     try:
-        filepath = get_filesystem_path(path, request_handler.user)
+        try:
+            filepath = get_filesystem_path(path, request_handler.user)
+        except ValueError as e:
+            requets_handler.status = 404
+            request_handler.body = e.message
+            return
         result = stat_reader(filepath, request_handler.user)
+        if result is None:
+            request_handler.status = 404
+            return
         result['children'] = []
         for path, directories, files in walk(filepath):
             for child in directories + files:
@@ -501,7 +541,7 @@ def exec_meta(request_handler):
                 result['children'].append(stat_reader(childpath, user))
             break
     except OSError:
-        request_Handler.status = 404
+        request_handler.status = 404
     request_handler.body = dumps(result)
     request_handler.status = 200
 
@@ -607,78 +647,32 @@ def fake_register_app(request_handler):
     codebase
     @param request_handler the object which has the body to extract as json
     """
-    if not request_handler.headers.get('Cookie'):
-        request_handler.status = 302
-        url = request_handler.protocol + \
-            request_handler.headers['Host'] + request_handler.path
-        request_handler.new_headers = {"Date": "Mon, 26 Oct 2015 16:06:08 GMT",
-                                       "Server": "Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14",
-                                       "X-Powered-By": "PHP/5.6.14",
-                                       "Set-Cookie": "PHPSESSID=ft41ihtl7uptocchfb1cj2ko95; expires=Tue, 27-Oct-2015 16:06:09 GMT; Max-Age=86400; path=/",
-                                       "Cache-Control": "no-cache",
-                                       "Location": request_handler.protocol + request_handler.headers['Host'] + "/login",
-                                       "Access-Control-Allow-Origin": "*",
-                                       "x-frame-options": "DENY",
-                                       "Strict-Transport-Security": "max-age=86400",
-                                       "Keep-Alive": "timeout=5, max=100",
-                                       "Connection": "Keep-Alive",
-                                       "Transfer-Encoding": "chunked",
-                                       "Content-Type": "text/html; charset=UTF8"}
-        request_handler.body = """<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="refresh" content="1;url=""" + url + """/login" />
+    configparser = ConfigSingleton()
+    hostcrt = configparser.get('httpd', 'certfile')
 
-        <title>Redirecting to """ + url + """/login</title>
-    </head>
-    <body>
-        Redirecting to <a href=\"""" + url + """/login">""" + url + """/login</a>.
-    </body>
-</html>"""
-    else:
-        result = {'baseurl': request_handler.protocol + request_handler.headers['Host'] + "/", 'name': 'schimmelpenning',
-                  'user': 'user', 'logourl': 'http://8ch.net/static/logo_33.svg',
+    backurl = configparser.get('oauth', 'direct_back_url')
+    y=open('host.crt').read()
+    result = {'baseurl': backurl, 'name': 'schimmelpenning',
+                  'user': request_handler.user, 'logourl': 'http://8ch.net/static/logo_33.svg',
                   'BackColor': '#00FF00', 'FontColor': '#0000FF', 'APIKeys':
                   [{'Name': 'LocalBox iOS', 'Key': 'keystring',
                     'Secret': 'secretstring'}],
-                  'pin_cert': 'MIIDVzCCAj+gAwIBAgIJAKn6Bcf2mTH+MA0GCSqGSIb3DQEBCwU'
-                  'AMEIxCzAJBgNVBAYTAlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdH'
-                  'kxHDAaBgNVBAoME0RlZmF1bHQgQ29tcGFueSBMdGQwHhcNMTUwO'
-                  'TE1MTAyODM3WhcNMTYwOTE0MTAyODM3WjBCMQswCQYDVQQGEwJY'
-                  'WDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZ'
-                  'hdWx0IENvbXBhbnkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ'
-                  '8AMIIBCgKCAQEAuhdfwhBc0pIaRxeq4+xv6WZVIb0PSbW8G6kJ7'
-                  'kbw+NL0s+FS+Au0JQNtOqauiYdi09ejqfHHUW+cLoX3qMeH2Wgr'
-                  '9TuIbRamLOJw/twstq0LqKOjaiLgq/xRNcUrqptgDfXSbBQXRcG'
-                  'sdB+6E6pKGfViDIZzhdgImXKqROfa6Yv5aGHuz204sKovu2/gSH'
-                  'Pz2IDXSdAehpNbJ5ORFP3+Gkb1z6VoZvJ5QAp/+Ri3th8ms6o/D'
-                  'XRhwSCtetKQshyRjYXpea3v/Oq9lbzBm43LhzyH24ThwKKX8p1J'
-                  'tCJcMfHzpa9OHgLNpDDp4AKCcq5KcDRWJxoTDs45Noj/j3PtlQI'
-                  'DAQABo1AwTjAdBgNVHQ4EFgQUibXrIXzSfhlh/ndNG4cMjIHg3v'
-                  '8wHwYDVR0jBBgwFoAUibXrIXzSfhlh/ndNG4cMjIHg3v8wDAYDV'
-                  'R0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEALEzFqDhRgiRW'
-                  'xJJx3CwG41VadNYJxxgvVos0sVc4y7fTWG2Rq42mMVbMGBvqxtz'
-                  '69KwcHGAvfC1DteEdTSHmEuhsR4DiX0mChfNQrWvrbDTnKaa00a'
-                  'aWArVMUGa+vbDFxsW+r0Z+hzBneQI9Qiy8dexUD3etV7EIumijE'
-                  'faPDvMDNnwwVGj17D7EXY/aDgFQqwTiPGlzOE73kcFTzkMMRzkN'
-                  'hurcNbhp/Z92ToL92LgetAVIrMNysWrgCJrI/gh7nPZIX6LH5TD'
-                  '0Erlx/NEP5IKcsVUnIxH+aXQD4sHjreiUxdPpuqsAy3u4ThMI+o'
-                  '5Rj6Iq1M5L8sPjJ6WzkEXblw==',
-                  "access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
-                  "token_type": "Bearer", "expires_in": 600,
-                  "refresh_token": "tNXAVVo2QE7c5MKgFB1mKuAPsu4xL", "scope": "all"}
-        request_handler.status = 200
-        request_handler.body = dumps(result)
+                  'pin_cert':  ''.join(y.split('\n')[1:-2])
+    }
+    request_handler.status = 200
+    request_handler.body = dumps(result)
 
 
 def fake_oauth(request_handler):
     """
     part of the fake login process, not part of the final codebase
     @param request_handler the object which has the body to extract as json
+
+    NOTE: this was support for the localbox app and is now most likely depricated. Please remove as fast as possible
     """
     if "token" in request_handler.path:
-        print("============================================ FAKE OAUTH PART 3")
+        print(
+            "============================================ FAKE OAUTH PART 3")
         request_handler.status = 200
         result = {"access_token": "2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9",
                   "token_type": "Bearer", "expires_in": 600,
@@ -686,15 +680,18 @@ def fake_oauth(request_handler):
                   "scope": "all"}
         request_handler.body = result
     elif request_handler.command != "POST":
-        print("============================================ FAKE OAUTH PART 1")
+        print(
+            "============================================ FAKE OAUTH PART 1")
         html = '<html><head></head><body><form action="/oauth2/v2/auth" '\
                'method="POST"><input type="submit" value="allow"></form>'\
                '</body></html>'
         request_handler.status = 200
-        request_handler.new_headers.append(('Content-type', 'text/html',))
+        request_handler.new_headers.append(
+            ('Content-type', 'text/html',))
         request_handler.body = html
     else:
-        print("============================================ FAKE OAUTH PART 2")
+        print(
+            "============================================ FAKE OAUTH PART 2")
         request_handler.status = 302
         request_handler.new_headers.append(('Location',
                                             'lbox://oauth-return?code=yay'))
