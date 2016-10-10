@@ -4,6 +4,7 @@ LocalBox shares module.
 from os.path import join
 from json import dumps
 
+from localbox import get_bindpoint
 from .files import SymlinkCache
 from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
@@ -222,7 +223,7 @@ def get_share_by_id(identifier):
     #          'title, is_dir from shareitem where path = ?'
 
     # itemdata = database_execte(itemsql, (sharedata[1],))
-    bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+    bindpoint = get_bindpoint()
     shareitem = stat_reader(
         join(bindpoint, sharedata[0], sharedata[1]), sharedata[1])
 

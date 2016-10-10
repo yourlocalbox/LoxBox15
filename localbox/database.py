@@ -39,7 +39,7 @@ def database_execute(command, params=None):
     @param params a list of tuple of values to substitute in command
     @returns a list of dictionaries representing the sql result
     """
-    getLogger("database").info("database_execute(" + command + ", " +
+    getLogger("database").debug("database_execute(" + command + ", " +
                                str(params) + ")", extra=get_sql_log_dict())
     parser = ConfigSingleton()
     dbtype = parser.get('database', 'type')
@@ -67,8 +67,6 @@ def sqlite_execute(command, params=None):
     @returns a list of dictionaries representing the sql result
     """
     # NOTE mostly copypasta'd from mysql_execute, may be a better way
-    getLogger("database").debug("sqlite_execute(" + command + ", " +
-                                str(params) + ")", extra=get_sql_log_dict())
     try:
         parser = ConfigSingleton()
         filename = parser.get('database', 'filename')

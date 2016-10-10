@@ -14,6 +14,10 @@ from os import chdir
 from os import getcwd
 from os import stat
 from os import walk
+
+from localbox.database import database_execute
+from localbox.utils import get_bindpoint
+
 try:
     from os import readlink
 except ImportError:
@@ -37,7 +41,7 @@ def get_filesystem_path(localbox_path, user):
         localbox_path = localbox_path[1:]
     if ".." in localbox_path.split('/'):
         raise ValueError("No relative paths allowed in localbox")
-    bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+    bindpoint = get_bindpoint()
     filepath = join(bindpoint, user, localbox_path)
     return filepath
 
@@ -50,7 +54,7 @@ def stat_reader(filesystem_path, user):
     @param user the user for which to reutrn the info
     @return a dictionary of metadata for the filesystem path given
     """
-    bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+    bindpoint = get_bindpoint()
     bindpath = abspath(join(bindpoint, user))
     if bindpath == abspath(filesystem_path):
         title = 'Home'
@@ -60,8 +64,9 @@ def stat_reader(filesystem_path, user):
     localboxpath = '/' + join(relpath(filesystem_path,
                                       bindpath)).replace(sep, '/')
     keypath = localboxpath[1:].split('/')[0]
-    #TODO: return the right answer to has_keys
-    sql = 'select 1 from keys where path=%s;'
+    sql = 'select 1 from keys where path=?;'
+    result = database_execute(sql, (filesystem_path,))
+    has_keys = True if result and len(result) > 0 else  False
     if localboxpath == '/.':
         localboxpath = '/'
     try:
@@ -74,7 +79,7 @@ def stat_reader(filesystem_path, user):
         'modified_at': datetime.fromtimestamp(statstruct.st_mtime).isoformat(),
         'is_share': SymlinkCache().exists(abspath(filesystem_path)),
         'is_shared': islink(abspath(filesystem_path)),
-        'has_keys': True,
+        'has_keys': has_keys,
         'path': localboxpath,
     }
     if statdict['is_dir']:
@@ -87,7 +92,6 @@ def stat_reader(filesystem_path, user):
 
 
 class SymlinkCache(object):
-
     """
     Singleton keeping track of all symlinks (shares)
     """
@@ -129,10 +133,10 @@ class SymlinkCache(object):
 
     def __init__(self, path=None):
         if not hasattr(self, 'cache'):
-            print("initialising SymlinkCache")
+            getLogger().info("initialising SymlinkCache", extra={'user': None, 'ip': None, 'path': None})
             self.cache = {}
             self.build_cache(path)
-            print("initialised SymlinkCache")
+            getLogger().info("initialised SymlinkCache", extra={'user': None, 'ip': None, 'path': None})
 
     def __iter__(self):
         for entry in set(self.cache.keys()):
@@ -146,7 +150,7 @@ class SymlinkCache(object):
         """
         working_directory = getcwd()
         if path is None:
-            bindpoint = ConfigSingleton().get('filesystem', 'bindpoint')
+            bindpoint = get_bindpoint()
             if bindpoint is None:
                 getLogger('files').error("No bindpoint found in the filesystem "
                                          "section of the configuration file, "
