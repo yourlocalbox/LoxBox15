@@ -468,7 +468,7 @@ def exec_key(request_handler):
     localbox_path = unquote_plus(request_handler.path.replace('/lox_api/key/', '', 1))
     while localbox_path.startswith('/'):
         localbox_path = localbox_path[1:]
-    localbox_path = localbox_path.split('/')[1]
+   
 
     if request_handler.command == "GET":
         result = get_key_and_iv(localbox_path, request_handler.user)
