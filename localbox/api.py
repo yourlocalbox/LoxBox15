@@ -535,6 +535,7 @@ def exec_meta(request_handler):
                                   extra=logging_utils.get_logging_extra(request_handler))
         if result is None:
             request_handler.status = 404
+            request_handler.body = 'no meta found for %s. maybe the file does not exist' % filepath
             return
         result['children'] = []
         for path, directories, files in walk(filepath):
