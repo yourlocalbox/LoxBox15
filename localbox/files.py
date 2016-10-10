@@ -65,7 +65,7 @@ def stat_reader(filesystem_path, user):
                                       bindpath)).replace(sep, '/')
     keypath = localboxpath[1:].split('/')[0]
     sql = 'select 1 from keys where path=?;'
-    result = database_execute(sql, (filesystem_path,))
+    result = database_execute(sql, (keypath,))
     has_keys = True if result and len(result) > 0 else  False
     if localboxpath == '/.':
         localboxpath = '/'
