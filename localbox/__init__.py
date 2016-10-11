@@ -10,6 +10,7 @@ from os.path import join
 from os.path import exists
 from shutil import rmtree
 
+import loxcommon.os_utils
 from localbox.utils import get_bindpoint
 import localbox.utils as lb_utils
 
@@ -183,7 +184,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         bindpoint = get_bindpoint()
         user_folder = join(bindpoint, self.user)
         if not exists(user_folder):
-            lb_utils.mkdir_p(user_folder)
+            loxcommon.os_utils.mkdir_p(user_folder)
         log.info(
             "processing " + self.path, extra=self.get_log_dict())
         for key in self.headers:

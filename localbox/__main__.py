@@ -36,4 +36,10 @@ def run():
 if __name__ == '__main__':
     configparser = ConfigSingleton('localbox', defaults={'console': False})
     prepare_logging(configparser)
+
+    import loxcommon, logging, logging_utils
+
+    loxcommon.log.loggers[loxcommon.os_utils.__name__] = logging.LoggerAdapter(
+        logging.getLogger(loxcommon.os_utils.__name__),
+        logging_utils.get_logging_empty_extra())
     run()
