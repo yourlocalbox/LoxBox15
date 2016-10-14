@@ -17,6 +17,7 @@ from os import walk
 
 from localbox.database import database_execute
 from localbox.utils import get_bindpoint
+import localbox.logging_utils as logging_utils
 
 try:
     from os import readlink
@@ -43,7 +44,28 @@ def get_filesystem_path(localbox_path, user):
         raise ValueError("No relative paths allowed in localbox")
     bindpoint = get_bindpoint()
     filepath = join(bindpoint, user, localbox_path)
+    getLogger(__name__).debug('filesystem path: %s' % filepath, extra=logging_utils.get_logging_empty_extra())
     return filepath
+
+
+def get_bindpoint_user(user):
+    return abspath(join(get_bindpoint(), user))
+
+
+def get_localbox_path(filesystem_path, user):
+    localboxpath = '/' + join(relpath(filesystem_path,
+                                      get_bindpoint_user(user))).replace(sep, '/')
+
+    if localboxpath == '/.':
+        localboxpath = '/'
+
+    return localboxpath
+
+
+def get_key_path(user, localbox_path=None, filesystem_path=None):
+    if localbox_path is not None:
+        return localbox_path
+    return get_localbox_path(filesystem_path, user)[1:].split('/')[0]
 
 
 def stat_reader(filesystem_path, user):
@@ -54,21 +76,21 @@ def stat_reader(filesystem_path, user):
     @param user the user for which to reutrn the info
     @return a dictionary of metadata for the filesystem path given
     """
-    bindpoint = get_bindpoint()
-    bindpath = abspath(join(bindpoint, user))
-    if bindpath == abspath(filesystem_path):
+    getLogger(__name__).debug('read stats for file: %s' % filesystem_path, extra=logging_utils.get_logging_empty_extra())
+    bindpath_user = get_bindpoint_user(user)
+    if bindpath_user == abspath(filesystem_path):
         title = 'Home'
     else:
         title = [
             item for item in split(filesystem_path) if item != ''][-1]
-    localboxpath = '/' + join(relpath(filesystem_path,
-                                      bindpath)).replace(sep, '/')
-    keypath = localboxpath[1:].split('/')[0]
+
+    localboxpath = get_localbox_path(filesystem_path, user)
+    keypath = get_key_path(user, filesystem_path=filesystem_path)
+
     sql = 'select 1 from keys where path=?;'
     result = database_execute(sql, (keypath,))
     has_keys = True if result and len(result) > 0 else  False
-    if localboxpath == '/.':
-        localboxpath = '/'
+
     try:
         statstruct = stat(filesystem_path)
     except OSError:

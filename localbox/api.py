@@ -53,7 +53,8 @@ except ImportError:
 
 from .database import get_key_and_iv
 from .database import database_execute
-from .files import get_filesystem_path
+from localbox.files import get_filesystem_path
+from localbox.files import get_key_path
 from .files import stat_reader
 from .files import SymlinkCache
 from .shares import Share, ShareItem, Invitation
@@ -239,7 +240,8 @@ def exec_files_path(request_handler):
             filedescriptor = open(filepath, 'wb')
             filedescriptor.write(request_handler.old_body)
         except IOError:
-            getLogger('api').log('Could not write to file %s' % path, extra=logging_utils.get_logging_extra(request_handler))
+            getLogger('api').log('Could not write to file %s' % path,
+                                 extra=logging_utils.get_logging_extra(request_handler))
             request_handler.status = 500
 
     if request_handler.command == "GET":
@@ -247,7 +249,8 @@ def exec_files_path(request_handler):
             # Not really looping but we need the first set of values
             for path, directories, files in walk(filepath):
                 if files is None or directories is None:
-                    getLogger(__name__).info("filesystem related problems", extra=logging_utils.get_logging_extra(request_handler))
+                    getLogger(__name__).info("filesystem related problems",
+                                             extra=logging_utils.get_logging_extra(request_handler))
                     return
                 # path, directories, files = walk(filepath).next()
                 dirdict = stat_reader(path, request_handler.user)
@@ -281,12 +284,12 @@ def exec_operations_create_folder(request_handler):
     filepath = join(bindpoint, request_handler.user, path)
     if lexists(filepath):
         getLogger(__name__).error("%s already exists" % path, extra=logging_utils.get_logging_extra(request_handler))
-        request_handler.status = 409 # Http conflict
+        request_handler.status = 409  # Http conflict
         request_handler.body = "Error: Something already exits at path"
         return
     makedirs(filepath)
     getLogger('api').info("created directory " + filepath,
-             extra=request_handler.get_log_dict())
+                          extra=request_handler.get_log_dict())
     request_handler.body = dumps(
         stat_reader(filepath, request_handler.user))
 
@@ -299,21 +302,31 @@ def exec_operations_delete(request_handler):
                            its body
     """
     request_handler.status = 200
+    user = request_handler.user
     pathstring = unquote_plus(
         request_handler.old_body).replace("path=/", "", 1)
     bindpoint = get_bindpoint()
-    filepath = join(bindpoint, request_handler.user, pathstring)
+    filepath = join(bindpoint, user, pathstring)
+
+    getLogger(__name__).debug('deleting %s' % filepath,
+                              extra=request_handler.get_log_dict())
+
     if not exists(filepath):
         request_handler.status = 404
         request_handler.body = "Error: No file exits at path"
-        getLogger('api').info("failed to delete " + filepath,
-                              extra=request_handler.get_log_dict())
+        getLogger('api').error("failed to delete %s" % filepath,
+                               extra=request_handler.get_log_dict())
 
         return
     if isdir(filepath):
         rmtree(filepath)
     else:
         remove(filepath)
+
+    # remove keys
+    sql = 'delete from keys where user = ? and path = ?'
+    database_execute(sql, (user, get_key_path(user, localbox_path=pathstring)))
+
     SymlinkCache().remove(filepath)
 
 
@@ -529,6 +542,8 @@ def exec_meta(request_handler):
         except ValueError as e:
             request_handler.status = 404
             request_handler.body = e.message
+            getLogger(__name__).error(e.message,
+                                      extra=logging_utils.get_logging_extra(request_handler))
             return
         result = stat_reader(filepath, request_handler.user)
         getLogger(__name__).debug('meta for filepath %s: %s' % (filepath, result),
@@ -544,8 +559,10 @@ def exec_meta(request_handler):
                 childpath = join(filepath, child)
                 result['children'].append(stat_reader(childpath, user))
             break
-    except OSError:
+    except OSError as err:
         request_handler.status = 404
+        getLogger(__name__).exception(err,
+                                      extra=logging_utils.get_logging_extra(request_handler))
     request_handler.body = dumps(result)
     request_handler.status = 200
 
