@@ -4,9 +4,9 @@ Encoding functions specific to localbox
 from os.path import join
 from json import JSONEncoder
 try:
-    from urllib import unquote  # pylint: disable=E0611
+    from urllib import unquote_plus  # pylint: disable=E0611
 except ImportError:
-    from urllib.parse import unquote  # pylint: disable=E0611,F0401
+    from urllib.parse import unquote_plus  # pylint: disable=E0611,F0401
 
 
 class LocalBoxJSONEncoder(JSONEncoder):
@@ -38,6 +38,6 @@ def localbox_path_decoder(path):
     components = path.split('/')
     for component in components:
         if component != '':
-            realpath.append(unquote(component))
+            realpath.append(unquote_plus(component))
     newpath = join(*realpath)
     return newpath
