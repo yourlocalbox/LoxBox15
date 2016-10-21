@@ -242,7 +242,7 @@ def exec_files_path(request_handler):
     if request_handler.old_body is not None:
         json_body = loads(request_handler.old_body)
         path = unquote_plus(json_body['path'])
-        path = get_filesystem_path(path, request_handler.user)
+        filepath = get_filesystem_path(path, request_handler.user)
         contents = b64decode(json_body['contents'])
 
     if request_handler.command == "POST":
@@ -251,7 +251,7 @@ def exec_files_path(request_handler):
             filedescriptor = open(filepath, 'wb')
             filedescriptor.write(contents)
         except IOError:
-            getLogger('api').log('Could not write to file %s' % path,
+            getLogger('api').error('Could not write to file %s' % path,
                                  extra=logging_utils.get_logging_extra(request_handler))
             request_handler.status = 500
 
