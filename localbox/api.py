@@ -239,6 +239,7 @@ def exec_files_path(request_handler):
     getLogger(__name__).debug('body %s' % (request_handler.old_body),
                               extra=logging_utils.get_logging_extra(request_handler))
 
+    contents = None
     if request_handler.old_body is not None:
         json_body = loads(request_handler.old_body)
         path = unquote_plus(json_body['path'])
@@ -246,7 +247,7 @@ def exec_files_path(request_handler):
         if json_body.has_key('contents'):
             contents = b64decode(json_body['contents'])
 
-    if request_handler.command == "POST":
+    if request_handler.command == "POST" and contents is not None:
         request_handler.status = 200
         try:
             filedescriptor = open(filepath, 'wb')
@@ -256,7 +257,7 @@ def exec_files_path(request_handler):
                                  extra=logging_utils.get_logging_extra(request_handler))
             request_handler.status = 500
 
-    if request_handler.command == "GET":
+    if request_handler.command == "GET" or (request_handler.command == "POST" and contents is not None):
         if isdir(filepath):
             # Not really looping but we need the first set of values
             for path, directories, files in walk(filepath):
