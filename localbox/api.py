@@ -553,7 +553,7 @@ def exec_meta(request_handler):
 
     getLogger(__name__).debug('body %s' % (request_handler.old_body),
                               extra=logging_utils.get_logging_extra(request_handler))
-    if request_handler.old_body is not None:
+    if request_handler.old_body:
         path = unquote_plus(loads(request_handler.old_body)['path'])
         if path == '/':
             path = '.'
