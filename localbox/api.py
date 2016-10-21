@@ -2,6 +2,7 @@
 LocalBox API Implementation module. This module holds the implementation of the
 API call handlers as well as directly related support functions
 """
+from base64 import b64decode
 from json import dumps
 from json import loads
 from logging import getLogger
@@ -234,11 +235,21 @@ def exec_files_path(request_handler):
         request_handler.status = 404
         request_handler.body = e.message
         return
+
+    getLogger(__name__).debug('body %s' % (request_handler.old_body),
+                              extra=logging_utils.get_logging_extra(request_handler))
+
+    if request_handler.old_body is not None:
+        json_body = loads(request_handler.old_body)
+        path = unquote_plus(json_body['path'])
+        path = get_filesystem_path(path, request_handler.user)
+        contents = b64decode(json_body['contents'])
+
     if request_handler.command == "POST":
         request_handler.status = 200
         try:
             filedescriptor = open(filepath, 'wb')
-            filedescriptor.write(request_handler.old_body)
+            filedescriptor.write(contents)
         except IOError:
             getLogger('api').log('Could not write to file %s' % path,
                                  extra=logging_utils.get_logging_extra(request_handler))
@@ -390,7 +401,6 @@ def exec_user(request_handler):
         sql = "select public_key, private_key from users where name = ?"
         result = database_execute(sql, (request_handler.user,))
         try:
-            getLogger(__name__).info("get keys result: %s" % result, extra=request_handler.get_log_dict())
             result_dictionary = {'user': request_handler.user, 'public_key': result[0][0],
                                  'private_key': result[0][1]}
         except IndexError:
@@ -759,7 +769,7 @@ def fake_set_cookies(request_handler):
 # requested. When the regex matches, the function is called with the
 # request_handler as argument.
 ROUTING_LIST = [
-    (regex_compile(r"\/lox_api\/files\/.*"), exec_files_path),
+    (regex_compile(r"\/lox_api\/files.*"), exec_files_path),
     (regex_compile(r"\/lox_api\/invitations"), exec_invitations),
     (regex_compile(r"\/lox_api\/invite/[0-9]+/accept"), exec_invite_accept),
     (regex_compile(r"\/lox_api\/invite/[0-9]+/revoke"), exec_invite_reject),
