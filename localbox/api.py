@@ -442,11 +442,13 @@ def exec_create_share(request_handler):
     """
     body = request_handler.old_body
     json_list = loads(body)
+    getLogger(__name__).debug('request data: %s' % json_list, extra=request_handler.get_log_dict())
     path2 = request_handler.path.replace(
         '/lox_api/share_create/', '', 1)
     bindpoint = get_bindpoint()
     sender = request_handler.user
     from_file = join(bindpoint, sender, path2)
+    getLogger(__name__).debug('from_file: %s' % from_file, extra=request_handler.get_log_dict())
     # TODO: something something something group
     share = Share(sender, None, ShareItem(path=path2))
     share.save_to_database()
@@ -455,18 +457,19 @@ def exec_create_share(request_handler):
         if json_object['type'] == 'user':
             receiver = json_object['username']
             to_file = join(bindpoint, receiver, path2)
+            getLogger(__name__).debug('to_file: %s' % to_file, extra=request_handler.get_log_dict())
             if exists(to_file):
-                print("destination " + to_file + " exists.")
+                getLogger(__name__).error("destination " + to_file + " exists.", extra=request_handler.get_log_dict())
                 request_handler.status = 500
                 return
             if not exists(from_file):
-                print("source " + from_file + "does not exist.")
+                getLogger(__name__).error("source " + from_file + "does not exist.", extra=request_handler.get_log_dict())
                 request_handler.status = 500
                 return
             try:
                 symlink(from_file, to_file)
             except OSError:
-                getLogger('api').info("Error making symlink from " + from_file +
+                getLogger('api').error("Error making symlink from " + from_file +
                                       " to " + to_file, extra=request_handler.get_log_dict())
                 request_handler.status = 500
             invite = Invitation(

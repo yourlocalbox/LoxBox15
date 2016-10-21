@@ -3,6 +3,8 @@ LocalBox shares module.
 """
 from os.path import join
 from json import dumps
+from localbox.utils import get_bindpoint
+from logging import getLogger
 
 from localbox import get_bindpoint
 from .files import SymlinkCache
@@ -232,7 +234,7 @@ def get_share_by_id(identifier):
     return Share(sharedata[0], identifier, shareitem)
 
 
-def list_share_items(path=None):
+def list_share_items(path=None, user=None):
     """
     returns a list of ShareItems. If 'path' is given, only ShareItems for said
     path are returned.
@@ -241,9 +243,11 @@ def list_share_items(path=None):
     """
     results = []
     symlinks = SymlinkCache()
+    getLogger(__name__).debug('get share items for path: %s' % path, extra={'user': None, 'ip': None, 'path': None})
     if path is not None:
-        if symlinks.exists(path):
-            results = symlinks.get(path)
+        filesystem_path = join(get_bindpoint(), user, path)
+        if symlinks.exists(filesystem_path):
+            results = symlinks.get(filesystem_path)
     else:
         for value in symlinks.cache.values():
             results = results + value
@@ -251,12 +255,13 @@ def list_share_items(path=None):
     returndata = {}
     for entry in results:
         sql = "SELECT shares.id, shares.user from shares where shares.path = ?"
-        shareinfo = database_execute(sql, (entry.path,))
-        shareitem = get_shareitem_by_path(entry.path, shareinfo[1])
-        if entry[0] in returndata:
-            returndata[entry[0]].adduser(shareinfo[1])
+        shareinfo = database_execute(sql, (path,))[0]
+        shareitem = get_shareitem_by_path(path, shareinfo[1])
+        print shareitem
+        if entry in returndata:
+            returndata[entry].adduser(shareinfo[1])
         else:
-            returndata[entry[0]] = Share(
+            returndata[entry] = Share(
                 shareinfo[1], shareinfo[0], shareitem)
     return dumps(returndata, cls=LocalBoxJSONEncoder)
 
