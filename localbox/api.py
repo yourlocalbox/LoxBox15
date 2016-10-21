@@ -463,14 +463,15 @@ def exec_create_share(request_handler):
                 request_handler.status = 500
                 return
             if not exists(from_file):
-                getLogger(__name__).error("source " + from_file + "does not exist.", extra=request_handler.get_log_dict())
+                getLogger(__name__).error("source " + from_file + "does not exist.",
+                                          extra=request_handler.get_log_dict())
                 request_handler.status = 500
                 return
             try:
                 symlink(from_file, to_file)
             except OSError:
                 getLogger('api').error("Error making symlink from " + from_file +
-                                      " to " + to_file, extra=request_handler.get_log_dict())
+                                       " to " + to_file, extra=request_handler.get_log_dict())
                 request_handler.status = 500
             invite = Invitation(
                 None, 'pending', share, sender, receiver)
@@ -539,6 +540,14 @@ def exec_meta(request_handler):
     else:
         path = unquote_plus(
             request_handler.path.replace('/lox_api/meta/', '', 1))
+
+    getLogger(__name__).debug('body %s' % (request_handler.old_body),
+                              extra=logging_utils.get_logging_extra(request_handler))
+    if request_handler.old_body is not None:
+        path = unquote_plus(loads(request_handler.old_body)['path'])
+        if path == '/':
+            path = '.'
+
     try:
         try:
             filepath = get_filesystem_path(path, request_handler.user)
