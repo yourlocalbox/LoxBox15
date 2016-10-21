@@ -243,7 +243,8 @@ def exec_files_path(request_handler):
         json_body = loads(request_handler.old_body)
         path = unquote_plus(json_body['path'])
         filepath = get_filesystem_path(path, request_handler.user)
-        contents = b64decode(json_body['contents'])
+        if json_body.has_key('contents'):
+            contents = b64decode(json_body['contents'])
 
     if request_handler.command == "POST":
         request_handler.status = 200
