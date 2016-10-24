@@ -140,6 +140,10 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         max_read_size = 65536
         log = getLogger('api')
         log.info("New Request", extra=self.get_log_dict())
+        for key in self.headers:
+            value = self.headers[key]
+            log.debug("Header: " + key + ": " + value,
+                      extra=self.get_log_dict())
         length = int(self.headers.get('content-length', 0))
         self.old_body = ""
         file_str = StringIO()
@@ -187,10 +191,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             loxcommon.os_utils.mkdir_p(user_folder)
         log.info(
             "processing " + self.path, extra=self.get_log_dict())
-        for key in self.headers:
-            value = self.headers[key]
-            log.debug("Header: " + key + ": " + value,
-                      extra=self.get_log_dict())
+
         match_found = False
         for regex, function in ROUTING_LIST:
             if regex.match(self.path):

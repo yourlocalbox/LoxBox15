@@ -98,7 +98,7 @@ def stat_reader(filesystem_path, user):
     statdict = {
         'title': title,
         'is_dir': isdir(filesystem_path),
-        'modified_at': datetime.fromtimestamp(statstruct.st_mtime).isoformat(),
+        'modified_at': statstruct.st_mtime,
         'is_share': SymlinkCache().exists(abspath(filesystem_path)),
         'is_shared': islink(abspath(filesystem_path)),
         'has_keys': has_keys,
