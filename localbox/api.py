@@ -257,7 +257,7 @@ def exec_files_path(request_handler):
                                  extra=logging_utils.get_logging_extra(request_handler))
             request_handler.status = 500
 
-    if request_handler.command == "GET" or (request_handler.command == "POST" and contents is not None):
+    if request_handler.command == "GET" or (request_handler.command == "POST" and contents is None):
         if isdir(filepath):
             # Not really looping but we need the first set of values
             for path, directories, files in walk(filepath):
