@@ -1,6 +1,7 @@
 """
 LocalBox main initialization class.
 """
+import ssl
 from ssl import wrap_socket
 from logging import getLogger
 from sys import argv
@@ -86,7 +87,8 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         request = Request(
             auth_url, None, {'Authorization': auth_header})
         try:
-            response = urlopen(request)
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+            response = urlopen(request, context=ctx)
             name = response.read()
         except HTTPError as error:
             if error.code == 403:
@@ -125,7 +127,11 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         logger. Extra information consists of 'user', 'ip' and 'path', or None
         where this information does not make sense.
         """
-        extra = {'user': self.user, 'ip': self.client_address[0],
+        try:
+            ip = self.headers['x-forwarded-for']
+        except KeyError:
+            ip = self.client_address[0]
+        extra = {'user': self.user, 'ip': ip,
                  'path': self.path}
         return extra
 
@@ -139,7 +145,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         """
         max_read_size = 65536
         log = getLogger('api')
-        log.info("New Request", extra=self.get_log_dict())
+        log.info("New Request: %s" % self.path, extra=self.get_log_dict())
         for key in self.headers:
             value = self.headers[key]
             log.debug("Header: " + key + ": " + value,
