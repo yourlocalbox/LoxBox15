@@ -236,16 +236,19 @@ def exec_files_path(request_handler):
         request_handler.body = e.message
         return
 
-    getLogger(__name__).debug('body %s' % (request_handler.old_body),
-                              extra=logging_utils.get_logging_extra(request_handler))
+    #getLogger(__name__).debug('body %s' % (request_handler.old_body),
+    #                          extra=logging_utils.get_logging_extra(request_handler))
 
     contents = None
     if request_handler.old_body is not None:
-        json_body = loads(request_handler.old_body)
-        path = unquote_plus(json_body['path'])
-        filepath = get_filesystem_path(path, request_handler.user)
-        if json_body.has_key('contents'):
-            contents = b64decode(json_body['contents'])
+        try:
+            json_body = loads(request_handler.old_body)
+            path = unquote_plus(json_body['path'])
+            filepath = get_filesystem_path(path, request_handler.user)
+            if json_body.has_key('contents'):
+                contents = b64decode(json_body['contents'])
+        except ValueError:
+            contents = request_handler.old_body
 
     if request_handler.command == "POST" and contents is not None:
         request_handler.status = 200
@@ -548,7 +551,7 @@ def exec_meta(request_handler):
     @param request_handler object with path encoded in its path
     """
     if (request_handler.path == '/lox_api/meta') or (request_handler.path == '/lox_api/meta/'):
-        path = '.'
+        path = ''
     else:
         path = unquote_plus(
             request_handler.path.replace('/lox_api/meta/', '', 1))

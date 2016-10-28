@@ -216,13 +216,19 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         """
         handle a POST request (by forwarding it to do_request)
         """
-        self.do_request()
+        try:
+            self.do_request()
+        except Exception as ex:
+            getLogger(__name__).exception('failed do_request: %s' % ex, extra=self.get_log_dict())
 
     def do_GET(self):
         """
         handle a POST request (by forwarding it to do_request)
         """
-        self.do_request()
+        try:
+            self.do_request()
+        except Exception as ex:
+            getLogger(__name__).exception('failed do_request: %s' % ex, extra=self.get_log_dict())
 
 
 def main():

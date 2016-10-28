@@ -88,7 +88,7 @@ def stat_reader(filesystem_path, user):
     keypath = get_key_path(user, filesystem_path=filesystem_path)
 
     sql = 'select 1 from keys where path=? and user=?;'
-    result = database_execute(sql, (keypath,user))
+    result = database_execute(sql, ('%s' % keypath, user))
     has_keys = True if result and len(result) > 0 else  False
 
     try:
