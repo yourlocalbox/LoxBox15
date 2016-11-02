@@ -6,7 +6,9 @@ SPHINXOPTS    = -c docs
 SPHINXBUILD   = sphinx-build
 SPHINXAPIDOC  = sphinx-apidoc
 PAPER         =
-BUILDDIR      = docs/_build
+BUILDDIR      = ../LoxBox15-docs
+PDFBUILDDIR	  = /tmp
+PDF 		  = ../manual.pdf
 APIDOCDIR	  = docs/_apidoc
 
 # Internal variables.

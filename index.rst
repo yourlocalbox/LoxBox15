@@ -7,7 +7,7 @@ Contents
 .. toctree::
     :maxdepth: 3
 
-    docs/installation.rst
+    docs/includeme.rst
     docs/configuration.rst
 * :ref:`modindex`
 * :ref:`genindex`
