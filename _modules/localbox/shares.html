@@ -1,0 +1,382 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>localbox.shares &#8212; LocalBox 1.6.2b documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.6.2b',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="LocalBox 1.6.2b documentation" href="../../index.html" />
+    <link rel="up" title="localbox" href="../localbox.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for localbox.shares</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">LocalBox shares module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">json</span> <span class="k">import</span> <span class="n">dumps</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="k">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
+
+<span class="kn">from</span> <span class="nn">localbox</span> <span class="k">import</span> <span class="n">get_bindpoint</span>
+<span class="kn">from</span> <span class="nn">.database</span> <span class="k">import</span> <span class="n">database_execute</span>
+<span class="kn">from</span> <span class="nn">.encoding</span> <span class="k">import</span> <span class="n">LocalBoxJSONEncoder</span>
+<span class="kn">from</span> <span class="nn">.files</span> <span class="k">import</span> <span class="n">SymlinkCache</span>
+<span class="kn">from</span> <span class="nn">.files</span> <span class="k">import</span> <span class="n">get_filesystem_path</span>
+<span class="kn">from</span> <span class="nn">.files</span> <span class="k">import</span> <span class="n">stat_reader</span>
+
+
+<div class="viewcode-block" id="User"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.User">[docs]</a><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    User object, limited to more or less the &#39;name&#39; only, given how the actual</span>
+<span class="sd">    user administration is done by the authentication mechanism.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+<div class="viewcode-block" id="User.to_json"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.User.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to turn this object into JSON.</span>
+
+<span class="sd">        :returns: JSON representation of this User</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;user&#39;</span><span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="Group"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Group">[docs]</a><span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Underdefined group object which due to lack of user administration will</span>
+<span class="sd">    probably be removed at a later stage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">users</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="o">=</span> <span class="n">users</span>
+
+<div class="viewcode-block" id="Group.to_json"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Group.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to turn this object into JSON.</span>
+
+<span class="sd">        :returns: JSON representation of this Group</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;group&#39;</span><span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="Invitation"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Invitation">[docs]</a><span class="k">class</span> <span class="nc">Invitation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The state of being asked to join in sharing a file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">share</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">receiver</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">share</span> <span class="o">=</span> <span class="n">share</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sender</span> <span class="o">=</span> <span class="n">sender</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">receiver</span> <span class="o">=</span> <span class="n">receiver</span>
+
+<div class="viewcode-block" id="Invitation.to_json"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Invitation.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This creates a JSON serialisation of the Invitation. This serialisation</span>
+<span class="sd">        is primarily for returning values and not a complete serialisation.</span>
+
+<span class="sd">        :returns: json representing this Invitation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: Add dates in database</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="s1">&#39;share&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">share</span><span class="p">,</span>
+                <span class="s1">&#39;item&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">share</span><span class="o">.</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;state&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;created_at&#39;</span><span class="p">:</span> <span class="s1">&#39;2915-09-11T15:31:27+0200&#39;</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Invitation.save_to_database"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Invitation.save_to_database">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves the Invitation to the database</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">receiver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">share</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;insert into invitations (sender, receiver, share_id, &quot;</span>\
+                  <span class="s2">&quot;state) values (?, ?, ?, ?)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,)</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;update invitations set sender = ?, receiver = ?, &quot;</span>\
+                  <span class="s2">&quot;share_id = ?, state = ? where id = ?&quot;</span>
+
+        <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;select id from invitations where sender = ? and &quot;</span> \
+                  <span class="s2">&quot;receiver = ?  and share_id = ? and state = ?&quot;</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">result</span></div></div>
+
+
+<div class="viewcode-block" id="get_database_invitations"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.get_database_invitations">[docs]</a><span class="k">def</span> <span class="nf">get_database_invitations</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns all (relevant) invitations from the database for a specific user</span>
+
+<span class="sd">    :param user: the user for who to return invitations</span>
+<span class="sd">    :returns: the invitations for this user</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;select id, sender, receiver, share_id, state from invitations &quot;</span> \
+          <span class="s2">&quot;where receiver = ? and state != &#39;accepted&#39;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">user</span><span class="p">,))</span>
+    <span class="n">invitation_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">share</span> <span class="o">=</span> <span class="n">get_share_by_id</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">invitation_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Invitation</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">share</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                          <span class="n">entry</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">dumps</span><span class="p">(</span><span class="n">invitation_list</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">LocalBoxJSONEncoder</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ShareItem"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.ShareItem">[docs]</a><span class="k">class</span> <span class="nc">ShareItem</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Item that signifies a &#39;share&#39;. Sharing a folder allows a different user to</span>
+<span class="sd">    access yor file/folder. A ShareItem is the representation of that folder</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">has_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_share</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">is_shared</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">modified_at</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_dir</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="n">icon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_keys</span> <span class="o">=</span> <span class="n">has_keys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_share</span> <span class="o">=</span> <span class="n">is_share</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_shared</span> <span class="o">=</span> <span class="n">is_shared</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modified_at</span> <span class="o">=</span> <span class="n">modified_at</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span> <span class="o">=</span> <span class="n">is_dir</span>
+
+<div class="viewcode-block" id="ShareItem.to_json"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.ShareItem.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a JSON encoded string out of this ShareItem. This is used by the</span>
+<span class="sd">        LocalBoxJSONEncoder to create JSON responses.</span>
+<span class="sd">        :returns: JSON representation of the ShareItem</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;icon&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">icon</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                <span class="s1">&#39;has_keys&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_keys</span><span class="p">,</span>
+                <span class="s1">&#39;is_share&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_share</span><span class="p">,</span> <span class="s1">&#39;is_shared&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_shared</span><span class="p">,</span>
+                <span class="s1">&#39;modified_at&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">modified_at</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                <span class="s1">&#39;is_dir&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="get_shareitem_by_path"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.get_shareitem_by_path">[docs]</a><span class="k">def</span> <span class="nf">get_shareitem_by_path</span><span class="p">(</span><span class="n">localbox_path</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns a ShareItem as defined by the given path.</span>
+
+<span class="sd">    :param localbox_path: localbox specific filepath</span>
+<span class="sd">    :param user: name of the user for who to do this</span>
+<span class="sd">    :returns: the metadata for the share on the supplied path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">stat_reader</span><span class="p">(</span><span class="n">get_filesystem_path</span><span class="p">(</span><span class="n">localbox_path</span><span class="p">,</span> <span class="n">user</span><span class="p">),</span> <span class="n">user</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Share"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Share">[docs]</a><span class="k">class</span> <span class="nc">Share</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    THe state of sharing a folder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">users</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="o">=</span> <span class="n">users</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">item</span>
+
+<div class="viewcode-block" id="Share.add_user"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Share.add_user">[docs]</a>    <span class="k">def</span> <span class="nf">add_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a user to the Share object</span>
+<span class="sd">        :param user: the user to add</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="o">=</span> <span class="p">[</span><span class="n">user</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Share.get_identities_json"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Share.get_identities_json">[docs]</a>    <span class="k">def</span> <span class="nf">get_identities_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span>
+        <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> \
+                <span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;user&#39;</span><span class="p">})</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span></div>
+
+<div class="viewcode-block" id="Share.to_json"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Share.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns a json representation of this Share</span>
+<span class="sd">        :returns: a json representation of this Share</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;identities&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_identities_json</span><span class="p">(),</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+                <span class="s1">&#39;item&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Share.save_to_database"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.Share.save_to_database">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        saves the current share to the database, either updating record &#39;id&#39;,</span>
+<span class="sd">        or creating a new one if this Share has no ID yet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;insert into shares (user, path) values (?, ?)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;update shares set user = ?, path = ? where id = ?&#39;</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,)</span>
+        <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;select id from shares where user = ? and path = ?&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="get_share_by_id"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.get_share_by_id">[docs]</a><span class="k">def</span> <span class="nf">get_share_by_id</span><span class="p">(</span><span class="n">identifier</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns the share with the supplied identifier</span>
+
+<span class="sd">    :param identifier: the number identifying the share in question</span>
+<span class="sd">    :returns: the Share identified by the identifier</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sharesql</span> <span class="o">=</span> <span class="s1">&#39;select user, path from shares where id = ?&#39;</span>
+    <span class="n">packedsharedata</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sharesql</span><span class="p">,</span> <span class="p">(</span><span class="n">identifier</span><span class="p">,))</span>
+    <span class="k">if</span> <span class="n">packedsharedata</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">sharedata</span> <span class="o">=</span> <span class="n">packedsharedata</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># itemsql = &#39;select icon, path, has_keys, is_share, is_shared, modified_at,&#39;\</span>
+    <span class="c1">#          &#39;title, is_dir from shareitem where path = ?&#39;</span>
+
+    <span class="c1"># itemdata = database_execte(itemsql, (sharedata[1],))</span>
+    <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+    <span class="n">shareitem</span> <span class="o">=</span> <span class="n">stat_reader</span><span class="p">(</span>
+        <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="n">sharedata</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sharedata</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">sharedata</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># shareitem = ShareItem(itemdata[0], itemdata[1], itemdata[2], itemdata[3],</span>
+    <span class="c1"># itemdata[4], itemdata[5], itemdata[6], itemdata[7])</span>
+    <span class="k">return</span> <span class="n">Share</span><span class="p">(</span><span class="n">sharedata</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">shareitem</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="list_share_items"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.list_share_items">[docs]</a><span class="k">def</span> <span class="nf">list_share_items</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns a list of ShareItems. If &#39;path&#39; is given, only ShareItems for said</span>
+<span class="sd">    path are returned.</span>
+
+<span class="sd">    :param path: a path for which to return the ShareItems</span>
+<span class="sd">    :returns: list of shareitems</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">symlinks</span> <span class="o">=</span> <span class="n">SymlinkCache</span><span class="p">()</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;get share items for path: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">filesystem_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">get_bindpoint</span><span class="p">(),</span> <span class="n">user</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">symlinks</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">):</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">symlinks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">symlinks</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">results</span> <span class="o">+</span> <span class="n">value</span>
+
+    <span class="n">returndata</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT shares.id, shares.user from shares where shares.path = ?&quot;</span>
+        <span class="n">shareinfo</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">path</span><span class="p">,))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">shareitem</span> <span class="o">=</span> <span class="n">get_shareitem_by_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">shareinfo</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="nb">print</span> <span class="n">shareitem</span>
+        <span class="k">if</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">returndata</span><span class="p">:</span>
+            <span class="n">returndata</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span><span class="o">.</span><span class="n">adduser</span><span class="p">(</span><span class="n">shareinfo</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">returndata</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span> <span class="o">=</span> <span class="n">Share</span><span class="p">(</span>
+                <span class="n">shareinfo</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">shareinfo</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shareitem</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dumps</span><span class="p">(</span><span class="n">returndata</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">LocalBoxJSONEncoder</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="toggle_invite_state"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.shares.toggle_invite_state">[docs]</a><span class="k">def</span> <span class="nf">toggle_invite_state</span><span class="p">(</span><span class="n">request_handler</span><span class="p">,</span> <span class="n">newstate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    sets the state of an invite to newstate.</span>
+
+<span class="sd">    :param request_handler: the request_handler with all required information to</span>
+<span class="sd">                           extract the invite from.</span>
+<span class="sd">    :param newstate: the new state for the invite</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">invite_identifier</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">readsql</span> <span class="o">=</span> <span class="s2">&quot;select 1 from invitations where state!=? and receiver = ? and &quot;</span>\
+              <span class="s2">&quot;id = ?&quot;</span>
+    <span class="n">readresult</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span>
+        <span class="n">readsql</span><span class="p">,</span> <span class="p">(</span><span class="n">newstate</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">invite_identifier</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">readresult</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;update invitations set state=? where receiver = ? and id = ?;&quot;</span>
+        <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">newstate</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">invite_identifier</span><span class="p">))</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">readresult</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../localbox.html">localbox</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

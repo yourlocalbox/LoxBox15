@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>localbox.files &#8212; LocalBox 1.6.2b documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.6.2b',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="LocalBox 1.6.2b documentation" href="../../index.html" />
+    <link rel="up" title="localbox" href="../localbox.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for localbox.files</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Encoding functions specific to localbox</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="k">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">chdir</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">getcwd</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">stat</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">walk</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">abspath</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">islink</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">relpath</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">split</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">exit</span> <span class="k">as</span> <span class="n">sysexit</span>
+
+<span class="kn">import</span> <span class="nn">localbox.utils</span>
+<span class="kn">from</span> <span class="nn">localbox.database</span> <span class="k">import</span> <span class="n">database_execute</span>
+<span class="kn">from</span> <span class="nn">localbox.utils</span> <span class="k">import</span> <span class="n">get_bindpoint</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">readlink</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">readlink</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">sep</span>
+
+
+<div class="viewcode-block" id="get_filesystem_path"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.get_filesystem_path">[docs]</a><span class="k">def</span> <span class="nf">get_filesystem_path</span><span class="p">(</span><span class="n">localbox_path</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a LocalBox path (e.g. &#39;/file_name&#39;), return the corresponding</span>
+<span class="sd">    filesystem path (e.g. &#39;/var/localbox/data/user/file_name&#39;)</span>
+
+<span class="sd">    :param localbox_path: the path relative to localbox&#39; view</span>
+<span class="sd">    :param user: the user for which to translate the path (the username is part</span>
+<span class="sd">           of the path and hence cannot be ommitted.</span>
+<span class="sd">    :returns: a filesystem path to the resource pointed to by the localbox path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="n">localbox_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+        <span class="n">localbox_path</span> <span class="o">=</span> <span class="n">localbox_path</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="s2">&quot;..&quot;</span> <span class="ow">in</span> <span class="n">localbox_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No relative paths allowed in localbox&quot;</span><span class="p">)</span>
+    <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">localbox_path</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;filesystem path: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_empty_extra</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">filepath</span></div>
+
+
+<div class="viewcode-block" id="get_bindpoint_user"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.get_bindpoint_user">[docs]</a><span class="k">def</span> <span class="nf">get_bindpoint_user</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">abspath</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">get_bindpoint</span><span class="p">(),</span> <span class="n">user</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_localbox_path"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.get_localbox_path">[docs]</a><span class="k">def</span> <span class="nf">get_localbox_path</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+    <span class="n">localboxpath</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">join</span><span class="p">(</span><span class="n">relpath</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">,</span>
+                                      <span class="n">get_bindpoint_user</span><span class="p">(</span><span class="n">user</span><span class="p">)))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">sep</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">localboxpath</span> <span class="o">==</span> <span class="s1">&#39;/.&#39;</span><span class="p">:</span>
+        <span class="n">localboxpath</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
+
+    <span class="k">return</span> <span class="n">localboxpath</span></div>
+
+
+<div class="viewcode-block" id="get_key_path"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.get_key_path">[docs]</a><span class="k">def</span> <span class="nf">get_key_path</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">localbox_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filesystem_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">localbox_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">localbox_path</span>
+    <span class="k">return</span> <span class="n">get_localbox_path</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">,</span> <span class="n">user</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="stat_reader"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.stat_reader">[docs]</a><span class="k">def</span> <span class="nf">stat_reader</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return metadata for the given (filesystem) path based on information</span>
+<span class="sd">    provided by the stat system call.</span>
+
+<span class="sd">    :param filesystem_path: a path referring to the file to stat</span>
+<span class="sd">    :param user: the user for which to reutrn the info</span>
+<span class="sd">    :returns: a dictionary of metadata for the filesystem path given</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;read stats for file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">filesystem_path</span><span class="p">,</span>
+                              <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_empty_extra</span><span class="p">())</span>
+    <span class="n">bindpath_user</span> <span class="o">=</span> <span class="n">get_bindpoint_user</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bindpath_user</span> <span class="o">==</span> <span class="n">abspath</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">):</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Home&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">split</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">localboxpath</span> <span class="o">=</span> <span class="n">get_localbox_path</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+    <span class="n">keypath</span> <span class="o">=</span> <span class="n">get_key_path</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">filesystem_path</span><span class="o">=</span><span class="n">filesystem_path</span><span class="p">)</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;select 1 from keys where path=? and user=?;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">keypath</span><span class="p">,</span> <span class="n">user</span><span class="p">))</span>
+    <span class="n">has_keys</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span>  <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">statstruct</span> <span class="o">=</span> <span class="n">stat</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">statdict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+        <span class="s1">&#39;is_dir&#39;</span><span class="p">:</span> <span class="n">isdir</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">),</span>
+        <span class="s1">&#39;modified_at&#39;</span><span class="p">:</span> <span class="n">statstruct</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">,</span>
+        <span class="s1">&#39;is_share&#39;</span><span class="p">:</span> <span class="n">SymlinkCache</span><span class="p">()</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">)),</span>
+        <span class="s1">&#39;is_shared&#39;</span><span class="p">:</span> <span class="n">islink</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">filesystem_path</span><span class="p">)),</span>
+        <span class="s1">&#39;has_keys&#39;</span><span class="p">:</span> <span class="n">has_keys</span><span class="p">,</span>
+        <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">localboxpath</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">statdict</span><span class="p">[</span><span class="s1">&#39;is_dir&#39;</span><span class="p">]:</span>
+        <span class="n">statdict</span><span class="p">[</span><span class="s1">&#39;icon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Folder&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">statdict</span><span class="p">[</span><span class="s1">&#39;icon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;File&#39;</span>
+    <span class="c1"># if isdir(filesystem_path):</span>
+    <span class="c1">#    statdict[&#39;hash&#39;] = &#39;TODO&#39;</span>
+    <span class="k">return</span> <span class="n">statdict</span></div>
+
+
+<div class="viewcode-block" id="SymlinkCache"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.SymlinkCache">[docs]</a><span class="k">class</span> <span class="nc">SymlinkCache</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Singleton keeping track of all symlinks (shares)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_instance</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cls</span><span class="o">.</span><span class="n">_instance</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SymlinkCache</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span>
+                <span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_instance</span>
+
+<div class="viewcode-block" id="SymlinkCache.remove"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.SymlinkCache.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute_filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        removes links to and from filename (from the cache)</span>
+<span class="sd">        :param absolute_filename: the file to remove from the cache</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">absolute_filename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">absolute_filename</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">absolute_filename</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">newvalue</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">absolute_filename</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">newvalue</span></div>
+
+<div class="viewcode-block" id="SymlinkCache.exists"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.SymlinkCache.exists">[docs]</a>    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute_file_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check whether absolute_file_name is in the cache, and thus a</span>
+<span class="sd">        destination of a symlink and thus a &#39;share&#39; folder</span>
+
+<span class="sd">        :param absolute_file_name: name of the file to check in the cache</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">absolute_file_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span></div>
+
+<div class="viewcode-block" id="SymlinkCache.get"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.SymlinkCache.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of sources of a symlink destination from the cache</span>
+
+<span class="sd">        :param path: a file which is symlinked to</span>
+<span class="sd">        :returns: a list of symlinks to that file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">path</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;cache&#39;</span><span class="p">):</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;initialising SymlinkCache&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_cache</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;initialised SymlinkCache&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">yield</span> <span class="n">entry</span>
+
+<div class="viewcode-block" id="SymlinkCache.build_cache"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.files.SymlinkCache.build_cache">[docs]</a>    <span class="k">def</span> <span class="nf">build_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build the reverse symlink cache by walking through the filesystem and</span>
+<span class="sd">        finding all symlinks and put them into a cache dictionary for reference</span>
+<span class="sd">        later.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">working_directory</span> <span class="o">=</span> <span class="n">getcwd</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">bindpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No bindpoint found in the filesystem &quot;</span>
+                                         <span class="s2">&quot;section of the configuration file, &quot;</span>
+                                         <span class="s2">&quot;exiting&quot;</span><span class="p">)</span>
+                <span class="n">sysexit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="k">for</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">directories</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">walk</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">directories</span> <span class="o">+</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">linkpath</span> <span class="o">=</span> <span class="n">abspath</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">entry</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">islink</span><span class="p">(</span><span class="n">linkpath</span><span class="p">):</span>
+                    <span class="n">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+                    <span class="n">destpath</span> <span class="o">=</span> <span class="n">abspath</span><span class="p">(</span><span class="n">readlink</span><span class="p">(</span><span class="n">linkpath</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">destpath</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">destpath</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">linkpath</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">destpath</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">linkpath</span><span class="p">]</span>
+        <span class="n">chdir</span><span class="p">(</span><span class="n">working_directory</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../localbox.html">localbox</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

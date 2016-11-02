@@ -1,0 +1,366 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>localbox &#8212; LocalBox 1.6.2b documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.6.2b',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="LocalBox 1.6.2b documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for localbox</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">LocalBox main initialization class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">ssl</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="k">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">remove</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">rmtree</span>
+<span class="kn">from</span> <span class="nn">ssl</span> <span class="k">import</span> <span class="n">wrap_socket</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">argv</span>
+
+<span class="kn">from</span> <span class="nn">loxcommon.config</span> <span class="k">import</span> <span class="n">ConfigSingleton</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">ConfigSingleton</span><span class="p">(</span><span class="s1">&#39;localbox&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">localbox.utils</span> <span class="k">as</span> <span class="nn">lb_utils</span>
+<span class="kn">import</span> <span class="nn">loxcommon.os_utils</span>
+<span class="kn">from</span> <span class="nn">localbox.utils</span> <span class="k">import</span> <span class="n">get_bindpoint</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="k">import</span> <span class="n">StringIO</span>
+    <span class="kn">from</span> <span class="nn">urllib2</span> <span class="k">import</span> <span class="n">Request</span>
+    <span class="kn">from</span> <span class="nn">urllib2</span> <span class="k">import</span> <span class="n">urlopen</span>
+    <span class="kn">from</span> <span class="nn">urllib2</span> <span class="k">import</span> <span class="n">HTTPError</span>
+    <span class="kn">from</span> <span class="nn">urllib</span> <span class="k">import</span> <span class="n">urlencode</span>  <span class="c1"># pylint: disable=E0611</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">StringIO</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">Request</span>  <span class="c1"># pylint: disable=E0611,F0401</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlopen</span>  <span class="c1"># pylint: disable=E0611,F0401</span>
+    <span class="kn">from</span> <span class="nn">urllib.error</span> <span class="k">import</span> <span class="n">HTTPError</span>  <span class="c1"># pylint: disable=E0611,F0401</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlencode</span>  <span class="c1"># pylint: disable=E0611,F0401</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">HALTER</span> <span class="o">=</span> <span class="n">raw_input</span>  <span class="c1"># pylint: disable=E0602</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="c1"># raw_input does not exist in python3, but input does, so in both python2</span>
+    <span class="c1"># and python3 we are now able to use the &#39;input()&#39; funcion.</span>
+    <span class="n">HALTER</span> <span class="o">=</span> <span class="nb">input</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">BaseHTTPServer</span> <span class="k">import</span> <span class="n">BaseHTTPRequestHandler</span>
+    <span class="kn">from</span> <span class="nn">BaseHTTPServer</span> <span class="k">import</span> <span class="n">HTTPServer</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">http.server</span> <span class="k">import</span> <span class="n">BaseHTTPRequestHandler</span>  <span class="c1"># pylint: disable=F0401</span>
+    <span class="kn">from</span> <span class="nn">http.server</span> <span class="k">import</span> <span class="n">HTTPServer</span>  <span class="c1"># pylint: disable=F0401</span>
+
+<span class="kn">from</span> <span class="nn">localbox.api</span> <span class="k">import</span> <span class="n">ROUTING_LIST</span>
+<span class="kn">from</span> <span class="nn">.cache</span> <span class="k">import</span> <span class="n">TimedCache</span>
+<span class="kn">from</span> <span class="nn">.files</span> <span class="k">import</span> <span class="n">SymlinkCache</span>
+<span class="kn">from</span> <span class="nn">.database</span> <span class="k">import</span> <span class="n">database_execute</span>
+
+
+<div class="viewcode-block" id="LocalBoxHTTPRequestHandler"><a class="viewcode-back" href="../docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler">[docs]</a><span class="k">class</span> <span class="nc">LocalBoxHTTPRequestHandler</span><span class="p">(</span><span class="n">BaseHTTPRequestHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class extending the BaseHTTPRequestHandler and handling the HTTP requests</span>
+<span class="sd">    in do_POST and do_GET (which in their turn forward said requests to</span>
+<span class="sd">    do_request)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">client_address</span><span class="p">,</span> <span class="n">server</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_body</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">500</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">BaseHTTPRequestHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">client_address</span><span class="p">,</span> <span class="n">server</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LocalBoxHTTPRequestHandler.check_authorization"><a class="viewcode-back" href="../docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.check_authorization">[docs]</a>    <span class="k">def</span> <span class="nf">check_authorization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        assert whether the authorization header is valid by checking it against</span>
+<span class="sd">        the cache first and if unsuccessful, the oauth server. Sets the &#39;user&#39;</span>
+<span class="sd">        field when successful and returns said name. returns None on failure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">auth_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">getheader</span><span class="p">(</span><span class="s1">&#39;Authorization&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">auth_header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;authentication failed: no Authorization header available&quot;</span><span class="p">,</span>
+                                    <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">auth_url</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;oauth&#39;</span><span class="p">,</span> <span class="s1">&#39;verify_url&#39;</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;verify_url: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">auth_url</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+        <span class="n">cache</span> <span class="o">=</span> <span class="n">TimedCache</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Cache is broken</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">auth_header</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">name</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span>
+            <span class="n">auth_url</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="n">auth_header</span><span class="p">})</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ctx</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">SSLContext</span><span class="p">(</span><span class="n">ssl</span><span class="o">.</span><span class="n">PROTOCOL_TLSv1_2</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">HTTPError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">error</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="mi">403</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;authentication failed: Wrong/expired code&quot;</span><span class="p">,</span>
+                                        <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;authentication failed: HttpError </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">error</span><span class="p">,</span>
+                                        <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;authentication failed: response </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span>
+                                    <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Authenticated user: &#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span>
+                                    <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+            <span class="n">cache</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">auth_header</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">name</span></div>
+
+<div class="viewcode-block" id="LocalBoxHTTPRequestHandler.send_request"><a class="viewcode-back" href="../docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.send_request">[docs]</a>    <span class="k">def</span> <span class="nf">send_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an answer to an HTTPRequest in the proper order of status,</span>
+<span class="sd">        new_headers, body. Other functions can set these values and this</span>
+<span class="sd">        function will send it over the line properly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_headers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_headers</span><span class="p">[</span><span class="n">header</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LocalBoxHTTPRequestHandler.get_log_dict"><a class="viewcode-back" href="../docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.get_log_dict">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns a dictionary of `extra&#39; information from the request for the</span>
+<span class="sd">        logger. Extra information consists of &#39;user&#39;, &#39;ip&#39; and &#39;path&#39;, or None</span>
+<span class="sd">        where this information does not make sense.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;x-forwarded-for&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span>
+                 <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">extra</span></div>
+
+<div class="viewcode-block" id="LocalBoxHTTPRequestHandler.do_request"><a class="viewcode-back" href="../docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.do_request">[docs]</a>    <span class="k">def</span> <span class="nf">do_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle a request (do_POST and do_GET both forward to this function).</span>
+<span class="sd">        Handling of a requests is done in three phases. First, the</span>
+<span class="sd">        authorization is checked. When this is in order, the ROUTING_LIST is</span>
+<span class="sd">        consulted to find the function to do the actual work. After this</span>
+<span class="sd">        function has executed, the request is responded tousing send_request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_read_size</span> <span class="o">=</span> <span class="mi">65536</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;api&#39;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;New Request: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Header: &quot;</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">value</span><span class="p">,</span>
+                      <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content-length&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_body</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">file_str</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">read_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_read_size</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;max_read_size: </span><span class="si">%s</span><span class="s2">, total_length: </span><span class="si">%s</span><span class="s2">, read_size: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">max_read_size</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">read_size</span><span class="p">),</span>
+                      <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+            <span class="n">file_str</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">read_size</span><span class="p">))</span>
+            <span class="n">length</span> <span class="o">-=</span> <span class="n">read_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_body</span> <span class="o">=</span> <span class="n">file_str</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="s2">&quot;https://&quot;</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">getboolean</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="s1">&#39;insecure-http&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="s2">&quot;http://&quot;</span>
+        <span class="n">back_url</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;oauth&#39;</span><span class="p">,</span> <span class="s1">&#39;direct_back_url&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">back_url</span><span class="p">:</span>
+            <span class="n">querystring</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;redirect_uri&#39;</span><span class="p">:</span> <span class="n">back_url</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">querystring</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;redirect_uri&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">+</span>
+                                                     <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Host&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">})</span>
+        <span class="c1"># self.user = authentication_dummy()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_authorization</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">401</span>
+            <span class="n">redirect_url</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;oauth&#39;</span><span class="p">,</span> <span class="s1">&#39;redirect_url&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;?&quot;</span> <span class="o">+</span> \
+                           <span class="n">querystring</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s1">&#39;redirect_url: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redirect_url</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_headers</span><span class="p">[</span>
+                <span class="s1">&#39;WWW-Authenticate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Bearer domain=&quot;&#39;</span> <span class="o">+</span> <span class="n">redirect_url</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;&lt;h1&gt;401: Forbidden.&lt;/h1&gt;&quot;</span> \
+                        <span class="s2">&quot;&lt;p&gt;Authorization failed. Please authenticate at&quot;</span> \
+                        <span class="s2">&quot;&lt;a href=</span><span class="se">\&quot;</span><span class="si">{0}</span><span class="se">\&quot;</span><span class="s2">&gt;</span><span class="si">{1}</span><span class="s2">&lt;/a&gt;&lt;/p&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">redirect_url</span><span class="p">,</span> <span class="n">redirect_url</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_request</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+        <span class="n">user_folder</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">user_folder</span><span class="p">):</span>
+            <span class="n">loxcommon</span><span class="o">.</span><span class="n">os_utils</span><span class="o">.</span><span class="n">mkdir_p</span><span class="p">(</span><span class="n">user_folder</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;processing &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+
+        <span class="n">match_found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">regex</span><span class="p">,</span> <span class="n">function</span> <span class="ow">in</span> <span class="n">ROUTING_LIST</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Running &quot;</span> <span class="o">+</span> <span class="n">function</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s2">&quot; on &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span>
+                          <span class="s2">&quot; for &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+                <span class="n">match_found</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_request</span><span class="p">()</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">match_found</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Could not match the path: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                      <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span></div>
+            <span class="c1"># log.debug(str(self.status) + &quot; &quot; +  str(self.new_headers) + &quot;\n\n&quot; + str(self.body), extra=self.get_log_dict())</span>
+
+<div class="viewcode-block" id="LocalBoxHTTPRequestHandler.do_POST"><a class="viewcode-back" href="../docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.do_POST">[docs]</a>    <span class="k">def</span> <span class="nf">do_POST</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        handle a POST request (by forwarding it to do_request)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">do_request</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;failed do_request: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ex</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="LocalBoxHTTPRequestHandler.do_GET"><a class="viewcode-back" href="../docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.do_GET">[docs]</a>    <span class="k">def</span> <span class="nf">do_GET</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        handle a POST request (by forwarding it to do_request)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">do_request</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;failed do_request: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ex</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../docs/_apidoc/localbox.html#localbox.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    run the actual LocalBox Server. Initialises the symlink cache, starts a</span>
+<span class="sd">    HTTPServer and serves requests forever, unless &#39;--test-single-call&#39; has</span>
+<span class="sd">    been specified as command line argument</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">symlinkcache</span> <span class="o">=</span> <span class="n">SymlinkCache</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">argv</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;--clear-user&quot;</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">user_folder</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filesystem&#39;</span><span class="p">,</span> <span class="s1">&#39;bindpoint&#39;</span><span class="p">),</span> <span class="n">user</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;api&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Deleting info for user &quot;</span> <span class="o">+</span> <span class="n">user</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ip&#39;</span><span class="p">:</span> <span class="s1">&#39;cli&#39;</span><span class="p">,</span> <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">sqlstring</span> <span class="ow">in</span> <span class="s1">&#39;delete from users where name = ?&#39;</span><span class="p">,</span> <span class="s1">&#39;delete from keys where user = ?&#39;</span><span class="p">,</span> <span class="s1">&#39;delete from invitations where sender = ?&#39;</span><span class="p">,</span> <span class="s1">&#39;delete from invitations where receiver = ?&#39;</span><span class="p">,</span> <span class="s1">&#39;delete from shares where user = ?&#39;</span><span class="p">:</span>
+            <span class="n">database_execute</span><span class="p">(</span><span class="n">sqlstring</span><span class="p">,</span> <span class="p">(</span><span class="n">user</span><span class="p">,))</span>
+        <span class="k">for</span> <span class="n">symlinkdest</span> <span class="ow">in</span> <span class="n">symlinkcache</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">symlinkdest</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">user_folder</span><span class="p">):</span>
+                <span class="n">symlinks</span> <span class="o">=</span> <span class="n">symlinkcache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">symlinkdest</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">symlink</span> <span class="ow">in</span> <span class="n">symlinks</span><span class="p">:</span>
+                    <span class="n">remove</span><span class="p">(</span><span class="n">symlink</span><span class="p">)</span>
+        <span class="n">rmtree</span><span class="p">(</span><span class="n">user_folder</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;httpd&#39;</span><span class="p">,</span> <span class="s1">&#39;port&#39;</span><span class="p">,</span> <span class="mi">443</span><span class="p">))</span>
+        <span class="n">insecure_mode</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">getboolean</span><span class="p">(</span><span class="s1">&#39;httpd&#39;</span><span class="p">,</span> <span class="s1">&#39;insecure-http&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">server_address</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+        <span class="n">httpd</span> <span class="o">=</span> <span class="n">HTTPServer</span><span class="p">(</span><span class="n">server_address</span><span class="p">,</span> <span class="n">LocalBoxHTTPRequestHandler</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">insecure_mode</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Running Insecure HTTP&#39;</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Therefore, SSL has not been enabled.&#39;</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;WARNING: Therefore, THIS SERVER IS NOT SECURE!!!&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;--test-single-call&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">argv</span><span class="p">:</span>
+                <span class="n">HALTER</span><span class="p">(</span><span class="s2">&quot;Press a key to continue.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">certfile</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;httpd&#39;</span><span class="p">,</span> <span class="s1">&#39;certfile&#39;</span><span class="p">)</span>
+            <span class="n">keyfile</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;httpd&#39;</span><span class="p">,</span> <span class="s1">&#39;keyfile&#39;</span><span class="p">)</span>
+            <span class="n">httpd</span><span class="o">.</span><span class="n">socket</span> <span class="o">=</span> <span class="n">wrap_socket</span><span class="p">(</span><span class="n">httpd</span><span class="o">.</span><span class="n">socket</span><span class="p">,</span> <span class="n">server_side</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                       <span class="n">certfile</span><span class="o">=</span><span class="n">certfile</span><span class="p">,</span> <span class="n">keyfile</span><span class="o">=</span><span class="n">keyfile</span><span class="p">)</span>
+
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Server ready&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+
+        <span class="k">if</span> <span class="s2">&quot;--test-single-call&quot;</span> <span class="ow">in</span> <span class="n">argv</span><span class="p">:</span>
+            <span class="n">httpd</span><span class="o">.</span><span class="n">handle_request</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">httpd</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

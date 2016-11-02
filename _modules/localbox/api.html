@@ -1,0 +1,918 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>localbox.api &#8212; LocalBox 1.6.2b documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.6.2b',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="LocalBox 1.6.2b documentation" href="../../index.html" />
+    <link rel="up" title="localbox" href="../localbox.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for localbox.api</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">LocalBox API Implementation module. This module holds the implementation of the</span>
+<span class="sd">API call handlers as well as directly related support functions</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">base64</span> <span class="k">import</span> <span class="n">b64decode</span>
+<span class="kn">from</span> <span class="nn">json</span> <span class="k">import</span> <span class="n">dumps</span>
+<span class="kn">from</span> <span class="nn">json</span> <span class="k">import</span> <span class="n">loads</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="k">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">makedirs</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">remove</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">walk</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">basename</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isfile</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">islink</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">lexists</span>
+<span class="kn">from</span> <span class="nn">re</span> <span class="k">import</span> <span class="nb">compile</span> <span class="k">as</span> <span class="n">regex_compile</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">copyfile</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">move</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">rmtree</span>
+
+<span class="kn">import</span> <span class="nn">localbox.utils</span>
+<span class="kn">from</span> <span class="nn">localbox.utils</span> <span class="k">import</span> <span class="n">get_bindpoint</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib</span> <span class="k">import</span> <span class="n">unquote_plus</span>  <span class="c1"># pylint: disable=F0401,E0611</span>
+    <span class="kn">from</span> <span class="nn">Cookie</span> <span class="k">import</span> <span class="n">SimpleCookie</span>  <span class="c1"># pylint: disable=F0401,E0611</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">http.cookies</span> <span class="k">import</span> <span class="n">SimpleCookie</span>  <span class="c1"># pylint: disable=F0401,E0611</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">unquote_plus</span>  <span class="c1"># pylint: disable=F0401,E0611</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">symlink</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># python26/windows fix for symlinking:</span>
+    <span class="c1"># Origined from http://stackoverflow.com/questions/6260149/os-symlink-support-in-windows</span>
+    <span class="c1"># As reported by Erik Renes, with minor changes</span>
+    <span class="k">def</span> <span class="nf">symlink</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">link_name</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">os</span>
+        <span class="n">os_symlink</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s2">&quot;symlink&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">os_symlink</span><span class="p">):</span>
+            <span class="n">os_symlink</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">link_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">ctypes</span>
+            <span class="n">csl</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">windll</span><span class="o">.</span><span class="n">kernel32</span><span class="o">.</span><span class="n">CreateSymbolicLinkW</span>
+            <span class="n">csl</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ctypes</span><span class="o">.</span><span class="n">c_wchar_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_wchar_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">)</span>
+            <span class="n">csl</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_ubyte</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">csl</span><span class="p">(</span><span class="n">link_name</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WinError</span><span class="p">()</span>
+
+<span class="kn">from</span> <span class="nn">localbox.database</span> <span class="k">import</span> <span class="n">get_key_and_iv</span>
+<span class="kn">from</span> <span class="nn">.database</span> <span class="k">import</span> <span class="n">database_execute</span>
+<span class="kn">from</span> <span class="nn">localbox.files</span> <span class="k">import</span> <span class="n">get_filesystem_path</span>
+<span class="kn">from</span> <span class="nn">localbox.files</span> <span class="k">import</span> <span class="n">get_key_path</span>
+<span class="kn">from</span> <span class="nn">.files</span> <span class="k">import</span> <span class="n">stat_reader</span>
+<span class="kn">from</span> <span class="nn">.files</span> <span class="k">import</span> <span class="n">SymlinkCache</span>
+<span class="kn">from</span> <span class="nn">.shares</span> <span class="k">import</span> <span class="n">Share</span><span class="p">,</span> <span class="n">ShareItem</span><span class="p">,</span> <span class="n">Invitation</span>
+<span class="kn">from</span> <span class="nn">.shares</span> <span class="k">import</span> <span class="n">list_share_items</span>
+<span class="kn">from</span> <span class="nn">.shares</span> <span class="k">import</span> <span class="n">get_share_by_id</span>
+<span class="kn">from</span> <span class="nn">.shares</span> <span class="k">import</span> <span class="n">get_database_invitations</span>
+<span class="kn">from</span> <span class="nn">.encoding</span> <span class="k">import</span> <span class="n">localbox_path_decoder</span>
+<span class="kn">from</span> <span class="nn">.shares</span> <span class="k">import</span> <span class="n">toggle_invite_state</span>
+<span class="kn">from</span> <span class="nn">loxcommon.config</span> <span class="k">import</span> <span class="n">ConfigSingleton</span>
+
+
+<div class="viewcode-block" id="ready_cookie"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.ready_cookie">[docs]</a><span class="k">def</span> <span class="nf">ready_cookie</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Readies a PHP-like cookie - not to be part of the final codebase</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Host&#39;</span><span class="p">)</span>
+    <span class="n">cookie</span> <span class="o">=</span> <span class="n">SimpleCookie</span><span class="p">()</span>
+    <span class="n">cookie</span><span class="p">[</span><span class="s1">&#39;PHPSESSID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;21345&quot;</span>
+    <span class="n">cookie</span><span class="p">[</span><span class="s1">&#39;PHPSESSID&#39;</span><span class="p">][</span><span class="s1">&#39;Domain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">host</span>
+    <span class="n">cookie</span><span class="p">[</span><span class="s1">&#39;PHPSESSID&#39;</span><span class="p">][</span><span class="s1">&#39;path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
+    <span class="n">cookie</span><span class="p">[</span><span class="s1">&#39;PHPSESSID&#39;</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">new_headers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Set-Cookie&#39;</span><span class="p">,</span>
+                                        <span class="n">cookie</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),))</span></div>
+
+
+<div class="viewcode-block" id="prepare_string"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.prepare_string">[docs]</a><span class="k">def</span> <span class="nf">prepare_string</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prepares a string to be sent over the wire. Python3 requires &#39;string&#39;s to</span>
+<span class="sd">    be encoded as bytes accoding to an encoding (e.g. UTF8) before sending them</span>
+<span class="sd">    through a socket. Within python2, &#39;bytes&#39; more or less are strings, and the</span>
+<span class="sd">    bytes&#39; constructor only accepts one argument. Hence, this function will</span>
+<span class="sd">    return the right type of object for sending over the network.</span>
+
+<span class="sd">    :param string: string to be encoded.</span>
+<span class="sd">    :param encoding: optional encoding in case it should not by UTF8 encoded.</span>
+<span class="sd">    :returns: the string as a socket write prepared bytes type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">string</span></div>
+
+
+<div class="viewcode-block" id="get_body_json"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.get_body_json">[docs]</a><span class="k">def</span> <span class="nf">get_body_json</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads the request handlers bode and parses it as a JSON object.</span>
+
+<span class="sd">    :param request_handler: the object which has the body to extract as json</span>
+<span class="sd">    :returns: json-parsed version of the requests&#39; body.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">loads</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="exec_leave_share"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_leave_share">[docs]</a><span class="k">def</span> <span class="nf">exec_leave_share</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle the leave_share call. Removes the share with the specified path for</span>
+<span class="sd">    the current user. Returns 200 if succesful, 404 on failure. Called via the</span>
+<span class="sd">    routing list.</span>
+
+<span class="sd">    :param request_handler: object holding the path of the share to leave</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pathstart</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/shares/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">pathstart</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/leave&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+    <span class="n">linkpath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">islink</span><span class="p">(</span><span class="n">linkpath</span><span class="p">):</span>
+        <span class="n">remove</span><span class="p">(</span><span class="n">linkpath</span><span class="p">)</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span></div>
+
+
+<div class="viewcode-block" id="exec_remove_shares"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_remove_shares">[docs]</a><span class="k">def</span> <span class="nf">exec_remove_shares</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes a share from being shared. Everyones access to this share, except</span>
+<span class="sd">    for that of the owner, is irrevokably removed by this call. Called via the</span>
+<span class="sd">    routing list.</span>
+
+<span class="sd">    :param request_handler: the object which contains the path to remove</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">share_start</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="s1">&#39;/lox_api/shares/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">shareid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">share_start</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/revoke&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;remove from shares where id = ?&#39;</span>
+    <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">shareid</span><span class="p">))</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span></div>
+
+
+<div class="viewcode-block" id="exec_edit_shares"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_edit_shares">[docs]</a><span class="k">def</span> <span class="nf">exec_edit_shares</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Edits the list of people who can access a certain share object. A list of</span>
+<span class="sd">    json encoded identities is in the body to represent the new list of people</span>
+<span class="sd">    with access to said share. Called via the routing list</span>
+
+<span class="sd">    :param request_handler: the object which contains the share id in its path</span>
+<span class="sd">                           and list of users json-encoded in its body.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">share_start</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="s1">&#39;/lox_api/shares/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">shareid</span> <span class="o">=</span> <span class="n">share_start</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/edit&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">share</span> <span class="o">=</span> <span class="n">get_share_by_id</span><span class="p">(</span><span class="n">shareid</span><span class="p">)</span>
+    <span class="n">json</span> <span class="o">=</span> <span class="n">get_body_json</span><span class="p">(</span><span class="n">request_handler</span><span class="p">)</span>
+    <span class="n">symlinks</span> <span class="o">=</span> <span class="n">SymlinkCache</span><span class="p">()</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">share</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">path</span>
+    <span class="n">links</span> <span class="o">=</span> <span class="n">symlinks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+    <span class="n">newlinks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">json</span><span class="p">:</span>
+        <span class="n">to_file</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">basename</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">newlinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">to_file</span><span class="p">)</span>
+        <span class="n">symlink</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">to_file</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">link</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">newlinks</span><span class="p">:</span>
+            <span class="n">remove</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+            <span class="n">symlinks</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">link</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="exec_shares"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_shares">[docs]</a><span class="k">def</span> <span class="nf">exec_shares</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle share information for a path given in the request. Returns a list</span>
+<span class="sd">    of shares containing the provided path. Called via the routing list.</span>
+
+<span class="sd">    :param request_handler: the object with the path encoded in its path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path2</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/shares/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">list_share_items</span><span class="p">(</span><span class="n">path2</span><span class="p">)</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="exec_invitations"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_invitations">[docs]</a><span class="k">def</span> <span class="nf">exec_invitations</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of all (pending) invitations for an user. Called via the</span>
+<span class="sd">    routing list</span>
+
+<span class="sd">    :param request_handler: object though which to return the values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">get_database_invitations</span><span class="p">(</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="exec_invite_accept"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_invite_accept">[docs]</a><span class="k">def</span> <span class="nf">exec_invite_accept</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Accepts/reopens an invitation to filesharing. called from the routing list.</span>
+
+<span class="sd">    :param request_handler: the object containing invite identifier in its path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">toggle_invite_state</span><span class="p">(</span><span class="n">request_handler</span><span class="p">,</span> <span class="s1">&#39;accepted&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span></div>
+
+
+<div class="viewcode-block" id="exec_invite_reject"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_invite_reject">[docs]</a><span class="k">def</span> <span class="nf">exec_invite_reject</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rejects/cancels an invitation to filesharing. Called from the routing list</span>
+
+<span class="sd">    :param request_handler: object with the invite identifier in its path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">toggle_invite_state</span><span class="p">(</span><span class="n">request_handler</span><span class="p">,</span> <span class="s1">&#39;rejected&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span></div>
+
+
+<div class="viewcode-block" id="exec_files_path"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_files_path">[docs]</a><span class="k">def</span> <span class="nf">exec_files_path</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows for the up- and downloading of (encrypted) files to and from the</span>
+<span class="sd">    localbox server. called from the routing list</span>
+
+<span class="sd">    :param request_handler: the object which contains the files path in its path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/files/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">localbox_path_decoder</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">get_filesystem_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span>
+        <span class="k">return</span>
+
+    <span class="c1"># getLogger(__name__).debug(&#39;body %s&#39; % (request_handler.old_body),</span>
+    <span class="c1">#                          extra=logging_utils.get_logging_extra(request_handler))</span>
+
+    <span class="n">contents</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">json_body</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span><span class="n">json_body</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">])</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">get_filesystem_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">json_body</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s1">&#39;contents&#39;</span><span class="p">):</span>
+                <span class="n">contents</span> <span class="o">=</span> <span class="n">b64decode</span><span class="p">(</span><span class="n">json_body</span><span class="p">[</span><span class="s1">&#39;contents&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span>
+
+    <span class="k">if</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span> <span class="ow">and</span> <span class="n">contents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">filedescriptor</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+            <span class="n">filedescriptor</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;api&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Could not write to file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">,</span>
+                                   <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_extra</span><span class="p">(</span><span class="n">request_handler</span><span class="p">))</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">500</span>
+
+    <span class="k">if</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;GET&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span> <span class="ow">and</span> <span class="n">contents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">isdir</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="c1"># Not really looping but we need the first set of values</span>
+            <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">directories</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">walk</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">files</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">directories</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;filesystem related problems&quot;</span><span class="p">,</span>
+                                             <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_extra</span><span class="p">(</span><span class="n">request_handler</span><span class="p">))</span>
+                    <span class="k">return</span>
+                <span class="c1"># path, directories, files = walk(filepath).next()</span>
+                <span class="n">dirdict</span> <span class="o">=</span> <span class="n">stat_reader</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+                <span class="n">dirdict</span><span class="p">[</span><span class="s1">&#39;children&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">directories</span> <span class="o">+</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="n">user</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span>
+                    <span class="n">childpath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+                    <span class="n">dirdict</span><span class="p">[</span><span class="s1">&#39;children&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">stat_reader</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="n">user</span><span class="p">))</span>
+                <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">dirdict</span><span class="p">)</span>
+                <span class="k">break</span>
+        <span class="k">elif</span> <span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">filedescriptor</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">filedescriptor</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span></div>
+
+
+<div class="viewcode-block" id="exec_operations_create_folder"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_operations_create_folder">[docs]</a><span class="k">def</span> <span class="nf">exec_operations_create_folder</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a new folder in the localbox directory structure. Called from the</span>
+<span class="sd">    routing list</span>
+
+<span class="sd">    :param request_handler: the object which has the path url-encoded in its</span>
+<span class="sd">                           body</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;path=/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;creating folder </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_extra</span><span class="p">(</span><span class="n">request_handler</span><span class="p">))</span>
+    <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lexists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_extra</span><span class="p">(</span><span class="n">request_handler</span><span class="p">))</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">409</span>  <span class="c1"># Http conflict</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;Error: Something already exits at path&quot;</span>
+        <span class="k">return</span>
+    <span class="n">makedirs</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;api&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;created directory &quot;</span> <span class="o">+</span> <span class="n">filepath</span><span class="p">,</span>
+                          <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span>
+        <span class="n">stat_reader</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="exec_operations_delete"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_operations_delete">[docs]</a><span class="k">def</span> <span class="nf">exec_operations_delete</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes a file or folder from the localbox directory structure. called from</span>
+<span class="sd">    the routing list</span>
+
+<span class="sd">    :param request_handler: the object which has the file path json-encoded in</span>
+<span class="sd">                           its body</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">pathstring</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;path=/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">pathstring</span><span class="p">)</span>
+
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;deleting </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">filepath</span><span class="p">,</span>
+                              <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;Error: No file exits at path&quot;</span>
+        <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;api&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;failed to delete </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filepath</span><span class="p">,</span>
+                               <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">isdir</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="n">rmtree</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="c1"># remove keys</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;delete from keys where user = ? and path = ?&#39;</span>
+    <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">get_key_path</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">localbox_path</span><span class="o">=</span><span class="n">pathstring</span><span class="p">)))</span>
+
+    <span class="n">SymlinkCache</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="exec_operations_move"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_operations_move">[docs]</a><span class="k">def</span> <span class="nf">exec_operations_move</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Moves a file within the localbox directory structure. Called from the</span>
+<span class="sd">    routing list</span>
+
+<span class="sd">    :param request_handler: the object which has the to_path and from_path</span>
+<span class="sd">                           json-encoded in its body</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">json_object</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">)</span>
+    <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+    <span class="n">move_from</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span>
+        <span class="n">bindpoint</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;from_path&#39;</span><span class="p">])</span>
+    <span class="n">move_to</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span>
+        <span class="n">bindpoint</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;to_path&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">move_from</span><span class="p">):</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;Error: No file exits at from_path&quot;</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">lexists</span><span class="p">(</span><span class="n">move_to</span><span class="p">):</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;Error: A file already exists at to_path&quot;</span>
+        <span class="k">return</span>
+    <span class="n">move</span><span class="p">(</span><span class="n">move_from</span><span class="p">,</span> <span class="n">move_to</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="exec_operations_copy"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_operations_copy">[docs]</a><span class="k">def</span> <span class="nf">exec_operations_copy</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    copies a file within the localbox filesystem. Called from the routing list</span>
+
+<span class="sd">    :param request_handler: object with to_path and from_path json-encoded in</span>
+<span class="sd">                           its body</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">json_object</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">)</span>
+    <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+    <span class="n">copy_from</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span>
+        <span class="n">bindpoint</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;from_path&#39;</span><span class="p">])</span>
+    <span class="n">copy_to</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span>
+        <span class="n">bindpoint</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;to_path&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">copy_from</span><span class="p">):</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;Error: No file exits at from_path&quot;</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">lexists</span><span class="p">(</span><span class="n">copy_to</span><span class="p">):</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;Error: A file already exists at to_path&quot;</span>
+        <span class="k">return</span>
+    <span class="n">copyfile</span><span class="p">(</span><span class="n">copy_from</span><span class="p">,</span> <span class="n">copy_to</span><span class="p">)</span>
+
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span></div>
+
+
+<div class="viewcode-block" id="exec_user"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_user">[docs]</a><span class="k">def</span> <span class="nf">exec_user</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns public- and private key information about the current user. Called</span>
+<span class="sd">    from the routing list</span>
+
+<span class="sd">    :param request_handler: object holding the user for which to return data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;running exec user&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;GET&quot;</span><span class="p">:</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;select public_key, private_key from users where name = ?&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result_dictionary</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;public_key&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                 <span class="s1">&#39;private_key&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]}</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">result_dictionary</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">}</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">result_dictionary</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">json_object</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">)</span>
+        <span class="n">privkey</span> <span class="o">=</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;private_key&#39;</span><span class="p">]</span>
+        <span class="n">pubkey</span> <span class="o">=</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;public_key&#39;</span><span class="p">]</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;insert into users (public_key, private_key, name) values (?, ?, ?)&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span>
+            <span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">pubkey</span><span class="p">,</span> <span class="n">privkey</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,))</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span>
+            <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;publib_key&#39;</span><span class="p">:</span> <span class="n">pubkey</span><span class="p">,</span> <span class="s1">&#39;private_key&#39;</span><span class="p">:</span> <span class="n">privkey</span><span class="p">})</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span></div>
+
+
+<div class="viewcode-block" id="exec_user_username"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_user_username">[docs]</a><span class="k">def</span> <span class="nf">exec_user_username</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns information about a certain user as specified in the url. Also</span>
+<span class="sd">    return private key data if this is that user making the request</span>
+
+<span class="sd">    :param request_handler: object containing the user for which to return data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/user/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;select public_key, private_key from users where name = ?;&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;select public_key from users where name = ?;&#39;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">username</span><span class="p">,))</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;Unknown user&quot;</span>
+        <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+
+    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="s1">&#39;public_key&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
+    <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;private_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">info</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="exec_create_share"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_create_share">[docs]</a><span class="k">def</span> <span class="nf">exec_create_share</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a &#39;share&#39; within localbox. Comes down to creating a symlink next</span>
+<span class="sd">    to a few database records to give the share an identifier.</span>
+
+<span class="sd">    :param request_handler: object with the share filepath encoded in its path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span>
+    <span class="n">json_list</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;request data: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">json_list</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+    <span class="n">path2</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="s1">&#39;/lox_api/share_create/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
+    <span class="n">sender</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">from_file</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">path2</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;from_file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">from_file</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+    <span class="c1"># TODO: something something something group</span>
+    <span class="n">share</span> <span class="o">=</span> <span class="n">Share</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ShareItem</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path2</span><span class="p">))</span>
+    <span class="n">share</span><span class="o">.</span><span class="n">save_to_database</span><span class="p">()</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="k">for</span> <span class="n">json_object</span> <span class="ow">in</span> <span class="n">json_list</span><span class="p">[</span><span class="s1">&#39;identities&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;user&#39;</span><span class="p">:</span>
+            <span class="n">receiver</span> <span class="o">=</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span>
+            <span class="n">to_file</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="n">receiver</span><span class="p">,</span> <span class="n">path2</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;to_file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">to_file</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">exists</span><span class="p">(</span><span class="n">to_file</span><span class="p">):</span>
+                <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;destination &quot;</span> <span class="o">+</span> <span class="n">to_file</span> <span class="o">+</span> <span class="s2">&quot; exists.&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+                <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">500</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">from_file</span><span class="p">):</span>
+                <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;source &quot;</span> <span class="o">+</span> <span class="n">from_file</span> <span class="o">+</span> <span class="s2">&quot;does not exist.&quot;</span><span class="p">,</span>
+                                          <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+                <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">500</span>
+                <span class="k">return</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">symlink</span><span class="p">(</span><span class="n">from_file</span><span class="p">,</span> <span class="n">to_file</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;api&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error making symlink from &quot;</span> <span class="o">+</span> <span class="n">from_file</span> <span class="o">+</span>
+                                       <span class="s2">&quot; to &quot;</span> <span class="o">+</span> <span class="n">to_file</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+                <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">500</span>
+            <span class="n">invite</span> <span class="o">=</span> <span class="n">Invitation</span><span class="p">(</span>
+                <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;pending&#39;</span><span class="p">,</span> <span class="n">share</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">receiver</span><span class="p">)</span>
+            <span class="n">invite</span><span class="o">.</span><span class="n">save_to_database</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="exec_key"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_key">[docs]</a><span class="k">def</span> <span class="nf">exec_key</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns rsa encrypted key and initialization vector for decoding the file</span>
+<span class="sd">    in the specified path</span>
+
+<span class="sd">    :param request_handler: object containing the file path encoded in its path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">localbox_path</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/key/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">while</span> <span class="n">localbox_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+        <span class="n">localbox_path</span> <span class="o">=</span> <span class="n">localbox_path</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">if</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;GET&quot;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">get_key_and_iv</span><span class="p">(</span><span class="n">localbox_path</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">initvector</span> <span class="o">=</span> <span class="n">result</span>  <span class="c1"># pylint: disable=W0633</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span> <span class="s1">&#39;iv&#39;</span><span class="p">:</span> <span class="n">initvector</span><span class="p">})</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+    <span class="k">elif</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span>
+        <span class="c1"># TODO: not crash on bull</span>
+        <span class="n">json_object</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;insert into keys (path, user, key, iv) VALUES (?, ?, ?, ?)&quot;</span>
+        <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">localbox_path</span><span class="p">,</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">],</span> <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span>
+                               <span class="n">json_object</span><span class="p">[</span><span class="s1">&#39;iv&#39;</span><span class="p">]))</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span></div>
+        <span class="c1"># TODO: recrypt encryped data</span>
+
+
+<div class="viewcode-block" id="exec_key_revoke"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_key_revoke">[docs]</a><span class="k">def</span> <span class="nf">exec_key_revoke</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    revoke/remove an encrypted key from the database so said user cannot access</span>
+<span class="sd">    said key anymore.</span>
+
+<span class="sd">    :param request_handler: object containing the path to the file in its path</span>
+<span class="sd">                           and json encoded name of the user whoes key to</span>
+<span class="sd">                           revoke</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/key_revoke/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">lengthstring</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content-length&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lengthstring</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span>
+        <span class="c1"># Let&#39;s either not allow users to add a username or not have the</span>
+        <span class="c1"># restriction that they cannot get the data back next time</span>
+        <span class="k">if</span> <span class="n">user</span> <span class="o">!=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">403</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;remove from keys where user = ? and path = ?;&#39;</span>
+    <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="exec_meta"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_meta">[docs]</a><span class="k">def</span> <span class="nf">exec_meta</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns metadata for a given file/directory</span>
+
+<span class="sd">    :param request_handler: object with path encoded in its path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s1">&#39;/lox_api/meta&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s1">&#39;/lox_api/meta/&#39;</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/meta/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;body </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">),</span>
+                              <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_extra</span><span class="p">(</span><span class="n">request_handler</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span><span class="n">loads</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">)[</span><span class="s1">&#39;path&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="o">==</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">get_filesystem_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                                      <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_extra</span><span class="p">(</span><span class="n">request_handler</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">stat_reader</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;meta for filepath </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">result</span><span class="p">),</span>
+                                  <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_extra</span><span class="p">(</span><span class="n">request_handler</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;no meta found for </span><span class="si">%s</span><span class="s1">. maybe the file does not exist&#39;</span> <span class="o">%</span> <span class="n">filepath</span>
+            <span class="k">return</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;children&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">directories</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">walk</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">directories</span> <span class="o">+</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">user</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span>
+                <span class="n">childpath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+                <span class="n">result</span><span class="p">[</span><span class="s1">&#39;children&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stat_reader</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="n">user</span><span class="p">))</span>
+            <span class="k">break</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">err</span><span class="p">,</span>
+                                      <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_extra</span><span class="p">(</span><span class="n">request_handler</span><span class="p">))</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span></div>
+
+
+<div class="viewcode-block" id="fake_login"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.fake_login">[docs]</a><span class="k">def</span> <span class="nf">fake_login</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    part of the fake login process, not part of the final codebase</span>
+
+<span class="sd">    :param request_handler: the object which has the body to extract as json</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">new_headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="s2">&quot;Mon, 26 Oct 2015 16:06:08 GMT&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Server&quot;</span><span class="p">:</span> <span class="s2">&quot;Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;X-Powered-By&quot;</span><span class="p">:</span> <span class="s2">&quot;PHP/5.6.14&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Set-Cookie&quot;</span><span class="p">:</span> <span class="s2">&quot;PHPSESSID=ft41ihtl7uptocchfb1cj2ko95; expires=Tue, 27-Oct-2015 16:06:09 GMT; Max-Age=86400; path=/&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Cache-Control&quot;</span><span class="p">:</span> <span class="s2">&quot;no-cache&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Access-Control-Allow-Origin&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;x-frame-options&quot;</span><span class="p">:</span> <span class="s2">&quot;DENY&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Strict-Transport-Security&quot;</span><span class="p">:</span> <span class="s2">&quot;max-age=86400&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">:</span> <span class="s2">&quot;timeout=5, max=100&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Connection&quot;</span><span class="p">:</span> <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Transfer-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;chunked&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;text/html; charset=UTF8&quot;</span><span class="p">}</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;!DOCTYPE html&gt;</span>
+<span class="s2">&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;</span>
+<span class="s2">    &lt;head&gt;</span>
+<span class="s2">        &lt;meta charset=&quot;utf-8&quot;/&gt;</span>
+<span class="s2">        &lt;title&gt;Sign in&lt;/title&gt;</span>
+
+<span class="s2">                                &lt;link href=&quot;/localbox/web/bundles/rednoseframework/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot; /&gt;</span>
+
+
+<span class="s2">    &lt;link href=&quot;/localbox/web/bundles/rednoseframework/css/login.css&quot; rel=&quot;stylesheet&quot; /&gt;</span>
+<span class="s2">    &lt;/head&gt;</span>
+<span class="s2">    &lt;body&gt;</span>
+
+<span class="s2">    &lt;div class=&quot;content&quot;&gt;</span>
+<span class="s2">      &lt;h2&gt;Sign in&lt;/h2&gt;</span>
+<span class="s2">        &lt;form action=&quot;/login_check&quot; method=&quot;POST&quot;&gt;</span>
+
+<span class="s2">        &lt;input type=&quot;hidden&quot; name=&quot;_csrf_token&quot; value=&quot;482f45992b7cfec0ffac259f25bc981e70371aa3&quot; /&gt;</span>
+
+
+<span class="s2">          &lt;div&gt;</span>
+<span class="s2">            &lt;input id=&quot;username&quot; name=&quot;_username&quot; required=&quot;required&quot; value=&quot;&quot; autofocus=&quot;autofocus&quot; type=&quot;text&quot; placeholder=&quot;Username&quot;&gt;</span>
+<span class="s2">          &lt;/div&gt;</span>
+<span class="s2">          &lt;div&gt;</span>
+<span class="s2">            &lt;input id=&quot;password&quot; name=&quot;_password&quot; required=&quot;required&quot; type=&quot;password&quot; placeholder=&quot;Password&quot;&gt;</span>
+<span class="s2">          &lt;/div&gt;</span>
+<span class="s2">          &lt;div&gt;</span>
+<span class="s2">              &lt;label class=&quot;checkbox&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;remember_me&quot; name=&quot;_remember_me&quot;&gt;Remember me&lt;/label&gt;</span>
+<span class="s2">          &lt;/div&gt;</span>
+<span class="s2">          &lt;div class=&quot;footer&quot;&gt;</span>
+<span class="s2">                            &lt;input class=&quot;btn btn-primary pull-right&quot; type=&quot;submit&quot; id=&quot;_submit&quot; name=&quot;_submit&quot; value=&quot;Sign in&quot; /&gt;</span>
+<span class="s2">          &lt;/div&gt;</span>
+<span class="s2">      &lt;/form&gt;</span>
+<span class="s2">    &lt;/div&gt;</span>
+
+<span class="s2">    &lt;/body&gt;</span>
+<span class="s2">&lt;/html&gt;&quot;&quot;&quot;</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">form</span></div>
+
+
+<div class="viewcode-block" id="fake_login_check"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.fake_login_check">[docs]</a><span class="k">def</span> <span class="nf">fake_login_check</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    part of the fake login process, not part of the final codebase</span>
+
+<span class="sd">    :param request_handler: the object which has the body to extract as json</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">protocol</span> <span class="o">+</span> \
+          <span class="n">request_handler</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Host&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">new_headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="s2">&quot;Mon, 26 Oct 2015 16:06:08 GMT&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Server&quot;</span><span class="p">:</span> <span class="s2">&quot;Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;X-Powered-By&quot;</span><span class="p">:</span> <span class="s2">&quot;PHP/5.6.14&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Set-Cookie&quot;</span><span class="p">:</span> <span class="s2">&quot;PHPSESSID=rjcc3p0uila4qcu9btvf75ihd5; expires=Tue, 27-Oct-2015 16:06:30 GMT; Max-Age=86400; path=/&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Cache-Control&quot;</span><span class="p">:</span> <span class="s2">&quot;no-cache&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Location&quot;</span><span class="p">:</span> <span class="n">url</span> <span class="o">+</span> <span class="s2">&quot;/register_app&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Access-Control-Allow-Origin&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;x-frame-options&quot;</span><span class="p">:</span> <span class="s2">&quot;DENY&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Strict-Transport-Security&quot;</span><span class="p">:</span> <span class="s2">&quot;max-age=86400&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">:</span> <span class="s2">&quot;timeout=5, max=100&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Connection&quot;</span><span class="p">:</span> <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Transfer-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;chunked&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;text/html; charset=UTF8&quot;</span><span class="p">}</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;!DOCTYPE html&gt;</span>
+<span class="s2">&lt;html&gt;</span>
+<span class="s2">    &lt;head&gt;</span>
+<span class="s2">        &lt;meta charset=&quot;UTF-8&quot; /&gt;</span>
+<span class="s2">        &lt;meta http-equiv=&quot;refresh&quot; content=&quot;1;url=&quot;&quot;&quot;</span> <span class="o">+</span> <span class="n">url</span> <span class="o">+</span> <span class="s2">&quot;&quot;&quot;/register_app&quot; /&gt;</span>
+
+<span class="s2">        &lt;title&gt;Redirecting to &quot;&quot;&quot;</span> <span class="o">+</span> <span class="n">url</span> <span class="o">+</span> <span class="s2">&quot;&quot;&quot;/register_app&lt;/title&gt;</span>
+<span class="s2">    &lt;/head&gt;</span>
+<span class="s2">    &lt;body&gt;</span>
+<span class="s2">        Redirecting to &lt;a href=</span><span class="se">\&quot;</span><span class="s2">&quot;&quot;&quot;</span> <span class="o">+</span> <span class="n">url</span> <span class="o">+</span> <span class="s2">&quot;&quot;&quot; /register_app&quot;&gt;http://192.168.178.25/localbox/web/app.php/register_app&lt;/a&gt;.</span>
+<span class="s2">    &lt;/body&gt;</span>
+<span class="s2">&lt;/html&gt;&quot;&quot;&quot;</span>
+    <span class="c1"># ready_cookie(request_handler)</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">302</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">html</span></div>
+
+
+<div class="viewcode-block" id="fake_register_app"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.fake_register_app">[docs]</a><span class="k">def</span> <span class="nf">fake_register_app</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    part of the fake login process, most definitely not part of the final</span>
+<span class="sd">    codebase</span>
+
+<span class="sd">    :param request_handler: the object which has the body to extract as json</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">configparser</span> <span class="o">=</span> <span class="n">ConfigSingleton</span><span class="p">()</span>
+    <span class="n">hostcrt</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;httpd&#39;</span><span class="p">,</span> <span class="s1">&#39;certfile&#39;</span><span class="p">)</span>
+
+    <span class="n">backurl</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;oauth&#39;</span><span class="p">,</span> <span class="s1">&#39;direct_back_url&#39;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;host.crt&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;baseurl&#39;</span><span class="p">:</span> <span class="n">backurl</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;schimmelpenning&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;logourl&#39;</span><span class="p">:</span> <span class="s1">&#39;http://8ch.net/static/logo_33.svg&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;BackColor&#39;</span><span class="p">:</span> <span class="s1">&#39;#00FF00&#39;</span><span class="p">,</span> <span class="s1">&#39;FontColor&#39;</span><span class="p">:</span> <span class="s1">&#39;#0000FF&#39;</span><span class="p">,</span> <span class="s1">&#39;APIKeys&#39;</span><span class="p">:</span>
+                  <span class="p">[{</span><span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="s1">&#39;LocalBox iOS&#39;</span><span class="p">,</span> <span class="s1">&#39;Key&#39;</span><span class="p">:</span> <span class="s1">&#39;keystring&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Secret&#39;</span><span class="p">:</span> <span class="s1">&#39;secretstring&#39;</span><span class="p">}],</span>
+              <span class="s1">&#39;pin_cert&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+              <span class="p">}</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fake_oauth"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.fake_oauth">[docs]</a><span class="k">def</span> <span class="nf">fake_oauth</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    part of the fake login process, not part of the final codebase</span>
+
+<span class="sd">    :param request_handler: the object which has the body to extract as json</span>
+
+<span class="sd">    NOTE: this was support for the localbox app and is now most likely depricated. Please remove as fast as possible</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;token&quot;</span> <span class="ow">in</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;============================================ FAKE OAUTH PART 3&quot;</span><span class="p">)</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="s2">&quot;2DHJlWJTui9d1pZnDDnkN6IV1p9Qq9&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;token_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Bearer&quot;</span><span class="p">,</span> <span class="s2">&quot;expires_in&quot;</span><span class="p">:</span> <span class="mi">600</span><span class="p">,</span>
+                  <span class="s2">&quot;refresh_token&quot;</span><span class="p">:</span> <span class="s2">&quot;tNXAVVo2QE7c5MKgFCB1mKuAPsu4xL&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;all&quot;</span><span class="p">}</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">result</span>
+    <span class="k">elif</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">command</span> <span class="o">!=</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;============================================ FAKE OAUTH PART 1&quot;</span><span class="p">)</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="s1">&#39;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&lt;form action=&quot;/oauth2/v2/auth&quot; &#39;</span> \
+               <span class="s1">&#39;method=&quot;POST&quot;&gt;&lt;input type=&quot;submit&quot; value=&quot;allow&quot;&gt;&lt;/form&gt;&#39;</span> \
+               <span class="s1">&#39;&lt;/body&gt;&lt;/html&gt;&#39;</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">new_headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">(</span><span class="s1">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s1">&#39;text/html&#39;</span><span class="p">,))</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">html</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;============================================ FAKE OAUTH PART 2&quot;</span><span class="p">)</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">302</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">new_headers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Location&#39;</span><span class="p">,</span>
+                                            <span class="s1">&#39;lbox://oauth-return?code=yay&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="exec_identities"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_identities">[docs]</a><span class="k">def</span> <span class="nf">exec_identities</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns a list of all (known) users</span>
+
+<span class="sd">    :param request_handler: object in which to return the userlist</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;select name, not ((public_key == &quot;&quot; or public_key is NULL) and (private_key == &quot;&quot; or private_key is NULL)) as haskey from users;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
+    <span class="n">outputlist</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">outputlist</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span>
+            <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;has_keys&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">])})</span>
+    <span class="k">if</span> <span class="n">outputlist</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">outputlist</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fake_set_cookies"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.fake_set_cookies">[docs]</a><span class="k">def</span> <span class="nf">fake_set_cookies</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    not part of final codebase</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span></div>
+
+
+<span class="c1"># list with regex: function pairs. The regex is to be matched with the url</span>
+<span class="c1"># requested. When the regex matches, the function is called with the</span>
+<span class="c1"># request_handler as argument.</span>
+<span class="n">ROUTING_LIST</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/files.*&quot;</span><span class="p">),</span> <span class="n">exec_files_path</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/invitations&quot;</span><span class="p">),</span> <span class="n">exec_invitations</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/invite/[0-9]+/accept&quot;</span><span class="p">),</span> <span class="n">exec_invite_accept</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/invite/[0-9]+/revoke&quot;</span><span class="p">),</span> <span class="n">exec_invite_reject</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/operations\/copy&quot;</span><span class="p">),</span> <span class="n">exec_operations_copy</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/operations\/move&quot;</span><span class="p">),</span> <span class="n">exec_operations_move</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/operations\/delete&quot;</span><span class="p">),</span> <span class="n">exec_operations_delete</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/operations\/create_folder&quot;</span><span class="p">),</span>
+     <span class="n">exec_operations_create_folder</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/share_create\/.*&quot;</span><span class="p">),</span> <span class="n">exec_create_share</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/.*\/edit&quot;</span><span class="p">),</span> <span class="n">exec_edit_shares</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/.*\/revoke&quot;</span><span class="p">),</span> <span class="n">exec_remove_shares</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/.*\/leave&quot;</span><span class="p">),</span> <span class="n">exec_leave_share</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/.*&quot;</span><span class="p">),</span> <span class="n">exec_shares</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/user\/.*&quot;</span><span class="p">),</span> <span class="n">exec_user_username</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/user&quot;</span><span class="p">),</span> <span class="n">exec_user</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/key\/.*&quot;</span><span class="p">),</span> <span class="n">exec_key</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/key_revoke\/.*&quot;</span><span class="p">),</span> <span class="n">exec_key_revoke</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/meta.*&quot;</span><span class="p">),</span> <span class="n">exec_meta</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/identities&quot;</span><span class="p">),</span> <span class="n">exec_identities</span><span class="p">),</span>
+
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;.*\/login&quot;</span><span class="p">),</span> <span class="n">fake_login</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/login_check&quot;</span><span class="p">),</span> <span class="n">fake_login_check</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/register_app&quot;</span><span class="p">),</span> <span class="n">fake_register_app</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/oauth.*&quot;</span><span class="p">),</span> <span class="n">fake_oauth</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/.*&quot;</span><span class="p">),</span> <span class="n">fake_set_cookies</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../localbox.html">localbox</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

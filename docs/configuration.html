@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Configuration &#8212; LocalBox 1.6.2b documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.6.2b',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="LocalBox 1.6.2b documentation" href="../index.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="includeme.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<p>Before running the server, two configuration files must be edit: <code class="docutils literal"><span class="pre">localbox.ini</span></code> and loauth.ini.</p>
+<div class="section" id="localbox-ini">
+<h2>localbox.ini<a class="headerlink" href="#localbox-ini" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="httpd">
+<h3>[httpd]<a class="headerlink" href="#httpd" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="port">
+<h4>port<a class="headerlink" href="#port" title="Permalink to this headline">¶</a></h4>
+<p>Port for running the service. Example: 5000</p>
+</div>
+</div>
+<div class="section" id="filesystem">
+<h3>[filesystem]<a class="headerlink" href="#filesystem" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="bindpoint">
+<h4>bindpoint<a class="headerlink" href="#bindpoint" title="Permalink to this headline">¶</a></h4>
+<p>Location for the files that the users are syncing. Example: /home/$USER/localbox-users</p>
+</div>
+</div>
+<div class="section" id="oauth">
+<h3>[oauth]<a class="headerlink" href="#oauth" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="verify-url">
+<h4>verify_url<a class="headerlink" href="#verify-url" title="Permalink to this headline">¶</a></h4>
+<p>When the user has an access token it is validated using this URL. Example: <a class="reference external" href="http://localhost:5000/verify">http://localhost:5000/verify</a></p>
+</div>
+<div class="section" id="redirect-url">
+<h4>redirect_url<a class="headerlink" href="#redirect-url" title="Permalink to this headline">¶</a></h4>
+<p>When the user is not authenticated he is redirected to this URL. Example: <a class="reference external" href="http://localhost:5000/loauth">http://localhost:5000/loauth</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="loauth-ini">
+<h2>loauth.ini<a class="headerlink" href="#loauth-ini" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>[httpd]<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id2">
+<h4>port<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>Port for running the service. Example: 5001</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Configuration</a><ul>
+<li><a class="reference internal" href="#localbox-ini">localbox.ini</a><ul>
+<li><a class="reference internal" href="#httpd">[httpd]</a><ul>
+<li><a class="reference internal" href="#port">port</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#filesystem">[filesystem]</a><ul>
+<li><a class="reference internal" href="#bindpoint">bindpoint</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#oauth">[oauth]</a><ul>
+<li><a class="reference internal" href="#verify-url">verify_url</a></li>
+<li><a class="reference internal" href="#redirect-url">redirect_url</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#loauth-ini">loauth.ini</a><ul>
+<li><a class="reference internal" href="#id1">[httpd]</a><ul>
+<li><a class="reference internal" href="#id2">port</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="includeme.html" title="previous chapter">&lt;no title&gt;</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/docs/configuration.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/docs/configuration.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,7 @@
+localbox
+========
+
+.. toctree::
+   :maxdepth: 4
+
+   localbox

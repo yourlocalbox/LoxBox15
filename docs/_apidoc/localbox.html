@@ -1,0 +1,1160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>localbox package &#8212; LocalBox 1.6.2b documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.6.2b',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="LocalBox 1.6.2b documentation" href="../../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="localbox-package">
+<h1>localbox package<a class="headerlink" href="#localbox-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-localbox.api">
+<span id="localbox-api-module"></span><h2>localbox.api module<a class="headerlink" href="#module-localbox.api" title="Permalink to this headline">¶</a></h2>
+<p>LocalBox API Implementation module. This module holds the implementation of the
+API call handlers as well as directly related support functions</p>
+<dl class="function">
+<dt id="localbox.api.exec_create_share">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_create_share</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_create_share"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_create_share" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a &#8216;share&#8217; within localbox. Comes down to creating a symlink next
+to a few database records to give the share an identifier.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object with the share filepath encoded in its path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_edit_shares">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_edit_shares</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_edit_shares"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_edit_shares" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edits the list of people who can access a certain share object. A list of
+json encoded identities is in the body to represent the new list of people
+with access to said share. Called via the routing list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which contains the share id in its path
+and list of users json-encoded in its body.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_files_path">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_files_path</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_files_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_files_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows for the up- and downloading of (encrypted) files to and from the
+localbox server. called from the routing list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which contains the files path in its path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_identities">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_identities</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_identities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_identities" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of all (known) users</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object in which to return the userlist</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_invitations">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_invitations</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_invitations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_invitations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all (pending) invitations for an user. Called via the
+routing list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object though which to return the values</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_invite_accept">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_invite_accept</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_invite_accept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_invite_accept" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accepts/reopens an invitation to filesharing. called from the routing list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object containing invite identifier in its path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_invite_reject">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_invite_reject</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_invite_reject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_invite_reject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rejects/cancels an invitation to filesharing. Called from the routing list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object with the invite identifier in its path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_key">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_key</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns rsa encrypted key and initialization vector for decoding the file
+in the specified path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object containing the file path encoded in its path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_key_revoke">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_key_revoke</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_key_revoke"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_key_revoke" title="Permalink to this definition">¶</a></dt>
+<dd><p>revoke/remove an encrypted key from the database so said user cannot access
+said key anymore.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object containing the path to the file in its path
+and json encoded name of the user whoes key to
+revoke</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_leave_share">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_leave_share</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_leave_share"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_leave_share" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle the leave_share call. Removes the share with the specified path for
+the current user. Returns 200 if succesful, 404 on failure. Called via the
+routing list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object holding the path of the share to leave</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_meta">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_meta</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns metadata for a given file/directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object with path encoded in its path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_operations_copy">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_operations_copy</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_operations_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_operations_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>copies a file within the localbox filesystem. Called from the routing list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object with to_path and from_path json-encoded in
+its body</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_operations_create_folder">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_operations_create_folder</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_operations_create_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_operations_create_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new folder in the localbox directory structure. Called from the
+routing list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which has the path url-encoded in its
+body</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_operations_delete">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_operations_delete</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_operations_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_operations_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a file or folder from the localbox directory structure. called from
+the routing list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which has the file path json-encoded in
+its body</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_operations_move">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_operations_move</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_operations_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_operations_move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves a file within the localbox directory structure. Called from the
+routing list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which has the to_path and from_path
+json-encoded in its body</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_remove_shares">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_remove_shares</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_remove_shares"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_remove_shares" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a share from being shared. Everyones access to this share, except
+for that of the owner, is irrevokably removed by this call. Called via the
+routing list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which contains the path to remove</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_shares">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_shares</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_shares"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_shares" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle share information for a path given in the request. Returns a list
+of shares containing the provided path. Called via the routing list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object with the path encoded in its path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_user">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_user</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns public- and private key information about the current user. Called
+from the routing list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object holding the user for which to return data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_user_username">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_user_username</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_user_username"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_user_username" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns information about a certain user as specified in the url. Also
+return private key data if this is that user making the request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; object containing the user for which to return data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.fake_login">
+<code class="descclassname">localbox.api.</code><code class="descname">fake_login</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#fake_login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.fake_login" title="Permalink to this definition">¶</a></dt>
+<dd><p>part of the fake login process, not part of the final codebase</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which has the body to extract as json</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.fake_login_check">
+<code class="descclassname">localbox.api.</code><code class="descname">fake_login_check</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#fake_login_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.fake_login_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>part of the fake login process, not part of the final codebase</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which has the body to extract as json</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.fake_oauth">
+<code class="descclassname">localbox.api.</code><code class="descname">fake_oauth</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#fake_oauth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.fake_oauth" title="Permalink to this definition">¶</a></dt>
+<dd><p>part of the fake login process, not part of the final codebase</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which has the body to extract as json</td>
+</tr>
+</tbody>
+</table>
+<p>NOTE: this was support for the localbox app and is now most likely depricated. Please remove as fast as possible</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.fake_register_app">
+<code class="descclassname">localbox.api.</code><code class="descname">fake_register_app</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#fake_register_app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.fake_register_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>part of the fake login process, most definitely not part of the final
+codebase</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which has the body to extract as json</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.fake_set_cookies">
+<code class="descclassname">localbox.api.</code><code class="descname">fake_set_cookies</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#fake_set_cookies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.fake_set_cookies" title="Permalink to this definition">¶</a></dt>
+<dd><p>not part of final codebase</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.get_body_json">
+<code class="descclassname">localbox.api.</code><code class="descname">get_body_json</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#get_body_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.get_body_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the request handlers bode and parses it as a JSON object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request_handler</strong> &#8211; the object which has the body to extract as json</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">json-parsed version of the requests&#8217; body.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.prepare_string">
+<code class="descclassname">localbox.api.</code><code class="descname">prepare_string</code><span class="sig-paren">(</span><em>string</em>, <em>encoding='UTF-8'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#prepare_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.prepare_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares a string to be sent over the wire. Python3 requires &#8216;string&#8217;s to
+be encoded as bytes accoding to an encoding (e.g. UTF8) before sending them
+through a socket. Within python2, &#8216;bytes&#8217; more or less are strings, and the
+bytes&#8217; constructor only accepts one argument. Hence, this function will
+return the right type of object for sending over the network.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>string</strong> &#8211; string to be encoded.</li>
+<li><strong>encoding</strong> &#8211; optional encoding in case it should not by UTF8 encoded.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the string as a socket write prepared bytes type.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.ready_cookie">
+<code class="descclassname">localbox.api.</code><code class="descname">ready_cookie</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#ready_cookie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.ready_cookie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Readies a PHP-like cookie - not to be part of the final codebase</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-localbox.cache">
+<span id="localbox-cache-module"></span><h2>localbox.cache module<a class="headerlink" href="#module-localbox.cache" title="Permalink to this headline">¶</a></h2>
+<p>Caching framework for authentication caching.</p>
+<dl class="class">
+<dt id="localbox.cache.TimedCache">
+<em class="property">class </em><code class="descclassname">localbox.cache.</code><code class="descname">TimedCache</code><span class="sig-paren">(</span><em>timeout=600</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/cache.html#TimedCache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.cache.TimedCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>TimedCache is a dictionary with a timeout. The class is initalised with a
+timeout, and data will be invalid after the timeout has expired. Invalid
+data will only be removed from the cache after it is referenced by get()
+or the clean() function is called.</p>
+<dl class="method">
+<dt id="localbox.cache.TimedCache.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>key</em>, <em>value</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/cache.html#TimedCache.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.cache.TimedCache.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an key and value pair to the cache.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> &#8211; key for the entry</li>
+<li><strong>value</strong> &#8211; value to return when key is requested</li>
+<li><strong>timeout</strong> &#8211; number of seconds this information is valid</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.cache.TimedCache.clean">
+<code class="descname">clean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/cache.html#TimedCache.clean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.cache.TimedCache.clean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check every key-value pair in the database and remove expired pairs.
+Removes stale entries in the cache</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.cache.TimedCache.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/cache.html#TimedCache.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.cache.TimedCache.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the value of a certain key in the cache. Returns None when key
+is not found or if the timeout has expired. Also cleans the entry in
+the latter case</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; the key to find the value for</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.cache.TimedCache.invalidate">
+<code class="descname">invalidate</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/cache.html#TimedCache.invalidate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.cache.TimedCache.invalidate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalidates an entry in the cache by removing it</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; entry to invalidate from the cache</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="localbox-config-module">
+<h2>localbox.config module<a class="headerlink" href="#localbox-config-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-localbox.database">
+<span id="localbox-database-module"></span><h2>localbox.database module<a class="headerlink" href="#module-localbox.database" title="Permalink to this headline">¶</a></h2>
+<p>Database implementation class</p>
+<dl class="function">
+<dt id="localbox.database.database_execute">
+<code class="descclassname">localbox.database.</code><code class="descname">database_execute</code><span class="sig-paren">(</span><em>command</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/database.html#database_execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.database.database_execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to execute a sql statement on the database. Executes the right
+backend and makes sure &#8216;?&#8217; is replaced for the local substitution variable
+if needed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>command</strong> &#8211; the sql command to execute</li>
+<li><strong>params</strong> &#8211; a list of tuple of values to substitute in command</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of dictionaries representing the sql result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.database.get_key_and_iv">
+<code class="descclassname">localbox.database.</code><code class="descname">get_key_and_iv</code><span class="sig-paren">(</span><em>localbox_path</em>, <em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/database.html#get_key_and_iv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.database.get_key_and_iv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches RSA encrypted key and IV from the database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>localbox_path</strong> &#8211; (localbox specific) path to the encrypted file</li>
+<li><strong>user</strong> &#8211; name of whoes key to fetch</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple containing the key and iv for a certain file.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.database.get_sql_log_dict">
+<code class="descclassname">localbox.database.</code><code class="descname">get_sql_log_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/database.html#get_sql_log_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.database.get_sql_log_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="localbox.database.mysql_execute">
+<code class="descclassname">localbox.database.</code><code class="descname">mysql_execute</code><span class="sig-paren">(</span><em>command</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/database.html#mysql_execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.database.mysql_execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to execute a sql statement on the mysql database. This function is
+called by the database_execute function when the mysql backend is set in
+the configuration file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>command</strong> &#8211; the sql command to execute</li>
+<li><strong>params</strong> &#8211; a list of tuple of values to substitute in command</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of dictionaries representing the sql result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.database.sqlite_execute">
+<code class="descclassname">localbox.database.</code><code class="descname">sqlite_execute</code><span class="sig-paren">(</span><em>command</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/database.html#sqlite_execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.database.sqlite_execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to execute a sql statement on the mysql database. This function is
+called by the database_execute function when the sqlite backend is set in
+the configuration file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>command</strong> &#8211; the sql command to execute</li>
+<li><strong>params</strong> &#8211; a list of tuple of values to substitute in command</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of dictionaries representing the sql result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-localbox.encoding">
+<span id="localbox-encoding-module"></span><h2>localbox.encoding module<a class="headerlink" href="#module-localbox.encoding" title="Permalink to this headline">¶</a></h2>
+<p>Encoding functions specific to localbox</p>
+<dl class="class">
+<dt id="localbox.encoding.LocalBoxJSONEncoder">
+<em class="property">class </em><code class="descclassname">localbox.encoding.</code><code class="descname">LocalBoxJSONEncoder</code><span class="sig-paren">(</span><em>skipkeys=False</em>, <em>ensure_ascii=True</em>, <em>check_circular=True</em>, <em>allow_nan=True</em>, <em>sort_keys=False</em>, <em>indent=None</em>, <em>separators=None</em>, <em>encoding='utf-8'</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/encoding.html#LocalBoxJSONEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.encoding.LocalBoxJSONEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">json.encoder.JSONEncoder</span></code></p>
+<p>JSONEncoder for localbox classes. Used to JSON encode localbox classes.</p>
+<dl class="method">
+<dt id="localbox.encoding.LocalBoxJSONEncoder.default">
+<code class="descname">default</code><span class="sig-paren">(</span><em>o</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/encoding.html#LocalBoxJSONEncoder.default"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.encoding.LocalBoxJSONEncoder.default" title="Permalink to this definition">¶</a></dt>
+<dd><p>The way objects are usually encoded into JSON.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>o</strong> &#8211; the object to encode into json</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the json equivalent of &#8216;o&#8217;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.encoding.localbox_path_decoder">
+<code class="descclassname">localbox.encoding.</code><code class="descname">localbox_path_decoder</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/encoding.html#localbox_path_decoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.encoding.localbox_path_decoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>A &#8216;localbox_path&#8217; is a unix filepath with the urlencoded components.
+This function takes a localbox path and turns it into a (relative) real
+path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; a &#8216;localbox_path&#8217; of which to urldecode the components</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the localbox path without urlencoded components</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-localbox.files">
+<span id="localbox-files-module"></span><h2>localbox.files module<a class="headerlink" href="#module-localbox.files" title="Permalink to this headline">¶</a></h2>
+<p>Encoding functions specific to localbox</p>
+<dl class="class">
+<dt id="localbox.files.SymlinkCache">
+<em class="property">class </em><code class="descclassname">localbox.files.</code><code class="descname">SymlinkCache</code><span class="sig-paren">(</span><em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#SymlinkCache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.SymlinkCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Singleton keeping track of all symlinks (shares)</p>
+<dl class="method">
+<dt id="localbox.files.SymlinkCache.build_cache">
+<code class="descname">build_cache</code><span class="sig-paren">(</span><em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#SymlinkCache.build_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.SymlinkCache.build_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build the reverse symlink cache by walking through the filesystem and
+finding all symlinks and put them into a cache dictionary for reference
+later.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.files.SymlinkCache.exists">
+<code class="descname">exists</code><span class="sig-paren">(</span><em>absolute_file_name</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#SymlinkCache.exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.SymlinkCache.exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether absolute_file_name is in the cache, and thus a
+destination of a symlink and thus a &#8216;share&#8217; folder</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>absolute_file_name</strong> &#8211; name of the file to check in the cache</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.files.SymlinkCache.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#SymlinkCache.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.SymlinkCache.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of sources of a symlink destination from the cache</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; a file which is symlinked to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of symlinks to that file</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.files.SymlinkCache.remove">
+<code class="descname">remove</code><span class="sig-paren">(</span><em>absolute_filename</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#SymlinkCache.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.SymlinkCache.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>removes links to and from filename (from the cache)
+:param absolute_filename: the file to remove from the cache</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.files.get_bindpoint_user">
+<code class="descclassname">localbox.files.</code><code class="descname">get_bindpoint_user</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#get_bindpoint_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.get_bindpoint_user" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="localbox.files.get_filesystem_path">
+<code class="descclassname">localbox.files.</code><code class="descname">get_filesystem_path</code><span class="sig-paren">(</span><em>localbox_path</em>, <em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#get_filesystem_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.get_filesystem_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a LocalBox path (e.g. &#8216;/file_name&#8217;), return the corresponding
+filesystem path (e.g. &#8216;/var/localbox/data/user/file_name&#8217;)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>localbox_path</strong> &#8211; the path relative to localbox&#8217; view</li>
+<li><strong>user</strong> &#8211; the user for which to translate the path (the username is part
+of the path and hence cannot be ommitted.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a filesystem path to the resource pointed to by the localbox path</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.files.get_key_path">
+<code class="descclassname">localbox.files.</code><code class="descname">get_key_path</code><span class="sig-paren">(</span><em>user</em>, <em>localbox_path=None</em>, <em>filesystem_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#get_key_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.get_key_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="localbox.files.get_localbox_path">
+<code class="descclassname">localbox.files.</code><code class="descname">get_localbox_path</code><span class="sig-paren">(</span><em>filesystem_path</em>, <em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#get_localbox_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.get_localbox_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="localbox.files.stat_reader">
+<code class="descclassname">localbox.files.</code><code class="descname">stat_reader</code><span class="sig-paren">(</span><em>filesystem_path</em>, <em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#stat_reader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.stat_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return metadata for the given (filesystem) path based on information
+provided by the stat system call.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filesystem_path</strong> &#8211; a path referring to the file to stat</li>
+<li><strong>user</strong> &#8211; the user for which to reutrn the info</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a dictionary of metadata for the filesystem path given</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="localbox-logging-utils-module">
+<h2>localbox.logging_utils module<a class="headerlink" href="#localbox-logging-utils-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-localbox.shares">
+<span id="localbox-shares-module"></span><h2>localbox.shares module<a class="headerlink" href="#module-localbox.shares" title="Permalink to this headline">¶</a></h2>
+<p>LocalBox shares module.</p>
+<dl class="class">
+<dt id="localbox.shares.Group">
+<em class="property">class </em><code class="descclassname">localbox.shares.</code><code class="descname">Group</code><span class="sig-paren">(</span><em>name=None</em>, <em>users=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Underdefined group object which due to lack of user administration will
+probably be removed at a later stage.</p>
+<dl class="method">
+<dt id="localbox.shares.Group.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Group.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Group.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to turn this object into JSON.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">JSON representation of this Group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="localbox.shares.Invitation">
+<em class="property">class </em><code class="descclassname">localbox.shares.</code><code class="descname">Invitation</code><span class="sig-paren">(</span><em>identifier=None</em>, <em>state=None</em>, <em>share=None</em>, <em>sender=None</em>, <em>receiver=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Invitation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Invitation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The state of being asked to join in sharing a file.</p>
+<dl class="method">
+<dt id="localbox.shares.Invitation.save_to_database">
+<code class="descname">save_to_database</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Invitation.save_to_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Invitation.save_to_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the Invitation to the database</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.shares.Invitation.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Invitation.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Invitation.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>This creates a JSON serialisation of the Invitation. This serialisation
+is primarily for returning values and not a complete serialisation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">json representing this Invitation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="localbox.shares.Share">
+<em class="property">class </em><code class="descclassname">localbox.shares.</code><code class="descname">Share</code><span class="sig-paren">(</span><em>users=None</em>, <em>identifier=None</em>, <em>item=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Share"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Share" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>THe state of sharing a folder.</p>
+<dl class="method">
+<dt id="localbox.shares.Share.add_user">
+<code class="descname">add_user</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Share.add_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Share.add_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a user to the Share object
+:param user: the user to add</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.shares.Share.get_identities_json">
+<code class="descname">get_identities_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Share.get_identities_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Share.get_identities_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="localbox.shares.Share.save_to_database">
+<code class="descname">save_to_database</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Share.save_to_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Share.save_to_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>saves the current share to the database, either updating record &#8216;id&#8217;,
+or creating a new one if this Share has no ID yet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.shares.Share.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#Share.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.Share.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a json representation of this Share
+:returns: a json representation of this Share</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="localbox.shares.ShareItem">
+<em class="property">class </em><code class="descclassname">localbox.shares.</code><code class="descname">ShareItem</code><span class="sig-paren">(</span><em>icon=None</em>, <em>path=None</em>, <em>has_keys=False</em>, <em>is_share=False</em>, <em>is_shared=False</em>, <em>modified_at=None</em>, <em>title=None</em>, <em>is_dir=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#ShareItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.ShareItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Item that signifies a &#8216;share&#8217;. Sharing a folder allows a different user to
+access yor file/folder. A ShareItem is the representation of that folder</p>
+<dl class="method">
+<dt id="localbox.shares.ShareItem.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#ShareItem.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.ShareItem.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a JSON encoded string out of this ShareItem. This is used by the
+LocalBoxJSONEncoder to create JSON responses.
+:returns: JSON representation of the ShareItem</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="localbox.shares.User">
+<em class="property">class </em><code class="descclassname">localbox.shares.</code><code class="descname">User</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#User"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.User" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>User object, limited to more or less the &#8216;name&#8217; only, given how the actual
+user administration is done by the authentication mechanism.</p>
+<dl class="method">
+<dt id="localbox.shares.User.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#User.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.User.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to turn this object into JSON.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">JSON representation of this User</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.shares.get_database_invitations">
+<code class="descclassname">localbox.shares.</code><code class="descname">get_database_invitations</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#get_database_invitations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.get_database_invitations" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all (relevant) invitations from the database for a specific user</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user</strong> &#8211; the user for who to return invitations</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the invitations for this user</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.shares.get_share_by_id">
+<code class="descclassname">localbox.shares.</code><code class="descname">get_share_by_id</code><span class="sig-paren">(</span><em>identifier</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#get_share_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.get_share_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the share with the supplied identifier</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>identifier</strong> &#8211; the number identifying the share in question</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the Share identified by the identifier</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.shares.get_shareitem_by_path">
+<code class="descclassname">localbox.shares.</code><code class="descname">get_shareitem_by_path</code><span class="sig-paren">(</span><em>localbox_path</em>, <em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#get_shareitem_by_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.get_shareitem_by_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a ShareItem as defined by the given path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>localbox_path</strong> &#8211; localbox specific filepath</li>
+<li><strong>user</strong> &#8211; name of the user for who to do this</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the metadata for the share on the supplied path</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.shares.list_share_items">
+<code class="descclassname">localbox.shares.</code><code class="descname">list_share_items</code><span class="sig-paren">(</span><em>path=None</em>, <em>user=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#list_share_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.list_share_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of ShareItems. If &#8216;path&#8217; is given, only ShareItems for said
+path are returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; a path for which to return the ShareItems</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of shareitems</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.shares.toggle_invite_state">
+<code class="descclassname">localbox.shares.</code><code class="descname">toggle_invite_state</code><span class="sig-paren">(</span><em>request_handler</em>, <em>newstate</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#toggle_invite_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.toggle_invite_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>sets the state of an invite to newstate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>request_handler</strong> &#8211; the request_handler with all required information to
+extract the invite from.</li>
+<li><strong>newstate</strong> &#8211; the new state for the invite</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-localbox.utils">
+<span id="localbox-utils-module"></span><h2>localbox.utils module<a class="headerlink" href="#module-localbox.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="localbox.utils.get_bindpoint">
+<code class="descclassname">localbox.utils.</code><code class="descname">get_bindpoint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/utils.html#get_bindpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.utils.get_bindpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="localbox.utils.get_logging_empty_extra">
+<code class="descclassname">localbox.utils.</code><code class="descname">get_logging_empty_extra</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/utils.html#get_logging_empty_extra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.utils.get_logging_empty_extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="localbox.utils.get_logging_extra">
+<code class="descclassname">localbox.utils.</code><code class="descname">get_logging_extra</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/utils.html#get_logging_extra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.utils.get_logging_extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-localbox">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-localbox" title="Permalink to this headline">¶</a></h2>
+<p>LocalBox main initialization class.</p>
+<dl class="class">
+<dt id="localbox.LocalBoxHTTPRequestHandler">
+<em class="property">class </em><code class="descclassname">localbox.</code><code class="descname">LocalBoxHTTPRequestHandler</code><span class="sig-paren">(</span><em>request</em>, <em>client_address</em>, <em>server</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">BaseHTTPServer.BaseHTTPRequestHandler</span></code></p>
+<p>class extending the BaseHTTPRequestHandler and handling the HTTP requests
+in do_POST and do_GET (which in their turn forward said requests to
+do_request)</p>
+<dl class="method">
+<dt id="localbox.LocalBoxHTTPRequestHandler.check_authorization">
+<code class="descname">check_authorization</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.check_authorization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.check_authorization" title="Permalink to this definition">¶</a></dt>
+<dd><p>assert whether the authorization header is valid by checking it against
+the cache first and if unsuccessful, the oauth server. Sets the &#8216;user&#8217;
+field when successful and returns said name. returns None on failure</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.LocalBoxHTTPRequestHandler.do_GET">
+<code class="descname">do_GET</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.do_GET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.do_GET" title="Permalink to this definition">¶</a></dt>
+<dd><p>handle a POST request (by forwarding it to do_request)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.LocalBoxHTTPRequestHandler.do_POST">
+<code class="descname">do_POST</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.do_POST"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.do_POST" title="Permalink to this definition">¶</a></dt>
+<dd><p>handle a POST request (by forwarding it to do_request)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.LocalBoxHTTPRequestHandler.do_request">
+<code class="descname">do_request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.do_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.do_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle a request (do_POST and do_GET both forward to this function).
+Handling of a requests is done in three phases. First, the
+authorization is checked. When this is in order, the ROUTING_LIST is
+consulted to find the function to do the actual work. After this
+function has executed, the request is responded tousing send_request.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.LocalBoxHTTPRequestHandler.get_log_dict">
+<code class="descname">get_log_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.get_log_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.get_log_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a dictionary of <a href="#id1"><span class="problematic" id="id2">`</span></a>extra&#8217; information from the request for the
+logger. Extra information consists of &#8216;user&#8217;, &#8216;ip&#8217; and &#8216;path&#8217;, or None
+where this information does not make sense.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.LocalBoxHTTPRequestHandler.send_request">
+<code class="descname">send_request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.send_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.send_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an answer to an HTTPRequest in the proper order of status,
+new_headers, body. Other functions can set these values and this
+function will send it over the line properly.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.main">
+<code class="descclassname">localbox.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>run the actual LocalBox Server. Initialises the symlink cache, starts a
+HTTPServer and serves requests forever, unless &#8216;&#8211;test-single-call&#8217; has
+been specified as command line argument</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">localbox package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-localbox.api">localbox.api module</a></li>
+<li><a class="reference internal" href="#module-localbox.cache">localbox.cache module</a></li>
+<li><a class="reference internal" href="#localbox-config-module">localbox.config module</a></li>
+<li><a class="reference internal" href="#module-localbox.database">localbox.database module</a></li>
+<li><a class="reference internal" href="#module-localbox.encoding">localbox.encoding module</a></li>
+<li><a class="reference internal" href="#module-localbox.files">localbox.files module</a></li>
+<li><a class="reference internal" href="#localbox-logging-utils-module">localbox.logging_utils module</a></li>
+<li><a class="reference internal" href="#module-localbox.shares">localbox.shares module</a></li>
+<li><a class="reference internal" href="#module-localbox.utils">localbox.utils module</a></li>
+<li><a class="reference internal" href="#module-localbox">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/_apidoc/localbox.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/docs/_apidoc/localbox.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

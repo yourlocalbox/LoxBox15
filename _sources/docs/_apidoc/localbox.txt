@@ -1,0 +1,86 @@
+localbox package
+================
+
+Submodules
+----------
+
+localbox.api module
+-------------------
+
+.. automodule:: localbox.api
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.cache module
+---------------------
+
+.. automodule:: localbox.cache
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.config module
+----------------------
+
+.. automodule:: localbox.config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.database module
+------------------------
+
+.. automodule:: localbox.database
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.encoding module
+------------------------
+
+.. automodule:: localbox.encoding
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.files module
+---------------------
+
+.. automodule:: localbox.files
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.logging_utils module
+-----------------------------
+
+.. automodule:: localbox.logging_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.shares module
+----------------------
+
+.. automodule:: localbox.shares
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.utils module
+---------------------
+
+.. automodule:: localbox.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: localbox
+    :members:
+    :undoc-members:
+    :show-inheritance:
