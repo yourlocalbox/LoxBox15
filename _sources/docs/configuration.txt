@@ -23,6 +23,20 @@ bindpoint
 +++++++++
 Location for the files that the users are syncing. Example: /home/$USER/localbox-users
 
+[logging]
+---------
+
+console
++++++++
+Example: True
+
+logfile
++++++++
+Example: ./localbox-log-file.log
+
+format
+++++++
+Example: %(asctime)s %(module)10s %(lineno)4s IP:%(ip)20s User:%(user)10s %(levelname)8s %(message)s
 
 [oauth]
 -------

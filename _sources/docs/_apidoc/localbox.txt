@@ -20,14 +20,6 @@ localbox.cache module
     :undoc-members:
     :show-inheritance:
 
-localbox.config module
-----------------------
-
-.. automodule:: localbox.config
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 localbox.database module
 ------------------------
 
@@ -48,14 +40,6 @@ localbox.files module
 ---------------------
 
 .. automodule:: localbox.files
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-localbox.logging_utils module
------------------------------
-
-.. automodule:: localbox.logging_utils
     :members:
     :undoc-members:
     :show-inheritance:
