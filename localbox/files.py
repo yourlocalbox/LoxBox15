@@ -1,23 +1,22 @@
 """
 Encoding functions specific to localbox
 """
-from datetime import datetime
-from os.path import join
-from os.path import split
-from os.path import abspath
-from os.path import relpath
-from os.path import isdir
-from os.path import islink
 from logging import getLogger
-from sys import exit as sysexit
 from os import chdir
 from os import getcwd
 from os import stat
 from os import walk
+from os.path import abspath
+from os.path import isdir
+from os.path import islink
+from os.path import join
+from os.path import relpath
+from os.path import split
+from sys import exit as sysexit
 
+import localbox.utils
 from localbox.database import database_execute
 from localbox.utils import get_bindpoint
-import localbox.logging_utils as logging_utils
 
 try:
     from os import readlink
@@ -26,17 +25,16 @@ except ImportError:
         raise NotImplementedError(var)
 from os import sep
 
-from .config import ConfigSingleton
-
 
 def get_filesystem_path(localbox_path, user):
     """
     Given a LocalBox path (e.g. '/file_name'), return the corresponding
     filesystem path (e.g. '/var/localbox/data/user/file_name')
-    @param localbox_path the path relative to localbox' view
-    @param user the user for which to translate the path (the username is part
+
+    :param localbox_path: the path relative to localbox' view
+    :param user: the user for which to translate the path (the username is part
            of the path and hence cannot be ommitted.
-    @return a filesystem path to the resource pointed to by the localbox path
+    :returns: a filesystem path to the resource pointed to by the localbox path
     """
     while localbox_path.startswith('/'):
         localbox_path = localbox_path[1:]
@@ -44,7 +42,7 @@ def get_filesystem_path(localbox_path, user):
         raise ValueError("No relative paths allowed in localbox")
     bindpoint = get_bindpoint()
     filepath = join(bindpoint, user, localbox_path)
-    getLogger(__name__).debug('filesystem path: %s' % filepath, extra=logging_utils.get_logging_empty_extra())
+    getLogger(__name__).debug('filesystem path: %s' % filepath, extra=localbox.utils.get_logging_empty_extra())
     return filepath
 
 
@@ -72,11 +70,13 @@ def stat_reader(filesystem_path, user):
     """
     Return metadata for the given (filesystem) path based on information
     provided by the stat system call.
-    @param filesystem_path a path referring to the file to stat
-    @param user the user for which to reutrn the info
-    @return a dictionary of metadata for the filesystem path given
+
+    :param filesystem_path: a path referring to the file to stat
+    :param user: the user for which to reutrn the info
+    :returns: a dictionary of metadata for the filesystem path given
     """
-    getLogger(__name__).debug('read stats for file: %s' % filesystem_path, extra=logging_utils.get_logging_empty_extra())
+    getLogger(__name__).debug('read stats for file: %s' % filesystem_path,
+                              extra=localbox.utils.get_logging_empty_extra())
     bindpath_user = get_bindpoint_user(user)
     if bindpath_user == abspath(filesystem_path):
         title = 'Home'
@@ -128,7 +128,7 @@ class SymlinkCache(object):
     def remove(self, absolute_filename):
         """
         removes links to and from filename (from the cache)
-        @param absolute_filename the file to remove from the cache
+        :param absolute_filename: the file to remove from the cache
         """
         if absolute_filename in self.cache.keys():
             self.cache.pop(absolute_filename)
@@ -141,15 +141,17 @@ class SymlinkCache(object):
         """
         Check whether absolute_file_name is in the cache, and thus a
         destination of a symlink and thus a 'share' folder
-        @param absolute_file_name name of the file to check in the cache
+
+        :param absolute_file_name: name of the file to check in the cache
         """
         return absolute_file_name in self.cache
 
     def get(self, path):
         """
         Returns a list of sources of a symlink destination from the cache
-        @param path a file which is symlinked to
-        @return a list of symlinks to that file
+
+        :param path: a file which is symlinked to
+        :returns: a list of symlinks to that file
         """
         return self.cache[path]
 

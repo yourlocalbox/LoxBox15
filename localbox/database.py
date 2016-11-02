@@ -3,6 +3,7 @@ Database implementation class
 """
 from logging import getLogger
 from os.path import exists
+
 try:
     from ConfigParser import NoSectionError
 except ImportError:
@@ -16,17 +17,15 @@ except ImportError:
 
 from sqlite3 import connect as sqlite_connect
 
-
-from .config import ConfigSingleton
+from localbox import config
 
 
 def get_sql_log_dict():
-    parser = ConfigSingleton()
-    dbtype = parser.get('database', 'type')
+    dbtype = config.get('database', 'type')
     if dbtype == 'sqlite':
-        ip = parser.get('database', 'filename')
+        ip = config.get('database', 'filename')
     else:
-        ip = parser.get('database', 'hostname')
+        ip = config.get('database', 'hostname')
     return {'ip': ip, 'user': '', 'path': 'database/'}
 
 
@@ -35,14 +34,14 @@ def database_execute(command, params=None):
     Function to execute a sql statement on the database. Executes the right
     backend and makes sure '?' is replaced for the local substitution variable
     if needed.
-    @param command the sql command to execute
-    @param params a list of tuple of values to substitute in command
-    @returns a list of dictionaries representing the sql result
+
+    :param command: the sql command to execute
+    :param params: a list of tuple of values to substitute in command
+    :returns: a list of dictionaries representing the sql result
     """
     getLogger("database").debug("database_execute(" + command + ", " +
-                               str(params) + ")", extra=get_sql_log_dict())
-    parser = ConfigSingleton()
-    dbtype = parser.get('database', 'type')
+                                str(params) + ")", extra=get_sql_log_dict())
+    dbtype = config.get('database', 'type')
 
     if dbtype == "mysql":
         if mysql_execute is None:
@@ -62,14 +61,14 @@ def sqlite_execute(command, params=None):
     Function to execute a sql statement on the mysql database. This function is
     called by the database_execute function when the sqlite backend is set in
     the configuration file
-    @param command the sql command to execute
-    @param params a list of tuple of values to substitute in command
-    @returns a list of dictionaries representing the sql result
+
+    :param command: the sql command to execute
+    :param params: a list of tuple of values to substitute in command
+    :returns: a list of dictionaries representing the sql result
     """
     # NOTE mostly copypasta'd from mysql_execute, may be a better way
     try:
-        parser = ConfigSingleton()
-        filename = parser.get('database', 'filename')
+        filename = config.get('database', 'filename')
         init_db = not exists(filename)
         connection = sqlite_connect(filename)
         cursor = connection.cursor()
@@ -102,19 +101,19 @@ def mysql_execute(command, params=None):
     Function to execute a sql statement on the mysql database. This function is
     called by the database_execute function when the mysql backend is set in
     the configuration file.
-    @param command the sql command to execute
-    @param params a list of tuple of values to substitute in command
-    @returns a list of dictionaries representing the sql result
+
+    :param command: the sql command to execute
+    :param params: a list of tuple of values to substitute in command
+    :returns: a list of dictionaries representing the sql result
     """
     getLogger("database").debug("mysql_execute(" + command + ", " + str(params)
                                 + ")", extra=get_sql_log_dict())
-    parser = ConfigSingleton()
     try:
-        host = parser.get('database', 'hostname')
-        user = parser.get('database', 'username')
-        pawd = parser.get('database', 'password')
-        dbse = parser.get('database', 'database')
-        port = parser.getint('database', 'port')
+        host = config.get('database', 'hostname')
+        user = config.get('database', 'username')
+        pawd = config.get('database', 'password')
+        dbse = config.get('database', 'database')
+        port = config.getint('database', 'port')
         connection = mysql_connect(host=host, port=port, user=user,
                                    passwd=pawd, db=dbse)
         cursor = connection.cursor()
@@ -135,9 +134,10 @@ def mysql_execute(command, params=None):
 def get_key_and_iv(localbox_path, user):
     """
     Fetches RSA encrypted key and IV from the database
-    @param localbox_path (localbox specific) path to the encrypted file
-    @param user name of whoes key to fetch
-    @return a tuple containing the key and iv for a certain file.
+
+    :param localbox_path: (localbox specific) path to the encrypted file
+    :param user: name of whoes key to fetch
+    :returns: a tuple containing the key and iv for a certain file.
     """
     sql = "select key, iv from keys where path = ? and user = ?"
     try:

@@ -18,8 +18,9 @@ class LocalBoxJSONEncoder(JSONEncoder):
     def default(self, o):  # pylint: disable=E0202
         """
         The way objects are usually encoded into JSON.
-        @param o the object to encode into json
-        @return the json equivalent of 'o'
+
+        :param o: the object to encode into json
+        :returns: the json equivalent of 'o'
         """
         if hasattr(o, 'to_json'):
             return o.to_json()
@@ -30,9 +31,10 @@ def localbox_path_decoder(path):
     """
     A 'localbox_path' is a unix filepath with the urlencoded components.
     This function takes a localbox path and turns it into a (relative) real
-    path 000000000000000
-    @param path a 'localbox_path' of which to urldecode the components
-    @return the localbox path without urlencoded components
+    path
+
+    :param path: a 'localbox_path' of which to urldecode the components
+    :returns: the localbox path without urlencoded components
     """
     realpath = []
     components = path.split('/')

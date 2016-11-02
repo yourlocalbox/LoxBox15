@@ -3,3 +3,5 @@ database.sqlite3
 *.log*
 .idea
 *.bak
+docs/_*
+logs/

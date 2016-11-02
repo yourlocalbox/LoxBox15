@@ -5,6 +5,7 @@ from logging import getLogger
 from signal import SIGINT, signal
 from sys import exit as sysexit
 
+import localbox.utils
 from loxcommon.log import prepare_logging
 from .__init__ import main
 from loxcommon.config import ConfigSingleton
@@ -37,9 +38,9 @@ if __name__ == '__main__':
     configparser = ConfigSingleton('localbox', defaults={'console': False})
     prepare_logging(configparser)
 
-    import loxcommon, logging, logging_utils
+    import loxcommon, logging
 
     loxcommon.log.loggers[loxcommon.os_utils.__name__] = logging.LoggerAdapter(
         logging.getLogger(loxcommon.os_utils.__name__),
-        logging_utils.get_logging_empty_extra())
+        localbox.utils.get_logging_empty_extra())
     run()

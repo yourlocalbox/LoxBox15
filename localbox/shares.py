@@ -1,18 +1,16 @@
 """
 LocalBox shares module.
 """
-from os.path import join
 from json import dumps
-from localbox.utils import get_bindpoint
 from logging import getLogger
+from os.path import join
 
 from localbox import get_bindpoint
-from .files import SymlinkCache
 from .database import database_execute
 from .encoding import LocalBoxJSONEncoder
-from .files import stat_reader
+from .files import SymlinkCache
 from .files import get_filesystem_path
-from .config import ConfigSingleton
+from .files import stat_reader
 
 
 class User(object):
@@ -28,7 +26,8 @@ class User(object):
     def to_json(self):
         """
         Method to turn this object into JSON.
-        @return JSON representation of this User
+
+        :returns: JSON representation of this User
         """
         return {'id': self.name, 'title': self.name, 'type': 'user'}
 
@@ -47,7 +46,8 @@ class Group(object):
     def to_json(self):
         """
         Method to turn this object into JSON.
-        @return JSON representation of this Group
+
+        :returns: JSON representation of this Group
         """
         return {'id': self.name, 'title': self.name, 'type': 'group'}
 
@@ -70,7 +70,8 @@ class Invitation(object):
         """
         This creates a JSON serialisation of the Invitation. This serialisation
         is primarily for returning values and not a complete serialisation.
-        @return json representing this Invitation
+
+        :returns: json representing this Invitation
         """
         # TODO: Add dates in database
         return {'id': self.identifier, 'share': self.share,
@@ -101,8 +102,9 @@ class Invitation(object):
 def get_database_invitations(user):
     """
     returns all (relevant) invitations from the database for a specific user
-    @param user the user for who to return invitations
-    @return the invitations for this user
+
+    :param user: the user for who to return invitations
+    :returns: the invitations for this user
     """
     sql = "select id, sender, receiver, share_id, state from invitations " \
           "where receiver = ? and state != 'accepted'"
@@ -137,7 +139,7 @@ class ShareItem(object):
         """
         Create a JSON encoded string out of this ShareItem. This is used by the
         LocalBoxJSONEncoder to create JSON responses.
-        @return JSON representation of the ShareItem
+        :returns: JSON representation of the ShareItem
         """
         return {'icon': self.icon, 'path': self.path,
                 'has_keys': self.has_keys,
@@ -149,9 +151,10 @@ class ShareItem(object):
 def get_shareitem_by_path(localbox_path, user):
     """
     returns a ShareItem as defined by the given path.
-    @param localbox_path localbox specific filepath
-    @param user name of the user for who to do this
-    @return the metadata for the share on the supplied path
+
+    :param localbox_path: localbox specific filepath
+    :param user: name of the user for who to do this
+    :returns: the metadata for the share on the supplied path
     """
     return stat_reader(get_filesystem_path(localbox_path, user), user)
 
@@ -170,7 +173,7 @@ class Share(object):
     def add_user(self, user):
         """
         Adds a user to the Share object
-        @param user the user to add
+        :param user: the user to add
         """
         if self.users is not None:
             self.users.append(user)
@@ -187,7 +190,7 @@ class Share(object):
     def to_json(self):
         """
         returns a json representation of this Share
-        @return a json representation of this Share
+        :returns: a json representation of this Share
         """
         return {'identities': self.get_identities_json(), 'id': self.identifier,
                 'item': self.item}
@@ -213,8 +216,9 @@ class Share(object):
 def get_share_by_id(identifier):
     """
     returns the share with the supplied identifier
-    @param identifier the number identifying the share in question
-    @return the Share identified by the identifier
+
+    :param identifier: the number identifying the share in question
+    :returns: the Share identified by the identifier
     """
     sharesql = 'select user, path from shares where id = ?'
     packedsharedata = database_execute(sharesql, (identifier,))
@@ -238,8 +242,9 @@ def list_share_items(path=None, user=None):
     """
     returns a list of ShareItems. If 'path' is given, only ShareItems for said
     path are returned.
-    @param path a path for which to return the ShareItems
-    @return list of shareitems
+
+    :param path: a path for which to return the ShareItems
+    :returns: list of shareitems
     """
     results = []
     symlinks = SymlinkCache()
@@ -269,9 +274,10 @@ def list_share_items(path=None, user=None):
 def toggle_invite_state(request_handler, newstate):
     """
     sets the state of an invite to newstate.
-    @param request_handler the request_handler with all required information to
+
+    :param request_handler: the request_handler with all required information to
                            extract the invite from.
-    @param newstate the new state for the invite
+    :param newstate: the new state for the invite
     """
     invite_identifier = int(request_handler.path.split('/')[3])
     user = request_handler.user

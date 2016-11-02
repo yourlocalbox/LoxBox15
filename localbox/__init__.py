@@ -2,18 +2,21 @@
 LocalBox main initialization class.
 """
 import ssl
-from ssl import wrap_socket
 from logging import getLogger
-from sys import argv
-from os import mkdir
 from os import remove
-from os.path import join
 from os.path import exists
+from os.path import join
 from shutil import rmtree
+from ssl import wrap_socket
+from sys import argv
 
+from loxcommon.config import ConfigSingleton
+
+config = ConfigSingleton('localbox')
+
+import localbox.utils as lb_utils
 import loxcommon.os_utils
 from localbox.utils import get_bindpoint
-import localbox.utils as lb_utils
 
 try:
     from cStringIO import StringIO
@@ -42,9 +45,8 @@ except ImportError:
     from http.server import BaseHTTPRequestHandler  # pylint: disable=F0401
     from http.server import HTTPServer  # pylint: disable=F0401
 
-from .api import ROUTING_LIST
+from localbox.api import ROUTING_LIST
 from .cache import TimedCache
-from .config import ConfigSingleton
 from .files import SymlinkCache
 from .database import database_execute
 
@@ -77,7 +79,6 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
             getLogger('auth').debug("authentication failed: no Authorization header available",
                                     extra=self.get_log_dict())
             return None
-        config = ConfigSingleton()
         auth_url = config.get('oauth', 'verify_url')
         getLogger('auth').debug("verify_url: %s" % auth_url, extra=self.get_log_dict())
         cache = TimedCache(timeout=0)  # Cache is broken
@@ -162,8 +163,6 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         self.old_body = file_str.getvalue()
         if self.body is None:
             self.body = ""
-        # log.debug(self.command + " " + self.path + "\n" + str(self.headers) + "\n\n" + self.old_body, extra=self.get_log_dict())
-        config = ConfigSingleton()
         self.protocol = "https://"
         if config.getboolean('http', 'insecure-http', True):
             self.protocol = "http://"
@@ -237,13 +236,12 @@ def main():
     HTTPServer and serves requests forever, unless '--test-single-call' has
     been specified as command line argument
     """
-    configparser = ConfigSingleton()
     symlinkcache = SymlinkCache()
     try:
         position = argv.index("--clear-user")
         user = argv[position + 1]
         user_folder = join(
-            configparser.get('filesystem', 'bindpoint'), user)
+            config.get('filesystem', 'bindpoint'), user)
         getLogger('api').info(
             "Deleting info for user " + user, extra={'ip': 'cli', 'user': user})
         for sqlstring in 'delete from users where name = ?', 'delete from keys where user = ?', 'delete from invitations where sender = ?', 'delete from invitations where receiver = ?', 'delete from shares where user = ?':
@@ -256,9 +254,8 @@ def main():
         rmtree(user_folder)
         return
     except (ValueError, IndexError):
-        port = int(configparser.get('httpd', 'port', 443))
-        insecure_mode = configparser.getboolean('httpd', 'insecure-http',
-                                                default=False)
+        port = int(config.get('httpd', 'port', 443))
+        insecure_mode = config.getboolean('httpd', 'insecure-http', default=False)
         server_address = ('', port)
         httpd = HTTPServer(server_address, LocalBoxHTTPRequestHandler)
         if insecure_mode:
@@ -268,8 +265,8 @@ def main():
             if "--test-single-call" not in argv:
                 HALTER("Press a key to continue.")
         else:
-            certfile = configparser.get('httpd', 'certfile')
-            keyfile = configparser.get('httpd', 'keyfile')
+            certfile = config.get('httpd', 'certfile')
+            keyfile = config.get('httpd', 'keyfile')
             httpd.socket = wrap_socket(httpd.socket, server_side=True,
                                        certfile=certfile, keyfile=keyfile)
 
