@@ -38,6 +38,15 @@ format
 ++++++
 Example: %(asctime)s %(module)10s %(lineno)4s IP:%(ip)20s User:%(user)10s %(levelname)8s %(message)s
 
+
+[cache]
+-------
+
+timeout
++++++++
+Example: 600
+
+
 [oauth]
 -------
 
