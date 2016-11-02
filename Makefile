@@ -51,6 +51,7 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
+	rm -rf $(APIDOCDIR)/*
 
 apidoc:
 	$(SPHINXAPIDOC) -o $(APIDOCDIR) localbox

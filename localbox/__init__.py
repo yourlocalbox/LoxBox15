@@ -124,7 +124,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def get_log_dict(self):
         """
-        returns a dictionary of `extra' information from the request for the
+        returns a dictionary of 'extra' information from the request for the
         logger. Extra information consists of 'user', 'ip' and 'path', or None
         where this information does not make sense.
         """
