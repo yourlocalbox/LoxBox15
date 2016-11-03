@@ -9,9 +9,9 @@ This repository holds the code for the backend functionality of LocalBox, under 
 * `Documentation <https://2ek.github.io/LoxBox15/>`_
 
 Related projects
-----------------
+================
 
-* `Loauth <https://2ek.github.io/LoxBox15/docs/installation.html>`_
+* `Loauth <https://github.com/2EK/loauth>`_
     OAuth2 authentication for LocalBox.
 * `LinWin-PySync <https://github.com/2EK/LinWin-PySync/>`_
     Desktop client for LocalBox.
