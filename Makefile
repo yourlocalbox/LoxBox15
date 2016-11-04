@@ -10,6 +10,9 @@ BUILDDIR      = ../LoxBox15-docs
 PDFBUILDDIR	  = /tmp
 PDF 		  = ../manual.pdf
 APIDOCDIR	  = docs/_apidoc
+DOCSDIR       = docs
+DIAGRAMSDIR   = $(DOCSDIR)/_diagrams
+SCRIPT_DIA_EXPORT = ../LoxCommon/scripts/dia_export.sh
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -56,8 +59,11 @@ clean:
 apidoc:
 	$(SPHINXAPIDOC) -o $(APIDOCDIR) localbox
 
+diagrams:
+	chmod +x $(SCRIPT_DIA_EXPORT) && $(SCRIPT_DIA_EXPORT) $(DIAGRAMSDIR)
+
 .PHONY: html
-html:	apidoc
+html:	apidoc  diagrams
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
