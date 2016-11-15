@@ -718,7 +718,7 @@ def fake_register_app(request_handler):
 
     :param request_handler: the object which has the body to extract as json
     """
-    configparser = ConfigSingleton()
+    configparser = ConfigSingleton('localbox')
     hostcrt = configparser.get('httpd', 'certfile')
 
     backurl = configparser.get('oauth', 'direct_back_url')
