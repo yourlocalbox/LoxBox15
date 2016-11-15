@@ -1,7 +1,7 @@
 #!/bin/bash -x
 python setup.py bdist_dumb
 python setup.py bdist_egg
-python setup.py bdist_wininst
+#python setup.py bdist_wininst
 #python setup.py bdist_rpm
 
 archivename=`cat conf/localbox.spec | grep "Source0:" | sed "s/Source0:[ \t]\+//"`
