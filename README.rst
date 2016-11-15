@@ -11,7 +11,9 @@ This repository holds the code for the backend functionality of LocalBox, under 
 Related projects
 ================
 
-* `Loauth <https://github.com/2EK/loauth>`_
-    OAuth2 authentication for LocalBox.
-* `LinWin-PySync <https://github.com/2EK/LinWin-PySync/>`_
+* `LinWin-PySync <https://github.com/yourlocalbox/LinWin-PySync/>`_
     Desktop client for LocalBox.
+* `Loauth <https://github.com/yourlocalbox/loauth>`_
+    OAuth2 authentication for LocalBox.
+* `LoxCommon <https://github.com/yourlocalbox/LoxCommon/>`_
+    Common code between the LocalBox projects.
