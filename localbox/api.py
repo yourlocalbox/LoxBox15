@@ -626,7 +626,7 @@ def fake_register_app(request_handler):
 
     backurl = configparser.get('oauth', 'direct_back_url')
     y = open('host.crt').read()
-    result = {'baseurl': backurl, 'name': 'schimmelpenning',
+    result = {'baseurl': backurl, 'name': '1.6.0',
               'user': request_handler.user, 'logourl': 'http://8ch.net/static/logo_33.svg',
               'BackColor': '#00FF00', 'FontColor': '#0000FF', 'APIKeys':
                   [{'Name': 'LocalBox iOS', 'Key': 'keystring',
@@ -723,8 +723,6 @@ ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/meta.*"), exec_meta),
     (regex_compile(r"\/lox_api\/identities"), exec_identities),
 
-    (regex_compile(r".*\/login"), fake_login),
-    (regex_compile(r"\/login_check"), fake_login_check),
     (regex_compile(r"\/register_app"), fake_register_app),
     (regex_compile(r"\/oauth.*"), fake_oauth),
     (regex_compile(r"\/.*"), fake_set_cookies),
