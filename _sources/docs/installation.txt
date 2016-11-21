@@ -15,7 +15,6 @@ Install LocalBox backend server
     git clone https://github.com/yourlocalbox/LoxBox15.git
     git clone https://github.com/yourlocalbox/LoxCommon.git
     cd LoxBox15
-    git checkout develop
 
 
 Install loauth backend server
@@ -25,7 +24,6 @@ Install loauth backend server
     cd ~
     git clone https://github.com/yourlocalbox/loauth.git
     cd loauth
-    git checkout develop
     python -m loauth --init-db
     python -m loauth --add-user <USERNAME>
 
