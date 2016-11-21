@@ -1,0 +1,7 @@
+gnupg module
+============
+
+.. automodule:: gnupg
+    :members:
+    :undoc-members:
+    :show-inheritance:

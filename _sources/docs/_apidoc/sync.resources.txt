@@ -1,0 +1,17 @@
+sync.resources package
+======================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    sync.resources.images
+
+Module contents
+---------------
+
+.. automodule:: sync.resources
+    :members:
+    :undoc-members:
+    :show-inheritance:

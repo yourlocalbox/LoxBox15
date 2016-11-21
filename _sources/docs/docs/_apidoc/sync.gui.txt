@@ -1,0 +1,46 @@
+sync.gui package
+================
+
+Submodules
+----------
+
+sync.gui.gui_utils module
+-------------------------
+
+.. automodule:: sync.gui.gui_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.gui.gui_wx module
+----------------------
+
+.. automodule:: sync.gui.gui_wx
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.gui.taskbar module
+-----------------------
+
+.. automodule:: sync.gui.taskbar
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.gui.wizard module
+----------------------
+
+.. automodule:: sync.gui.wizard
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sync.gui
+    :members:
+    :undoc-members:
+    :show-inheritance:

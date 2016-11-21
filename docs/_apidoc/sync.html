@@ -1,0 +1,950 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sync package &#8212; LoxPySync 1.6.2b documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.6.2b',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="LoxPySync 1.6.2b documentation" href="../../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="sync-package">
+<h1>sync package<a class="headerlink" href="#sync-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sync.controllers.html">sync.controllers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sync.controllers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.controllers.html#module-sync.controllers.account_ctrl">sync.controllers.account_ctrl module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.controllers.html#module-sync.controllers.localbox_ctrl">sync.controllers.localbox_ctrl module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.controllers.html#module-sync.controllers.login_ctrl">sync.controllers.login_ctrl module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.controllers.html#module-sync.controllers.preferences_ctrl">sync.controllers.preferences_ctrl module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.controllers.html#module-sync.controllers">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sync.gui.html">sync.gui package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sync.gui.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.gui.html#module-sync.gui.gui_utils">sync.gui.gui_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.gui.html#module-sync.gui.gui_wx">sync.gui.gui_wx module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.gui.html#module-sync.gui.taskbar">sync.gui.taskbar module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.gui.html#module-sync.gui.wizard">sync.gui.wizard module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.gui.html#module-sync.gui">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sync.models.html">sync.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sync.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.models.html#module-sync.models.label_model">sync.models.label_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sync.models.html#module-sync.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sync.resources.html">sync.resources package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sync.resources.html#subpackages">Subpackages</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sync.resources.html#module-sync.resources">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-sync.auth">
+<span id="sync-auth-module"></span><h2>sync.auth module<a class="headerlink" href="#module-sync.auth" title="Permalink to this headline">¶</a></h2>
+<p>Authentication module for LocalBox/loauth</p>
+<dl class="exception">
+<dt id="sync.auth.AlreadyAuthenticatedError">
+<em class="property">exception </em><code class="descclassname">sync.auth.</code><code class="descname">AlreadyAuthenticatedError</code><a class="headerlink" href="#sync.auth.AlreadyAuthenticatedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>authentication has already been done error.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="sync.auth.AuthenticationError">
+<em class="property">exception </em><code class="descclassname">sync.auth.</code><code class="descname">AuthenticationError</code><a class="headerlink" href="#sync.auth.AuthenticationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Custom error class to signify problems in authentication</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sync.auth.Authenticator">
+<em class="property">class </em><code class="descclassname">sync.auth.</code><code class="descname">Authenticator</code><span class="sig-paren">(</span><em>authentication_url</em>, <em>label</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>class implementing the authentication code</p>
+<dl class="method">
+<dt id="sync.auth.Authenticator.authenticate_with_client_secret">
+<code class="descname">authenticate_with_client_secret</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator.authenticate_with_client_secret" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do authentication with the client credentials.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.auth.Authenticator.authenticate_with_password">
+<code class="descname">authenticate_with_password</code><span class="sig-paren">(</span><em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator.authenticate_with_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do initial authentication with the resource owner password credentials</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.auth.Authenticator.get_authorization_header">
+<code class="descname">get_authorization_header</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator.get_authorization_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Authorization header for authorizing against the
+LocalBox server proper.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.auth.Authenticator.has_client_credentials">
+<code class="descname">has_client_credentials</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator.has_client_credentials" title="Permalink to this definition">¶</a></dt>
+<dd><p>check whether client credentials are available for this host</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.auth.Authenticator.init_authenticate">
+<code class="descname">init_authenticate</code><span class="sig-paren">(</span><em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator.init_authenticate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do initial authentication with the resource owner password credentials</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.auth.Authenticator.is_authenticated">
+<code class="descname">is_authenticated</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator.is_authenticated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.auth.Authenticator.load_client_data">
+<code class="descname">load_client_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator.load_client_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get client data belonging to the localbox identified by label</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.auth.Authenticator.password_authentication">
+<code class="descname">password_authentication</code><span class="sig-paren">(</span><em>localbox_client</em>, <em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator.password_authentication" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.auth.Authenticator.save_client_data">
+<code class="descname">save_client_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.Authenticator.save_client_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the client credentials for the localbox identified by the label in
+the database</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.auth.generate_client_id">
+<code class="descclassname">sync.auth.</code><code class="descname">generate_client_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.generate_client_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate a client id</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.auth.generate_client_secret">
+<code class="descclassname">sync.auth.</code><code class="descname">generate_client_secret</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.auth.generate_client_secret" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate a client secret</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sync.database">
+<span id="sync-database-module"></span><h2>sync.database module<a class="headerlink" href="#module-sync.database" title="Permalink to this headline">¶</a></h2>
+<p>Database implementation class</p>
+<dl class="exception">
+<dt id="sync.database.DatabaseError">
+<em class="property">exception </em><code class="descclassname">sync.database.</code><code class="descname">DatabaseError</code><a class="headerlink" href="#sync.database.DatabaseError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>An error related to the database has occurred</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.database.database_execute">
+<code class="descclassname">sync.database.</code><code class="descname">database_execute</code><span class="sig-paren">(</span><em>command</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.database.database_execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to execute a sql statement on the database. Executes the right
+backend and makes sure &#8216;?&#8217; is replaced for the local substitution variable
+if needed.
+&#64;param command the sql command to execute
+&#64;param params a list of tuple of values to substitute in command
+&#64;returns a list of dictionaries representing the sql result</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.database.get_sql_log_dict">
+<code class="descclassname">sync.database.</code><code class="descname">get_sql_log_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.database.get_sql_log_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>get logging dictionary related to the database</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.database.mysql_execute">
+<code class="descclassname">sync.database.</code><code class="descname">mysql_execute</code><span class="sig-paren">(</span><em>command</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.database.mysql_execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to execute a sql statement on the mysql database. This function is
+called by the database_execute function when the mysql backend is set in
+the configuration file.
+&#64;param command the sql command to execute
+&#64;param params a list of tuple of values to substitute in command
+&#64;returns a list of dictionaries representing the sql result</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.database.sqlite_execute">
+<code class="descclassname">sync.database.</code><code class="descname">sqlite_execute</code><span class="sig-paren">(</span><em>command</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.database.sqlite_execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to execute a sql statement on the mysql database. This function is
+called by the database_execute function when the sqlite backend is set in
+the configuration file
+&#64;param command the sql command to execute
+&#64;param params a list of tuple of values to substitute in command
+&#64;returns a list of dictionaries representing the sql result</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.database.warning_no_database_section">
+<code class="descclassname">sync.database.</code><code class="descname">warning_no_database_section</code><span class="sig-paren">(</span><em>error</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.database.warning_no_database_section" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sync.defaults">
+<span id="sync-defaults-module"></span><h2>sync.defaults module<a class="headerlink" href="#module-sync.defaults" title="Permalink to this headline">¶</a></h2>
+<p>listing of values/variables&#8217; default values.</p>
+</div>
+<div class="section" id="module-sync.gpg">
+<span id="sync-gpg-module"></span><h2>sync.gpg module<a class="headerlink" href="#module-sync.gpg" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sync.gpg.gpg">
+<em class="property">class </em><code class="descclassname">sync.gpg.</code><code class="descname">gpg</code><span class="sig-paren">(</span><em>folder_path=None</em>, <em>binary_path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>module to wrap the gnupg library and gpg binary</p>
+<dl class="method">
+<dt id="sync.gpg.gpg.add_keypair">
+<code class="descname">add_keypair</code><span class="sig-paren">(</span><em>public_key</em>, <em>private_key</em>, <em>site</em>, <em>user</em>, <em>passphrase</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg.add_keypair" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a keypair into the gpg key database</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sync.gpg.gpg.add_pkcs7_padding">
+<em class="property">static </em><code class="descname">add_pkcs7_padding</code><span class="sig-paren">(</span><em>contents</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg.add_pkcs7_padding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.gpg.gpg.decrypt">
+<code class="descname">decrypt</code><span class="sig-paren">(</span><em>data</em>, <em>passphrase</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg.decrypt" title="Permalink to this definition">¶</a></dt>
+<dd><p>decrypt data received from site.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.gpg.gpg.encrypt">
+<code class="descname">encrypt</code><span class="sig-paren">(</span><em>data</em>, <em>site</em>, <em>user</em>, <em>armor=False</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg.encrypt" title="Permalink to this definition">¶</a></dt>
+<dd><p>encrypt data for user at site.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.gpg.gpg.generate">
+<code class="descname">generate</code><span class="sig-paren">(</span><em>passphrase</em>, <em>site</em>, <em>user</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a new 2048 bit GPG key and add it to the gpg manager.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.gpg.gpg.get_key">
+<code class="descname">get_key</code><span class="sig-paren">(</span><em>fingerprint</em>, <em>private</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg.get_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the key belonging to the fingerprint given. if &#8216;private&#8217; is
+True, the private key is returned. If &#8216;private&#8217; is False, the public
+key will be returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.gpg.gpg.has_key">
+<code class="descname">has_key</code><span class="sig-paren">(</span><em>site</em>, <em>user</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg.has_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether a key is present for a certain site and user</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.gpg.gpg.is_passphrase_valid">
+<code class="descname">is_passphrase_valid</code><span class="sig-paren">(</span><em>passphrase</em>, <em>label=None</em>, <em>user=None</em>, <em>fingerprint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg.is_passphrase_valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sync.gpg.gpg.remove_pkcs7_padding">
+<em class="property">static </em><code class="descname">remove_pkcs7_padding</code><span class="sig-paren">(</span><em>contents</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.gpg.gpg.remove_pkcs7_padding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove PKCS#7 padding bytes</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gpg</span><span class="o">.</span><span class="n">remove_pkcs7_padding</span><span class="p">(</span><span class="s1">&#39;some_content&#39;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
+<span class="go">&#39;some_content&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gpg</span><span class="o">.</span><span class="n">remove_pkcs7_padding</span><span class="p">(</span><span class="s1">&#39;some_content&#39;</span><span class="p">)</span>
+<span class="go">&#39;some_content&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gpg</span><span class="o">.</span><span class="n">remove_pkcs7_padding</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="go">&#39;&#39;</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>contents</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">contents without padding</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sync.gui">
+<span id="sync-gui-module"></span><h2>sync.gui module<a class="headerlink" href="#module-sync.gui" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-sync.language">
+<span id="sync-language-module"></span><h2>sync.language module<a class="headerlink" href="#module-sync.language" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="sync.language.set_language">
+<code class="descclassname">sync.language.</code><code class="descname">set_language</code><span class="sig-paren">(</span><em>lang</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.language.set_language" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the translation from the MO files
+:param lang: should be a string like &#8216;en&#8217;, &#8216;nl, etc
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sync.localbox">
+<span id="sync-localbox-module"></span><h2>sync.localbox module<a class="headerlink" href="#module-sync.localbox" title="Permalink to this headline">¶</a></h2>
+<p>localbox client library</p>
+<dl class="exception">
+<dt id="sync.localbox.InvalidLocalboxError">
+<em class="property">exception </em><code class="descclassname">sync.localbox.</code><code class="descname">InvalidLocalboxError</code><a class="headerlink" href="#sync.localbox.InvalidLocalboxError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>URL for localbox backend is invalid or is unreachable</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sync.localbox.LocalBox">
+<em class="property">class </em><code class="descclassname">sync.localbox.</code><code class="descname">LocalBox</code><span class="sig-paren">(</span><em>url</em>, <em>label</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>object representing localbox</p>
+<dl class="attribute">
+<dt id="sync.localbox.LocalBox.authenticator">
+<code class="descname">authenticator</code><a class="headerlink" href="#sync.localbox.LocalBox.authenticator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.call_keys">
+<code class="descname">call_keys</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.call_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>do the keys call</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.call_user">
+<code class="descname">call_user</code><span class="sig-paren">(</span><em>send_data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.call_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>do the user call</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.create_directory">
+<code class="descname">create_directory</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.create_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>do the create directory call</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.decode_file">
+<code class="descname">decode_file</code><span class="sig-paren">(</span><em>path</em>, <em>filename</em>, <em>passphrase</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.decode_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>decode a file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>do the delete call</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.encode_file">
+<code class="descname">encode_file</code><span class="sig-paren">(</span><em>path</em>, <em>contents</em>, <em>passphrase</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.encode_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>encode a file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.get_all_users">
+<code class="descname">get_all_users</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.get_all_users" title="Permalink to this definition">¶</a></dt>
+<dd><p>gets a list from the localbox server with all users.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.get_authentication_url">
+<code class="descname">get_authentication_url</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.get_authentication_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an authentication url belonging to a localbox instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.get_file">
+<code class="descname">get_file</code><span class="sig-paren">(</span><em>path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.get_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>do the file call</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sync.localbox.LocalBox.get_keys_path">
+<em class="property">static </em><code class="descname">get_keys_path</code><span class="sig-paren">(</span><em>localbox_path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.get_keys_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the keys location for this localbox path.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">LocalBox</span><span class="o">.</span><span class="n">get_keys_path</span><span class="p">(</span><span class="s1">&#39;/a/b/c&#39;</span><span class="p">)</span>
+<span class="go">&#39;a&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">LocalBox</span><span class="o">.</span><span class="n">get_keys_path</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="go">&#39;a&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">LocalBox</span><span class="o">.</span><span class="n">get_keys_path</span><span class="p">(</span><span class="s1">&#39;/a/b/c/&#39;</span><span class="p">)</span>
+<span class="go">&#39;a&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">LocalBox</span><span class="o">.</span><span class="n">get_keys_path</span><span class="p">(</span><span class="s1">&#39;a/b&#39;</span><span class="p">)</span>
+<span class="go">&#39;a&#39;</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>localbox_path</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">it returns the parent &#8216;directory&#8217;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sync.localbox.LocalBox.get_keys_path_v2">
+<em class="property">static </em><code class="descname">get_keys_path_v2</code><span class="sig-paren">(</span><em>localbox_path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.get_keys_path_v2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the keys location for this localbox path.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">LocalBox</span><span class="o">.</span><span class="n">get_keys_path</span><span class="p">(</span><span class="s1">&#39;/a/b/c&#39;</span><span class="p">)</span>
+<span class="go">&#39;a/b&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">LocalBox</span><span class="o">.</span><span class="n">get_keys_path</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="go">&#39;a&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">LocalBox</span><span class="o">.</span><span class="n">get_keys_path</span><span class="p">(</span><span class="s1">&#39;/a/b/c/&#39;</span><span class="p">)</span>
+<span class="go">&#39;a/b/c&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">LocalBox</span><span class="o">.</span><span class="n">get_keys_path</span><span class="p">(</span><span class="s1">&#39;a/b&#39;</span><span class="p">)</span>
+<span class="go">&#39;a&#39;</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>localbox_path</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">it returns the parent &#8216;directory&#8217;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.get_meta">
+<code class="descname">get_meta</code><span class="sig-paren">(</span><em>path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.get_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>do the meta call</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.is_valid_url">
+<code class="descname">is_valid_url</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.is_valid_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.save_key">
+<code class="descname">save_key</code><span class="sig-paren">(</span><em>path</em>, <em>key</em>, <em>iv</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.save_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>saves an encrypted key on the localbox server</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> &#8211; path relative to localbox location. eg: /some_folder/image.jpg</li>
+<li><strong>key</strong> &#8211; </li>
+<li><strong>iv</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.localbox.LocalBox.upload_file">
+<code class="descname">upload_file</code><span class="sig-paren">(</span><em>path</em>, <em>fs_path</em>, <em>passphrase</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.LocalBox.upload_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>upload a file to localbox</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> &#8211; path relative to localbox location. eg: /some_folder/image.jpg</li>
+<li><strong>fs_path</strong> &#8211; file system path. eg: /home/user/localbox/some_folder/image.jpg</li>
+<li><strong>passphrase</strong> &#8211; used to encrypt file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="sync.localbox.NoKeysFoundError">
+<em class="property">exception </em><code class="descclassname">sync.localbox.</code><code class="descname">NoKeysFoundError</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.NoKeysFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Failed to get keys for file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.localbox.create_key_and_iv">
+<code class="descclassname">sync.localbox.</code><code class="descname">create_key_and_iv</code><span class="sig-paren">(</span><em>localbox_client</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.create_key_and_iv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sync.localbox.getChecksum">
+<code class="descclassname">sync.localbox.</code><code class="descname">getChecksum</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.getChecksum" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a partial hash of the given key for differentiation in logs. May need a stronger algorithm.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.localbox.get_aes_key">
+<code class="descclassname">sync.localbox.</code><code class="descname">get_aes_key</code><span class="sig-paren">(</span><em>localbox_client</em>, <em>path</em>, <em>passphrase</em>, <em>should_create=False</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.localbox.get_aes_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sync.metavfs">
+<span id="sync-metavfs-module"></span><h2>sync.metavfs module<a class="headerlink" href="#module-sync.metavfs" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sync.metavfs.MetaVFS">
+<em class="property">class </em><code class="descclassname">sync.metavfs.</code><code class="descname">MetaVFS</code><span class="sig-paren">(</span><em>modified_at=None</em>, <em>path=None</em>, <em>is_dir=None</em>, <em>children=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>virtual meta filesystem</p>
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.add_child">
+<code class="descname">add_child</code><span class="sig-paren">(</span><em>child</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.add_child" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a child to this node, also set child&#8217;s parent</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.add_paths">
+<code class="descname">add_paths</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.add_paths" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.contains_directory">
+<code class="descname">contains_directory</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.contains_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>is a certain path in this vfs directory structure?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.debug_print">
+<code class="descname">debug_print</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.debug_print" title="Permalink to this definition">¶</a></dt>
+<dd><p>do a debug pring of all paths</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.gen">
+<code class="descname">gen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.gen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.get_entry">
+<code class="descname">get_entry</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.get_entry" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an entry (file or directory) from the system</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.get_files">
+<code class="descname">get_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.get_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>return all paths to files (not directories) contained in this filesystem</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.get_paths">
+<code class="descname">get_paths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.get_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>return all paths contained in this filesystem</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>load this metvfs from a file</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sync.metavfs.MetaVFS.newest">
+<em class="property">static </em><code class="descname">newest</code><span class="sig-paren">(</span><em>*arguments</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.newest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the one single MetaVFS entry of the three with the highest
+modified time. Returns None otherwise, including when two are tied for
+highest modification time.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>save this MetaVFS into a file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.yield_directories">
+<code class="descname">yield_directories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.yield_directories" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a directory part of this metavfs</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.metavfs.MetaVFS.yield_files">
+<code class="descname">yield_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.MetaVFS.yield_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a file part of this metavfs</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.metavfs.normalize_path">
+<code class="descclassname">sync.metavfs.</code><code class="descname">normalize_path</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.metavfs.normalize_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sync.syncer">
+<span id="sync-syncer-module"></span><h2>sync.syncer module<a class="headerlink" href="#module-sync.syncer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sync.syncer.MainSyncer">
+<em class="property">class </em><code class="descclassname">sync.syncer.</code><code class="descname">MainSyncer</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.MainSyncer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
+<dl class="method">
+<dt id="sync.syncer.MainSyncer.is_running">
+<code class="descname">is_running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.MainSyncer.is_running" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sync.syncer.MainSyncer.keep_running">
+<code class="descname">keep_running</code><a class="headerlink" href="#sync.syncer.MainSyncer.keep_running" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.MainSyncer.remove_runner">
+<code class="descname">remove_runner</code><span class="sig-paren">(</span><em>label</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.MainSyncer.remove_runner" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.MainSyncer.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.MainSyncer.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.MainSyncer.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.MainSyncer.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.MainSyncer.sync">
+<code class="descname">sync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.MainSyncer.sync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sync.syncer.MainSyncer.thread_pool">
+<code class="descname">thread_pool</code><a class="headerlink" href="#sync.syncer.MainSyncer.thread_pool" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sync.syncer.MainSyncer.waitevent">
+<code class="descname">waitevent</code><a class="headerlink" href="#sync.syncer.MainSyncer.waitevent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="sync.syncer.StopSyncException">
+<em class="property">exception </em><code class="descclassname">sync.syncer.</code><code class="descname">StopSyncException</code><a class="headerlink" href="#sync.syncer.StopSyncException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sync.syncer.SyncRunner">
+<em class="property">class </em><code class="descclassname">sync.syncer.</code><code class="descname">SyncRunner</code><span class="sig-paren">(</span><em>group=None</em>, <em>target=None</em>, <em>name=None</em>, <em>args=()</em>, <em>kwargs=None</em>, <em>verbose=None</em>, <em>syncer=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.SyncRunner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
+<p>Thread responsible for synchronizing between the client and one server.</p>
+<dl class="attribute">
+<dt id="sync.syncer.SyncRunner.name">
+<code class="descname">name</code><a class="headerlink" href="#sync.syncer.SyncRunner.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.SyncRunner.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.SyncRunner.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that runs one iteration of the synchronization</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sync.syncer.SyncRunner.stop_event">
+<code class="descname">stop_event</code><a class="headerlink" href="#sync.syncer.SyncRunner.stop_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sync.syncer.Syncer">
+<em class="property">class </em><code class="descclassname">sync.syncer.</code><code class="descname">Syncer</code><span class="sig-paren">(</span><em>localbox_instance</em>, <em>file_root_path</em>, <em>direction</em>, <em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.Syncer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="sync.syncer.Syncer.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.Syncer.delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.Syncer.download">
+<code class="descname">download</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.Syncer.download" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.Syncer.get_file_path">
+<code class="descname">get_file_path</code><span class="sig-paren">(</span><em>metavfs_entry</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.Syncer.get_file_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>System local filename
+:param metavfs_entry:
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.Syncer.mkdir">
+<code class="descname">mkdir</code><span class="sig-paren">(</span><em>metavfs</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.Syncer.mkdir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.Syncer.populate_filepath_metadata">
+<code class="descname">populate_filepath_metadata</code><span class="sig-paren">(</span><em>path='/'</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.Syncer.populate_filepath_metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.Syncer.populate_localbox_metadata">
+<code class="descname">populate_localbox_metadata</code><span class="sig-paren">(</span><em>path='/'</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.Syncer.populate_localbox_metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sync.syncer.Syncer.stop_event">
+<code class="descname">stop_event</code><a class="headerlink" href="#sync.syncer.Syncer.stop_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.syncer.Syncer.syncsync">
+<code class="descname">syncsync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.Syncer.syncsync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sync.syncer.get_syncers">
+<code class="descclassname">sync.syncer.</code><code class="descname">get_syncers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.syncer.get_syncers" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of Syncers. One per configured localbox instance.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sync.version">
+<span id="sync-version-module"></span><h2>sync.version module<a class="headerlink" href="#module-sync.version" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-sync.wizard">
+<span id="sync-wizard-module"></span><h2>sync.wizard module<a class="headerlink" href="#module-sync.wizard" title="Permalink to this headline">¶</a></h2>
+<p>Add LocalBox Wizard</p>
+<dl class="exception">
+<dt id="sync.wizard.ConfigError">
+<em class="property">exception </em><code class="descclassname">sync.wizard.</code><code class="descname">ConfigError</code><a class="headerlink" href="#sync.wizard.ConfigError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sync.wizard.Errorwindow">
+<em class="property">class </em><code class="descclassname">sync.wizard.</code><code class="descname">Errorwindow</code><span class="sig-paren">(</span><em>message</em>, <em>parent=None</em>, <em>language=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Errorwindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Tkinter.Tk</span></code></p>
+<dl class="method">
+<dt id="sync.wizard.Errorwindow.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Errorwindow.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sync.wizard.Wizard">
+<em class="property">class </em><code class="descclassname">sync.wizard.</code><code class="descname">Wizard</code><span class="sig-paren">(</span><em>parent=None</em>, <em>language=None</em>, <em>configparser=None</em>, <em>topwindow=None</em>, <em>siteslist=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Tkinter.Tk</span></code></p>
+<dl class="method">
+<dt id="sync.wizard.Wizard.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.endwizard">
+<code class="descname">endwizard</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.endwizard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.exit_button">
+<code class="descname">exit_button</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.exit_button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.get_file">
+<code class="descname">get_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.get_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.next_1">
+<code class="descname">next_1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.next_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.next_2">
+<code class="descname">next_2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.next_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.next_3">
+<code class="descname">next_3</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.next_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.next_4">
+<code class="descname">next_4</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.next_4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.save">
+<code class="descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.translate">
+<code class="descname">translate</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.translate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.validate_server">
+<code class="descname">validate_server</code><span class="sig-paren">(</span><em>server_url</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.validate_server" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.window1">
+<code class="descname">window1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.window1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.window2">
+<code class="descname">window2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.window2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sync.wizard.Wizard.window3">
+<code class="descname">window3</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sync.wizard.Wizard.window3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sync">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sync" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="sync.remove_decrypted_files">
+<code class="descclassname">sync.</code><code class="descname">remove_decrypted_files</code><span class="sig-paren">(</span><em>signum=None</em>, <em>frame=None</em><span class="sig-paren">)</span><a class="headerlink" href="#sync.remove_decrypted_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">sync package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sync.auth">sync.auth module</a></li>
+<li><a class="reference internal" href="#module-sync.database">sync.database module</a></li>
+<li><a class="reference internal" href="#module-sync.defaults">sync.defaults module</a></li>
+<li><a class="reference internal" href="#module-sync.gpg">sync.gpg module</a></li>
+<li><a class="reference internal" href="#module-sync.gui">sync.gui module</a></li>
+<li><a class="reference internal" href="#module-sync.language">sync.language module</a></li>
+<li><a class="reference internal" href="#module-sync.localbox">sync.localbox module</a></li>
+<li><a class="reference internal" href="#module-sync.metavfs">sync.metavfs module</a></li>
+<li><a class="reference internal" href="#module-sync.syncer">sync.syncer module</a></li>
+<li><a class="reference internal" href="#module-sync.version">sync.version module</a></li>
+<li><a class="reference internal" href="#module-sync.wizard">sync.wizard module</a></li>
+<li><a class="reference internal" href="#module-sync">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/_apidoc/sync.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, 2EK.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/docs/_apidoc/sync.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

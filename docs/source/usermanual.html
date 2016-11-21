@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>User Manual &#8212; LoxPySync 1.6.2b documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.6.2b',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="LoxPySync 1.6.2b documentation" href="../../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="user-manual">
+<h1>User Manual<a class="headerlink" href="#user-manual" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Execute the installer (eg. LocalBoxInstaller.exe)</p>
+<ul class="simple">
+<li>Agree to the EUPL [I Agree]</li>
+<li>choose a different directory to install (optional) or choose the default install folder.</li>
+<li>Choose [Install] You can also choose [More details] for monitoring the installation.</li>
+<li>Possible there is a message that there is a installation of the software found: &#8216;A prior wxPython installation was found in this directory. It is recommended that it be uninstalled first. Should I do it?&#8217; Answer: is [Yes].</li>
+<li>Wait for the installer starts PyCrypto-xxx &#8212;&gt; push or click [Next &gt;] [Next &gt;] [Next &gt;] {Finish}</li>
+<li>Wait for the installer starts LocalboxSync-xxx start. push or click [Next &gt;] [Next &gt;] [Next &gt;] {Finish}</li>
+<li>If all goes well there is a completed window, and you can than click [Close]</li>
+<li>Reboot or not (yep... it&#8217;s Windows) or try to start the program, and you see in the taskbar a new localbox icon</li>
+</ul>
+</div>
+<div class="section" id="explaning-localbox">
+<h2>Explaning LocalBox<a class="headerlink" href="#explaning-localbox" title="Permalink to this headline">¶</a></h2>
+<p>The LocalBox user can setup a directory on his computer to be stored securely on a remote server.
+Using the same account the user can synchronize the same files with other devices / computers.
+Each user has his own LocalBox directory on the server. All the files inside this directory are encrypted.
+When the files are downloaded to the computer they are encrypted.
+When the file are uploaded to the server they are encrypted.</p>
+<img alt="../../_images/current_scenario.svg" src="../../_images/current_scenario.svg" /></div>
+<div class="section" id="creating-your-first-localbox">
+<h2>Creating your first localbox<a class="headerlink" href="#creating-your-first-localbox" title="Permalink to this headline">¶</a></h2>
+<p>This document provides guidelines on how to test the YourLocalBox sync client.</p>
+<p>Look in the “Start menu” for the LocalBox sync link</p>
+<img alt="../../_images/localbox-startmenu.jpeg" src="../../_images/localbox-startmenu.jpeg" />
+<p>It opens directly to tray,</p>
+<img alt="../../_images/localbox-tray.jpeg" src="../../_images/localbox-tray.jpeg" />
+<p>Here is the main interface</p>
+<img alt="../../_images/localbox-main.jpeg" src="../../_images/localbox-main.jpeg" />
+<p>Get started using the “Add” button</p>
+<img alt="../../_images/localbox-add-new.jpeg" src="../../_images/localbox-add-new.jpeg" />
+<p>Description of the inputs:
+* Label: An identifier for of the sync / localbox. <strong>Don’t use special characters in it</strong>.
+* URL: address of the YourLocalBox backend server. Just type: <a class="reference external" href="https://box.yourlocalbox.org">https://box.yourlocalbox.org</a>
+* Path: path to the directory on your computer whose contents will be uploaded and synced to the remote server. Use the “Select” button to choose one.</p>
+<p>On the next step, you’ll be asked for your credentials. For a new account send an e-mail to: <a class="reference external" href="mailto:wilson&#46;santos&#37;&#52;&#48;penguinformula&#46;com">wilson<span>&#46;</span>santos<span>&#64;</span>penguinformula<span>&#46;</span>com</a></p>
+<img alt="../../_images/localbox-username-password.jpeg" src="../../_images/localbox-username-password.jpeg" />
+<p>As a final step you must provide a passphrase. This will be used to encrypt / decrypt your files.  The security of the files depends on the complexity of this passphrase.</p>
+<img alt="../../_images/localbox-new-passphrase.jpeg" src="../../_images/localbox-new-passphrase.jpeg" />
+<p>That’s it! Now it’s time to add a file to your localbox.</p>
+<img alt="../../_images/localbox-new-file.jpeg" src="../../_images/localbox-new-file.jpeg" />
+<p>By default the syncing progress only runs once an hour so feel free to use the “Force sync” option on the tray icon.</p>
+<img alt="../../_images/localbox-force-sync.jpeg" src="../../_images/localbox-force-sync.jpeg" />
+<p>and… we are done! The files are up in the serve</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">User Manual</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#explaning-localbox">Explaning LocalBox</a></li>
+<li><a class="reference internal" href="#creating-your-first-localbox">Creating your first localbox</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/docs/source/usermanual.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, 2EK.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/docs/source/usermanual.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

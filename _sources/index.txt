@@ -9,6 +9,7 @@ Contents
 
     docs/installation.rst
     docs/configuration.rst
+    docs/specification.rst
 
 * :ref:`modindex`
 * :ref:`genindex`

@@ -1,0 +1,37 @@
+desktop_utils package
+=====================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    desktop_utils.controllers
+
+Submodules
+----------
+
+desktop_utils.defaults module
+-----------------------------
+
+.. automodule:: desktop_utils.defaults
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+desktop_utils.version module
+----------------------------
+
+.. automodule:: desktop_utils.version
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: desktop_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

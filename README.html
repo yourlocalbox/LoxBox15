@@ -43,44 +43,35 @@
             
   <div class="section" id="localbox">
 <h1>LocalBox<a class="headerlink" href="#localbox" title="Permalink to this headline">¶</a></h1>
+<p>Synchronize your files securely with client and server encryption.</p>
+<p>This repository holds the code for the backend functionality of LocalBox, under the <cite>localbox</cite> directory.</p>
 <ul class="simple">
 <li><a class="reference external" href="https://2ek.github.io/LoxBox15/docs/installation.html">Installation</a></li>
 <li><a class="reference external" href="https://2ek.github.io/LoxBox15/">Documentation</a></li>
 </ul>
+<div class="section" id="related-projects">
+<h2>Related projects<a class="headerlink" href="#related-projects" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><dl class="first docutils">
+<dt><a class="reference external" href="https://github.com/yourlocalbox/LinWin-PySync/">LinWin-PySync</a></dt>
+<dd><p class="first last">Desktop client for LocalBox.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference external" href="https://github.com/yourlocalbox/loauth">Loauth</a></dt>
+<dd><p class="first last">OAuth2 authentication for LocalBox.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference external" href="https://github.com/yourlocalbox/LoxCommon/">LoxCommon</a></dt>
+<dd><p class="first last">Common code between the LocalBox projects.</p>
+</dd>
+</dl>
+</li>
+</ul>
 </div>
-<div class="section" id="old-dutch-docs">
-<h1>Old Dutch Docs<a class="headerlink" href="#old-dutch-docs" title="Permalink to this headline">¶</a></h1>
-<p>LocalBox 1.5 rewrite, ook bekend als versie Schimmelpenning
-Oudere versies kan men naar verwijzen als &#8216;Willem 2&#8217; of &#8216;Uit de tijd van Willem 2&#8217;</p>
-<p>Nederlandse instalatiegids is te vinden op documentatie/instalatie.md</p>
-<p>De volgende documentatie componenten zijn onderdeel van de Localbox:
-FO  (Functioneel Ontwerp)
-TO  (Technisch Ontwerp)
-APH (Applicatie Productie Handleiding)
-IH  (Installatie Handleiding)
-IP  (ImplementatiePlan)
-TP  (TestPlan)</p>
-<p>Programmatuur staat in de LocalBox submap op de GitHub.</p>
-<p>TODO: Integriteit geuploade files</p>
-<p>[httpd]
-certfile = localhost.crt
-keyfile = localhost.key
-port = 8001
-insecure-http = False</p>
-<p>[database]
-type = sqlite
-filename = database.sqlite3</p>
-<p>[filesystem]
-bindpoint = /home/nido/localbox/</p>
-<p>[logging]
-console = True
-logfile = ./localbox-log-file.log</p>
-<p>[oauth]
-verify_url = <a class="reference external" href="http://localhost:8000/verify">http://localhost:8000/verify</a>
-redirect_url = <a class="reference external" href="http://localhost:8000/">http://localhost:8000/</a>
-direct_back_url = <a class="reference external" href="http://localhost/">http://localhost/</a></p>
-<p>[cache]
-timeout = 600</p>
 </div>
 
 
@@ -91,8 +82,10 @@ timeout = 600</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">LocalBox</a></li>
-<li><a class="reference internal" href="#old-dutch-docs">Old Dutch Docs</a></li>
+<li><a class="reference internal" href="#">LocalBox</a><ul>
+<li><a class="reference internal" href="#related-projects">Related projects</a></li>
+</ul>
+</li>
 </ul>
 <div class="relations">
 <h3>Related Topics</h3>

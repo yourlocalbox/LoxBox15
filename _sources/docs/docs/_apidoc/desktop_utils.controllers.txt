@@ -1,0 +1,22 @@
+desktop_utils.controllers package
+=================================
+
+Submodules
+----------
+
+desktop_utils.controllers.openfiles_ctrl module
+-----------------------------------------------
+
+.. automodule:: desktop_utils.controllers.openfiles_ctrl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: desktop_utils.controllers
+    :members:
+    :undoc-members:
+    :show-inheritance:

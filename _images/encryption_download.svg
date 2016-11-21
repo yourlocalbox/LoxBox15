@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="29cm" height="24cm" viewBox="165 164 576 478" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="166.4" y="165.8" width="74.15" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="166.4" y="165.8" width="74.15" height="36"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="203.475" y="187.7">
+      <tspan x="203.475" y="187.7">backend</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="176.4" y1="190.7" x2="230.55" y2="190.7"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="486.4" y="165.8" width="55.15" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="486.4" y="165.8" width="55.15" height="36"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="513.975" y="187.7">
+      <tspan x="513.975" y="187.7">client</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="496.4" y1="190.7" x2="531.55" y2="190.7"/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="203.474" y1="201.8" x2="203.474" y2="241.8"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="203.474" y1="301.8" x2="203.474" y2="541.8"/>
+    <rect style="fill: #ffffff" x="196.474" y="241.8" width="14" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="196.474" y="241.8" width="14" height="60"/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="513.974" y1="201.8" x2="513.974" y2="241.8"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="513.974" y1="301.8" x2="513.974" y2="405.8"/>
+    <rect style="fill: #ffffff" x="506.974" y="241.8" width="14" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="506.974" y="241.8" width="14" height="60"/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="227.474" y1="256.8" x2="506.974" y2="256.8"/>
+    <polygon style="fill: #000000" points="227.474,251.8 211.474,256.8 227.474,261.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="227.474,251.8 211.474,256.8 227.474,261.8 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="358.724" y="266.8">get encrypted key, iv</text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="489.974" y1="286.8" x2="210.474" y2="286.8"/>
+    <polygon style="fill: #000000" points="489.974,291.8 505.974,286.8 489.974,281.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="489.974,291.8 505.974,286.8 489.974,281.8 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="513.974" y1="401.8" x2="513.974" y2="441.8"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="513.974" y1="501.8" x2="513.974" y2="578.72"/>
+    <rect style="fill: #ffffff" x="506.974" y="441.8" width="14" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="506.974" y="441.8" width="14" height="60"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="520.974,456.8 541.974,456.8 541.974,486.8 530.71,486.8 "/>
+    <polygon style="fill: #000000" points="523.21,486.8 533.21,481.8 530.71,486.8 533.21,491.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="523.21,486.8 533.21,481.8 530.71,486.8 533.21,491.8 "/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="562.286,454.558 699.186,454.558 711.186,466.558 711.186,488.558 562.286,488.558 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="562.286,454.558 699.186,454.558 711.186,466.558 711.186,488.558 562.286,488.558 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="699.186,454.558 699.186,466.558 711.186,466.558 "/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="569.286" y="479.458">
+      <tspan x="569.286" y="479.458">key, iv = decrypt</tspan>
+    </text>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="403.474" y="261.8">
+    <tspan x="403.474" y="261.8"></tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="513.974" y1="501.8" x2="513.974" y2="541.8"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="513.974" y1="601.8" x2="513.974" y2="641.8"/>
+    <rect style="fill: #ffffff" x="506.974" y="541.8" width="14" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="506.974" y="541.8" width="14" height="60"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="520.974,556.8 541.974,556.8 541.974,586.8 530.71,586.8 "/>
+    <polygon style="fill: #000000" points="523.21,586.8 533.21,581.8 530.71,586.8 533.21,591.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="523.21,586.8 533.21,581.8 530.71,586.8 533.21,591.8 "/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="559.908,556.124 727.608,556.124 739.608,568.124 739.608,590.124 559.908,590.124 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="559.908,556.124 727.608,556.124 739.608,568.124 739.608,590.124 559.908,590.124 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="727.608,556.124 727.608,568.124 739.608,568.124 "/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="566.908" y="581.024">
+      <tspan x="566.908" y="581.024">AES(CFB).decrypt_file</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="513.974" y1="301.8" x2="513.974" y2="341.8"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="513.974" y1="401.8" x2="513.974" y2="430.196"/>
+    <rect style="fill: #ffffff" x="506.974" y="341.8" width="14" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="506.974" y="341.8" width="14" height="60"/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="203.474" y1="301.8" x2="203.474" y2="341.8"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke-dasharray: 8; stroke: #000000" x1="203.474" y1="401.8" x2="203.474" y2="529.122"/>
+    <rect style="fill: #ffffff" x="196.474" y="341.8" width="14" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="196.474" y="341.8" width="14" height="60"/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="227.474" y1="356.8" x2="506.974" y2="356.8"/>
+    <polygon style="fill: #000000" points="227.474,351.8 211.474,356.8 227.474,361.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="227.474,351.8 211.474,356.8 227.474,361.8 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="358.724" y="366.8">get file</text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="489.974" y1="386.8" x2="210.474" y2="386.8"/>
+    <polygon style="fill: #000000" points="489.974,391.8 505.974,386.8 489.974,381.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="489.974,391.8 505.974,386.8 489.974,381.8 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="358.724" y="396.8">encrypted file</text>
+  </g>
+</svg>

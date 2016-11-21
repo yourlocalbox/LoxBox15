@@ -1,0 +1,22 @@
+sync.models package
+===================
+
+Submodules
+----------
+
+sync.models.label_model module
+------------------------------
+
+.. automodule:: sync.models.label_model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sync.models
+    :members:
+    :undoc-members:
+    :show-inheritance:

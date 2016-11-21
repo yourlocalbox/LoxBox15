@@ -659,103 +659,6 @@
     <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span></div>
 
 
-<div class="viewcode-block" id="fake_login"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.fake_login">[docs]</a><span class="k">def</span> <span class="nf">fake_login</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    part of the fake login process, not part of the final codebase</span>
-
-<span class="sd">    :param request_handler: the object which has the body to extract as json</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">request_handler</span><span class="o">.</span><span class="n">new_headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="s2">&quot;Mon, 26 Oct 2015 16:06:08 GMT&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Server&quot;</span><span class="p">:</span> <span class="s2">&quot;Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;X-Powered-By&quot;</span><span class="p">:</span> <span class="s2">&quot;PHP/5.6.14&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Set-Cookie&quot;</span><span class="p">:</span> <span class="s2">&quot;PHPSESSID=ft41ihtl7uptocchfb1cj2ko95; expires=Tue, 27-Oct-2015 16:06:09 GMT; Max-Age=86400; path=/&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Cache-Control&quot;</span><span class="p">:</span> <span class="s2">&quot;no-cache&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Access-Control-Allow-Origin&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;x-frame-options&quot;</span><span class="p">:</span> <span class="s2">&quot;DENY&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Strict-Transport-Security&quot;</span><span class="p">:</span> <span class="s2">&quot;max-age=86400&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">:</span> <span class="s2">&quot;timeout=5, max=100&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Connection&quot;</span><span class="p">:</span> <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Transfer-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;chunked&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;text/html; charset=UTF8&quot;</span><span class="p">}</span>
-    <span class="n">form</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;!DOCTYPE html&gt;</span>
-<span class="s2">&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;</span>
-<span class="s2">    &lt;head&gt;</span>
-<span class="s2">        &lt;meta charset=&quot;utf-8&quot;/&gt;</span>
-<span class="s2">        &lt;title&gt;Sign in&lt;/title&gt;</span>
-
-<span class="s2">                                &lt;link href=&quot;/localbox/web/bundles/rednoseframework/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot; /&gt;</span>
-
-
-<span class="s2">    &lt;link href=&quot;/localbox/web/bundles/rednoseframework/css/login.css&quot; rel=&quot;stylesheet&quot; /&gt;</span>
-<span class="s2">    &lt;/head&gt;</span>
-<span class="s2">    &lt;body&gt;</span>
-
-<span class="s2">    &lt;div class=&quot;content&quot;&gt;</span>
-<span class="s2">      &lt;h2&gt;Sign in&lt;/h2&gt;</span>
-<span class="s2">        &lt;form action=&quot;/login_check&quot; method=&quot;POST&quot;&gt;</span>
-
-<span class="s2">        &lt;input type=&quot;hidden&quot; name=&quot;_csrf_token&quot; value=&quot;482f45992b7cfec0ffac259f25bc981e70371aa3&quot; /&gt;</span>
-
-
-<span class="s2">          &lt;div&gt;</span>
-<span class="s2">            &lt;input id=&quot;username&quot; name=&quot;_username&quot; required=&quot;required&quot; value=&quot;&quot; autofocus=&quot;autofocus&quot; type=&quot;text&quot; placeholder=&quot;Username&quot;&gt;</span>
-<span class="s2">          &lt;/div&gt;</span>
-<span class="s2">          &lt;div&gt;</span>
-<span class="s2">            &lt;input id=&quot;password&quot; name=&quot;_password&quot; required=&quot;required&quot; type=&quot;password&quot; placeholder=&quot;Password&quot;&gt;</span>
-<span class="s2">          &lt;/div&gt;</span>
-<span class="s2">          &lt;div&gt;</span>
-<span class="s2">              &lt;label class=&quot;checkbox&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;remember_me&quot; name=&quot;_remember_me&quot;&gt;Remember me&lt;/label&gt;</span>
-<span class="s2">          &lt;/div&gt;</span>
-<span class="s2">          &lt;div class=&quot;footer&quot;&gt;</span>
-<span class="s2">                            &lt;input class=&quot;btn btn-primary pull-right&quot; type=&quot;submit&quot; id=&quot;_submit&quot; name=&quot;_submit&quot; value=&quot;Sign in&quot; /&gt;</span>
-<span class="s2">          &lt;/div&gt;</span>
-<span class="s2">      &lt;/form&gt;</span>
-<span class="s2">    &lt;/div&gt;</span>
-
-<span class="s2">    &lt;/body&gt;</span>
-<span class="s2">&lt;/html&gt;&quot;&quot;&quot;</span>
-    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
-    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">form</span></div>
-
-
-<div class="viewcode-block" id="fake_login_check"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.fake_login_check">[docs]</a><span class="k">def</span> <span class="nf">fake_login_check</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    part of the fake login process, not part of the final codebase</span>
-
-<span class="sd">    :param request_handler: the object which has the body to extract as json</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">protocol</span> <span class="o">+</span> \
-          <span class="n">request_handler</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Host&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span>
-    <span class="n">request_handler</span><span class="o">.</span><span class="n">new_headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="s2">&quot;Mon, 26 Oct 2015 16:06:08 GMT&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Server&quot;</span><span class="p">:</span> <span class="s2">&quot;Apache/2.4.16 (Fedora) OpenSSL/1.0.1k-fips PHP/5.6.14&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;X-Powered-By&quot;</span><span class="p">:</span> <span class="s2">&quot;PHP/5.6.14&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Set-Cookie&quot;</span><span class="p">:</span> <span class="s2">&quot;PHPSESSID=rjcc3p0uila4qcu9btvf75ihd5; expires=Tue, 27-Oct-2015 16:06:30 GMT; Max-Age=86400; path=/&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Cache-Control&quot;</span><span class="p">:</span> <span class="s2">&quot;no-cache&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Location&quot;</span><span class="p">:</span> <span class="n">url</span> <span class="o">+</span> <span class="s2">&quot;/register_app&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Access-Control-Allow-Origin&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;x-frame-options&quot;</span><span class="p">:</span> <span class="s2">&quot;DENY&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Strict-Transport-Security&quot;</span><span class="p">:</span> <span class="s2">&quot;max-age=86400&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">:</span> <span class="s2">&quot;timeout=5, max=100&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Connection&quot;</span><span class="p">:</span> <span class="s2">&quot;Keep-Alive&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Transfer-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;chunked&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;text/html; charset=UTF8&quot;</span><span class="p">}</span>
-    <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;!DOCTYPE html&gt;</span>
-<span class="s2">&lt;html&gt;</span>
-<span class="s2">    &lt;head&gt;</span>
-<span class="s2">        &lt;meta charset=&quot;UTF-8&quot; /&gt;</span>
-<span class="s2">        &lt;meta http-equiv=&quot;refresh&quot; content=&quot;1;url=&quot;&quot;&quot;</span> <span class="o">+</span> <span class="n">url</span> <span class="o">+</span> <span class="s2">&quot;&quot;&quot;/register_app&quot; /&gt;</span>
-
-<span class="s2">        &lt;title&gt;Redirecting to &quot;&quot;&quot;</span> <span class="o">+</span> <span class="n">url</span> <span class="o">+</span> <span class="s2">&quot;&quot;&quot;/register_app&lt;/title&gt;</span>
-<span class="s2">    &lt;/head&gt;</span>
-<span class="s2">    &lt;body&gt;</span>
-<span class="s2">        Redirecting to &lt;a href=</span><span class="se">\&quot;</span><span class="s2">&quot;&quot;&quot;</span> <span class="o">+</span> <span class="n">url</span> <span class="o">+</span> <span class="s2">&quot;&quot;&quot; /register_app&quot;&gt;http://192.168.178.25/localbox/web/app.php/register_app&lt;/a&gt;.</span>
-<span class="s2">    &lt;/body&gt;</span>
-<span class="s2">&lt;/html&gt;&quot;&quot;&quot;</span>
-    <span class="c1"># ready_cookie(request_handler)</span>
-    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">302</span>
-    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">html</span></div>
-
-
 <div class="viewcode-block" id="fake_register_app"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.fake_register_app">[docs]</a><span class="k">def</span> <span class="nf">fake_register_app</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    part of the fake login process, most definitely not part of the final</span>
@@ -763,12 +666,12 @@
 
 <span class="sd">    :param request_handler: the object which has the body to extract as json</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">configparser</span> <span class="o">=</span> <span class="n">ConfigSingleton</span><span class="p">()</span>
+    <span class="n">configparser</span> <span class="o">=</span> <span class="n">ConfigSingleton</span><span class="p">(</span><span class="s1">&#39;localbox&#39;</span><span class="p">)</span>
     <span class="n">hostcrt</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;httpd&#39;</span><span class="p">,</span> <span class="s1">&#39;certfile&#39;</span><span class="p">)</span>
 
     <span class="n">backurl</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;oauth&#39;</span><span class="p">,</span> <span class="s1">&#39;direct_back_url&#39;</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;host.crt&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;baseurl&#39;</span><span class="p">:</span> <span class="n">backurl</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;schimmelpenning&#39;</span><span class="p">,</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;baseurl&#39;</span><span class="p">:</span> <span class="n">backurl</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;1.6.0&#39;</span><span class="p">,</span>
               <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;logourl&#39;</span><span class="p">:</span> <span class="s1">&#39;http://8ch.net/static/logo_33.svg&#39;</span><span class="p">,</span>
               <span class="s1">&#39;BackColor&#39;</span><span class="p">:</span> <span class="s1">&#39;#00FF00&#39;</span><span class="p">,</span> <span class="s1">&#39;FontColor&#39;</span><span class="p">:</span> <span class="s1">&#39;#0000FF&#39;</span><span class="p">,</span> <span class="s1">&#39;APIKeys&#39;</span><span class="p">:</span>
                   <span class="p">[{</span><span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="s1">&#39;LocalBox iOS&#39;</span><span class="p">,</span> <span class="s1">&#39;Key&#39;</span><span class="p">:</span> <span class="s1">&#39;keystring&#39;</span><span class="p">,</span>
@@ -865,8 +768,6 @@
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/meta.*&quot;</span><span class="p">),</span> <span class="n">exec_meta</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/identities&quot;</span><span class="p">),</span> <span class="n">exec_identities</span><span class="p">),</span>
 
-    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;.*\/login&quot;</span><span class="p">),</span> <span class="n">fake_login</span><span class="p">),</span>
-    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/login_check&quot;</span><span class="p">),</span> <span class="n">fake_login_check</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/register_app&quot;</span><span class="p">),</span> <span class="n">fake_register_app</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/oauth.*&quot;</span><span class="p">),</span> <span class="n">fake_oauth</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/.*&quot;</span><span class="p">),</span> <span class="n">fake_set_cookies</span><span class="p">),</span>

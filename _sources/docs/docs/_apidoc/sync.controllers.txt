@@ -1,0 +1,46 @@
+sync.controllers package
+========================
+
+Submodules
+----------
+
+sync.controllers.account_ctrl module
+------------------------------------
+
+.. automodule:: sync.controllers.account_ctrl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.controllers.localbox_ctrl module
+-------------------------------------
+
+.. automodule:: sync.controllers.localbox_ctrl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.controllers.login_ctrl module
+----------------------------------
+
+.. automodule:: sync.controllers.login_ctrl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.controllers.preferences_ctrl module
+----------------------------------------
+
+.. automodule:: sync.controllers.preferences_ctrl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sync.controllers
+    :members:
+    :undoc-members:
+    :show-inheritance:

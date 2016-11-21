@@ -1,0 +1,112 @@
+sync package
+============
+
+Subpackages
+-----------
+
+.. toctree::
+
+    sync.controllers
+    sync.gui
+    sync.models
+    sync.resources
+
+Submodules
+----------
+
+sync.auth module
+----------------
+
+.. automodule:: sync.auth
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.database module
+--------------------
+
+.. automodule:: sync.database
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.defaults module
+--------------------
+
+.. automodule:: sync.defaults
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.gpg module
+---------------
+
+.. automodule:: sync.gpg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.gui module
+---------------
+
+.. automodule:: sync.gui
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.language module
+--------------------
+
+.. automodule:: sync.language
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.localbox module
+--------------------
+
+.. automodule:: sync.localbox
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.metavfs module
+-------------------
+
+.. automodule:: sync.metavfs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.syncer module
+------------------
+
+.. automodule:: sync.syncer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.version module
+-------------------
+
+.. automodule:: sync.version
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sync.wizard module
+------------------
+
+.. automodule:: sync.wizard
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sync
+    :members:
+    :undoc-members:
+    :show-inheritance:
