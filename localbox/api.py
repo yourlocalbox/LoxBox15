@@ -678,12 +678,19 @@ def exec_identities(request_handler):
 
     :param request_handler: object in which to return the userlist
     """
-    sql = 'select name, not ((public_key == "" or public_key is NULL) and (private_key == "" or private_key is NULL)) as haskey from users;'
+    sql = 'select name, not ((public_key == "" or public_key is NULL) and (private_key == "" or private_key is NULL)) as haskey,' \
+          'public_key from users;'
     result = database_execute(sql)
     outputlist = []
     for entry in result:
-        outputlist.append({'id': entry[0], 'title': entry[0], 'username': entry[
-            0], 'type': 'user', 'has_keys': bool(entry[1])})
+        outputlist.append({
+            'id': entry[0],
+            'title': entry[0],
+            'username': entry[0],
+            'type': 'user',
+            'has_keys': bool(entry[1]),
+            'public_key': entry[2]
+        })
     if outputlist == []:
         request_handler.status = 404
     else:
