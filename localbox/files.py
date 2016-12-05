@@ -6,6 +6,7 @@ from os import chdir
 from os import getcwd
 from os import stat
 from os import walk
+from os import remove
 from os.path import abspath
 from os.path import isdir
 from os.path import islink
@@ -130,12 +131,19 @@ class SymlinkCache(object):
         removes links to and from filename (from the cache)
         :param absolute_filename: the file to remove from the cache
         """
-        if absolute_filename in self.cache.keys():
-            self.cache.pop(absolute_filename)
-        for key, value in self.cache.items():
-            if absolute_filename in value:
-                newvalue = value.remove(absolute_filename)
-                self.cache[key] = newvalue
+        if absolute_filename.endswith('/'):
+            absolute_filename = absolute_filename[:-1]
+
+        try:
+            # check if were are removing the parent of some links
+            map(lambda l: remove(l), self.cache[absolute_filename])
+            del self.cache[absolute_filename]
+        except KeyError:
+            # check if were are removing a link
+            for key, value in self.cache.items():
+                if absolute_filename in value:
+                    newvalue = value.remove(absolute_filename)
+                    self.cache[key] = newvalue
 
     def exists(self, absolute_file_name):
         """
