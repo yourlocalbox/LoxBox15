@@ -56,8 +56,9 @@ clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf $(APIDOCDIR)/*
 
+.PHONY: apidoc
 apidoc:
-	$(SPHINXAPIDOC) -o $(APIDOCDIR) localbox
+	$(SPHINXAPIDOC) -f -o $(APIDOCDIR) localbox
 
 diagrams:
 	chmod +x $(SCRIPT_DIA_EXPORT) && $(SCRIPT_DIA_EXPORT) $(DIAGRAMSDIR)

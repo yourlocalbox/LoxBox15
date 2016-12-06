@@ -7,6 +7,7 @@ from os import getcwd
 from os import stat
 from os import walk
 from os import remove
+from os.path import exists
 from os.path import abspath
 from os.path import isdir
 from os.path import islink
@@ -15,9 +16,10 @@ from os.path import relpath
 from os.path import split
 from sys import exit as sysexit
 
-import localbox.utils
 from localbox.database import database_execute
 from localbox.utils import get_bindpoint
+from localbox.utils import get_logging_empty_extra
+from loxcommon.os_utils import mkdir_p
 
 try:
     from os import readlink
@@ -34,7 +36,7 @@ def get_filesystem_path(localbox_path, user):
 
     :param localbox_path: the path relative to localbox' view
     :param user: the user for which to translate the path (the username is part
-           of the path and hence cannot be ommitted.
+           of the path and hence cannot be omitted.
     :returns: a filesystem path to the resource pointed to by the localbox path
     """
     while localbox_path.startswith('/'):
@@ -43,7 +45,7 @@ def get_filesystem_path(localbox_path, user):
         raise ValueError("No relative paths allowed in localbox")
     bindpoint = get_bindpoint()
     filepath = join(bindpoint, user, localbox_path)
-    getLogger(__name__).debug('filesystem path: %s' % filepath, extra=localbox.utils.get_logging_empty_extra())
+    getLogger(__name__).debug('filesystem path: %s' % filepath, extra=get_logging_empty_extra())
     return filepath
 
 
@@ -77,7 +79,7 @@ def stat_reader(filesystem_path, user):
     :returns: a dictionary of metadata for the filesystem path given
     """
     getLogger(__name__).debug('read stats for file: %s' % filesystem_path,
-                              extra=localbox.utils.get_logging_empty_extra())
+                              extra=get_logging_empty_extra())
     bindpath_user = get_bindpoint_user(user)
     if bindpath_user == abspath(filesystem_path):
         title = 'Home'
@@ -112,6 +114,18 @@ def stat_reader(filesystem_path, user):
     # if isdir(filesystem_path):
     #    statdict['hash'] = 'TODO'
     return statdict
+
+
+def create_user_home(user):
+    """
+    Create user home directory (for storing LocalBox files), if necessary.
+
+    :param user: username
+    :return:
+    """
+    user_folder = join(get_bindpoint(), user)
+    if not exists(user_folder):
+        mkdir_p(user_folder)
 
 
 class SymlinkCache(object):
