@@ -501,6 +501,7 @@ def exec_create_share(request_handler):
                 return
             try:
                 symlink(from_file, to_file)
+                SymlinkCache().add(from_file, to_file)
             except OSError:
                 getLogger('api').error("Error making symlink from " + from_file +
                                        " to " + to_file, extra=request_handler.get_log_dict())

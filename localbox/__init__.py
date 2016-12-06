@@ -172,7 +172,6 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         else:
             querystring = urlencode({'redirect_uri': self.protocol +
                                                      self.headers['Host'] + self.path})
-        # self.user = authentication_dummy()
         self.user = self.check_authorization()
 
         if not self.user:
@@ -209,7 +208,6 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler):
         if not match_found:
             log.debug("Could not match the path: " + self.path,
                       extra=self.get_log_dict())
-            # log.debug(str(self.status) + " " +  str(self.new_headers) + "\n\n" + str(self.body), extra=self.get_log_dict())
 
     def do_POST(self):
         """

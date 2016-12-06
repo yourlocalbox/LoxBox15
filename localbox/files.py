@@ -73,7 +73,7 @@ def stat_reader(filesystem_path, user):
     provided by the stat system call.
 
     :param filesystem_path: a path referring to the file to stat
-    :param user: the user for which to reutrn the info
+    :param user: the user for which to return the info
     :returns: a dictionary of metadata for the filesystem path given
     """
     getLogger(__name__).debug('read stats for file: %s' % filesystem_path,
@@ -153,6 +153,18 @@ class SymlinkCache(object):
         :param absolute_file_name: name of the file to check in the cache
         """
         return absolute_file_name in self.cache
+
+    def add(self, from_file, to_file):
+        """
+        Add entry to symbolic link cache.
+
+        :param from_file: absolute file name of the origin file
+        :param to_file: absolute file name of the destination file
+        """
+        if self.cache.get(from_file):
+            self.cache[from_file].append(to_file)
+        else:
+            self.cache[from_file] = [to_file]
 
     def get(self, path):
         """
