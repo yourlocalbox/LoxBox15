@@ -28,6 +28,18 @@ Install loauth backend server
     python -m loauth --init-db
     python -m loauth --add-user <USERNAME>
 
+Setup as service
+----------------
+
+Ubuntu >= 15.04
++++++++++++++++
+.. code-block:: bash
+
+    sudo cp scripts/localbox.service /etc/systemd/system/
+    sudo cp scripts/localbox.sh /usr/local/bin
+    sudo systemctl daemon-reload
+    sudo systemctl enable localbox.service
+    sudo systemctl start localbox
 
 Dependencies
 ------------
