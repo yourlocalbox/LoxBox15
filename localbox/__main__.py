@@ -1,14 +1,16 @@
 """
 Start the LocalBox server
 """
+import logging
 from logging import getLogger
 from signal import SIGINT, signal
-from sys import exit as sysexit
+from sys import exit as sysexit, stdout
 
 import localbox.utils
 from loxcommon.log import prepare_logging
 from .__init__ import main
 from loxcommon.config import ConfigSingleton
+from loxcommon import os_utils
 
 
 def sig_handler(signum, frame):  # pylint: disable=W0613
@@ -38,9 +40,7 @@ if __name__ == '__main__':
     configparser = ConfigSingleton('localbox', defaults={'console': False})
     prepare_logging(configparser)
 
-    import loxcommon, logging
-
-    loxcommon.log.loggers[loxcommon.os_utils.__name__] = logging.LoggerAdapter(
-        logging.getLogger(loxcommon.os_utils.__name__),
+    logging.Logger.manager.loggerDict[os_utils.__name__] = logging.LoggerAdapter(
+        logging.getLogger(os_utils.__name__),
         localbox.utils.get_logging_empty_extra())
     run()

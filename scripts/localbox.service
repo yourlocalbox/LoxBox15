@@ -3,7 +3,7 @@ Description=LocalBox server
 
 [Service]
 Type=idle
-ExecStart=/home/wilson/bin/localbox.sh
+ExecStart=/usr/local/bin/localbox.sh
 RemainAfterExit=yes
 
 [Install]

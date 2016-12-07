@@ -35,8 +35,9 @@ Ubuntu >= 15.04
 +++++++++++++++
 .. code-block:: bash
 
+    echo -e "export LOX_HOME=/opt/localbox/LoxBox15" | sudo tee /etc/profile.d/localbox.sh
     sudo cp scripts/localbox.service /etc/systemd/system/
-    sudo cp scripts/localbox.sh /usr/local/bin
+    echo -e "#!/bin/sh -\ncd ${LOX_HOME}\n/usr/bin/python -m localbox" | sudo tee /usr/local/bin/localbox.sh
     sudo systemctl daemon-reload
     sudo systemctl enable localbox.service
     sudo systemctl start localbox
