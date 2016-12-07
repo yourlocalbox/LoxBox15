@@ -475,8 +475,7 @@ def exec_create_share(request_handler):
     body = request_handler.old_body
     json_list = loads(body)
     getLogger(__name__).debug('request data: %s' % json_list, extra=request_handler.get_log_dict())
-    path2 = request_handler.path.replace(
-        '/lox_api/share_create/', '', 1)
+    path2 = unquote_plus(request_handler.path.replace('/lox_api/share_create/', '', 1))
     bindpoint = get_bindpoint()
     sender = request_handler.user
     from_file = join(bindpoint, sender, path2)
@@ -577,7 +576,7 @@ def exec_meta(request_handler):
         path = unquote_plus(
             request_handler.path.replace('/lox_api/meta/', '', 1))
 
-    getLogger(__name__).debug('body %s' % (request_handler.old_body),
+    getLogger(__name__).debug('body %s' % request_handler.old_body,
                               extra=localbox.utils.get_logging_extra(request_handler))
     if request_handler.old_body:
         path = unquote_plus(loads(request_handler.old_body)['path'])
