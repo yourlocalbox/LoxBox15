@@ -145,6 +145,15 @@ def exec_remove_shares(request_handler):
     request_handler.status = 200
 
 
+def exec_shares_delete(request_handler):
+    share_start = request_handler.path.replace(
+        '/lox_api/shares/', '', 1)
+    shareid = int(share_start.replace('/delete', '', 1))
+    sql = 'delete from shares where id = ?'
+    database_execute(sql, (shareid,))
+    request_handler.status = 200
+
+
 def exec_edit_shares(request_handler):
     """
     Edits the list of people who can access a certain share object. A list of
@@ -731,6 +740,7 @@ ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/share_create\/.*"), exec_create_share),
     (regex_compile(r"\/lox_api\/shares\/.*\/edit"), exec_edit_shares),
     (regex_compile(r"\/lox_api\/shares\/.*\/revoke"), exec_remove_shares),
+    (regex_compile(r"\/lox_api\/shares\/.*\/delete"), exec_shares_delete),
     (regex_compile(r"\/lox_api\/shares\/.*\/leave"), exec_leave_share),
     (regex_compile(r"\/lox_api\/shares\/user/.*"), exec_shares_list),
     (regex_compile(r"\/lox_api\/shares\/.*"), exec_shares),
