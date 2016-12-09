@@ -191,6 +191,16 @@ def exec_shares(request_handler):
         request_handler.body = None
 
 
+def exec_shares_list(request_handler):
+    user = unquote_plus(request_handler.path.replace('/lox_api/shares/user/', '', 1))
+    data = list_share_items(user=user)
+    request_handler.body = data
+    request_handler.status = 200
+    if data == "{}":
+        request_handler.status = 404
+        request_handler.body = None
+
+
 def exec_invitations(request_handler):
     """
     Returns a list of all (pending) invitations for an user. Called via the
@@ -722,6 +732,7 @@ ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/shares\/.*\/edit"), exec_edit_shares),
     (regex_compile(r"\/lox_api\/shares\/.*\/revoke"), exec_remove_shares),
     (regex_compile(r"\/lox_api\/shares\/.*\/leave"), exec_leave_share),
+    (regex_compile(r"\/lox_api\/shares\/user/.*"), exec_shares_list),
     (regex_compile(r"\/lox_api\/shares\/.*"), exec_shares),
     (regex_compile(r"\/lox_api\/user\/.*"), exec_user_username),
     (regex_compile(r"\/lox_api\/user"), exec_user),
