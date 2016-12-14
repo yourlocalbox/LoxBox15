@@ -239,3 +239,9 @@ dummy:
 	@echo
 	@echo "Build finished. Dummy builder generates no files."
 
+.PHONY: deb
+deb:
+	rm -rf debian
+	make-deb
+	cp scripts/postinst debian
+	dpkg-buildpackage -us -uc
