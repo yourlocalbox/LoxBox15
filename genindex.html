@@ -61,6 +61,7 @@
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -70,10 +71,20 @@
   <dt><a href="docs/_apidoc/localbox.html#localbox.cache.TimedCache.add">add() (localbox.cache.TimedCache method)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="docs/_apidoc/localbox.html#localbox.files.SymlinkCache.add">(localbox.files.SymlinkCache method)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="docs/_apidoc/localbox.html#localbox.shares.Share.add_user">add_user() (localbox.shares.Share method)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#localbox.auth.authorize">authorize() (in module localbox.auth)</a>
   </dt>
 
   </dl></td>
@@ -93,13 +104,17 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.check_authorization">check_authorization() (localbox.LocalBoxHTTPRequestHandler method)</a>
+  <dt><a href="docs/_apidoc/localbox.html#localbox.auth.check_authorization">check_authorization() (in module localbox.auth)</a>
   </dt>
 
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="docs/_apidoc/localbox.html#localbox.cache.TimedCache.clean">clean() (localbox.cache.TimedCache method)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#localbox.files.create_user_home">create_user_home() (in module localbox.files)</a>
   </dt>
 
   </dl></td>
@@ -176,12 +191,12 @@
   <dt><a href="docs/_apidoc/localbox.html#localbox.api.exec_leave_share">exec_leave_share() (in module localbox.api)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="docs/_apidoc/localbox.html#localbox.api.exec_meta">exec_meta() (in module localbox.api)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="docs/_apidoc/localbox.html#localbox.api.exec_operations_copy">exec_operations_copy() (in module localbox.api)</a>
   </dt>
@@ -204,6 +219,14 @@
 
       
   <dt><a href="docs/_apidoc/localbox.html#localbox.api.exec_shares">exec_shares() (in module localbox.api)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#localbox.api.exec_shares_delete">exec_shares_delete() (in module localbox.api)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#localbox.api.exec_shares_list">exec_shares_list() (in module localbox.api)</a>
   </dt>
 
       
@@ -355,6 +378,14 @@
   </dt>
 
       
+  <dt><a href="docs/_apidoc/localbox.html#module-localbox.apitests">localbox.apitests (module)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#module-localbox.auth">localbox.auth (module)</a>
+  </dt>
+
+      
   <dt><a href="docs/_apidoc/localbox.html#module-localbox.cache">localbox.cache (module)</a>
   </dt>
 
@@ -374,6 +405,14 @@
 
       
   <dt><a href="docs/_apidoc/localbox.html#module-localbox.shares">localbox.shares (module)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#module-localbox.test_api">localbox.test_api (module)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#module-localbox.test_list_share_items">localbox.test_list_share_items (module)</a>
   </dt>
 
       
@@ -425,11 +464,15 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="docs/_apidoc/localbox.html#localbox.api.ready_cookie">ready_cookie() (in module localbox.api)</a>
+  <dt><a href="docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.read_request_body">read_request_body() (localbox.LocalBoxHTTPRequestHandler method)</a>
   </dt>
 
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="docs/_apidoc/localbox.html#localbox.api.ready_cookie">ready_cookie() (in module localbox.api)</a>
+  </dt>
+
       
   <dt><a href="docs/_apidoc/localbox.html#localbox.files.SymlinkCache.remove">remove() (localbox.files.SymlinkCache method)</a>
   </dt>
@@ -451,7 +494,7 @@
 
       </dl></dd>
       
-  <dt><a href="docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.send_request">send_request() (localbox.LocalBoxHTTPRequestHandler method)</a>
+  <dt><a href="docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.send_response">send_response() (localbox.LocalBoxHTTPRequestHandler method)</a>
   </dt>
 
       
@@ -483,9 +526,27 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="docs/_apidoc/localbox.html#localbox.test_api.Test_Api">Test_Api (class in localbox.test_api)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#localbox.test_api.Test_Api.test_exec_identities">test_exec_identities() (localbox.test_api.Test_Api method)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#localbox.test_list_share_items.TestList_share_items.test_list_share_items">test_list_share_items() (localbox.test_list_share_items.TestList_share_items method)</a>
+  </dt>
+
+      
+  <dt><a href="docs/_apidoc/localbox.html#localbox.test_list_share_items.TestList_share_items">TestList_share_items (class in localbox.test_list_share_items)</a>
+  </dt>
+
+      
   <dt><a href="docs/_apidoc/localbox.html#localbox.cache.TimedCache">TimedCache (class in localbox.cache)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="docs/_apidoc/localbox.html#localbox.shares.Group.to_json">to_json() (localbox.shares.Group method)</a>
   </dt>
@@ -508,8 +569,6 @@
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="docs/_apidoc/localbox.html#localbox.shares.toggle_invite_state">toggle_invite_state() (in module localbox.shares)</a>
   </dt>
@@ -522,6 +581,16 @@
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="docs/_apidoc/localbox.html#localbox.shares.User">User (class in localbox.shares)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="docs/_apidoc/localbox.html#localbox.LocalBoxHTTPRequestHandler.wrap_request">wrap_request() (localbox.LocalBoxHTTPRequestHandler method)</a>
   </dt>
 
   </dl></td>

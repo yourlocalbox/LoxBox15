@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>localbox.auth &#8212; LocalBox 1.6.2b documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.6.2b',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="LocalBox 1.6.2b documentation" href="../../index.html" />
+    <link rel="up" title="localbox" href="../localbox.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for localbox.auth</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ssl</span> <span class="k">import</span> <span class="n">SSLContext</span>
+<span class="kn">from</span> <span class="nn">ssl</span> <span class="k">import</span> <span class="n">PROTOCOL_TLSv1_2</span> <span class="k">as</span> <span class="n">SSL_PROTOCOL</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="k">import</span> <span class="n">getLogger</span>
+
+<span class="kn">from</span> <span class="nn">localbox</span> <span class="k">import</span> <span class="n">config</span>
+<span class="kn">from</span> <span class="nn">localbox.cache</span> <span class="k">import</span> <span class="n">TimedCache</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib2</span> <span class="k">import</span> <span class="n">HTTPError</span>
+    <span class="kn">from</span> <span class="nn">urllib</span> <span class="k">import</span> <span class="n">urlencode</span>  <span class="c1"># pylint: disable=E0611</span>
+    <span class="kn">from</span> <span class="nn">urllib2</span> <span class="k">import</span> <span class="n">Request</span>
+    <span class="kn">from</span> <span class="nn">urllib2</span> <span class="k">import</span> <span class="n">urlopen</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib.error</span> <span class="k">import</span> <span class="n">HTTPError</span>  <span class="c1"># pylint: disable=E0611,F0401</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlencode</span>  <span class="c1"># pylint: disable=E0611,F0401</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">Request</span>  <span class="c1"># pylint: disable=E0611,F0401</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlopen</span>  <span class="c1"># pylint: disable=E0611,F0401</span>
+
+
+<div class="viewcode-block" id="authorize"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.auth.authorize">[docs]</a><span class="k">def</span> <span class="nf">authorize</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator for checking if the user has authorization before executing the request_handler.</span>
+<span class="sd">    If the user has authorization the request_handler is executed by the decorator.</span>
+<span class="sd">    Otherwise the user will receive the authentication url as response; sent by</span>
+<span class="sd">    :py:func:`~localbox.LocalBoxHTTPRequestHandler.wrap_request` via</span>
+<span class="sd">    :py:func:`~localbox.LocalBoxHTTPRequestHandler.send_response`</span>
+
+<span class="sd">    :param func: method in :py:class:`~localbox.LocalBoxHTTPRequestHandler` that requires authorization</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">check_authorization</span><span class="p">(</span><span class="n">request_handler</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">401</span>
+
+            <span class="k">if</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">back_url</span><span class="p">:</span>
+                <span class="n">querystring</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;redirect_uri&#39;</span><span class="p">:</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">back_url</span><span class="p">})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">querystring</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;redirect_uri&#39;</span><span class="p">:</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">protocol</span>
+                                                         <span class="o">+</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Host&#39;</span><span class="p">]</span>
+                                                         <span class="o">+</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="p">})</span>
+
+            <span class="n">redirect_url</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;oauth&#39;</span><span class="p">,</span> <span class="s1">&#39;redirect_url&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;?&quot;</span> <span class="o">+</span> <span class="n">querystring</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;redirect_url: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redirect_url</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">new_headers</span><span class="p">[</span><span class="s1">&#39;WWW-Authenticate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Bearer domain=&quot;&#39;</span> <span class="o">+</span> <span class="n">redirect_url</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+            <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;&lt;h1&gt;401: Forbidden.&lt;/h1&gt;&quot;</span> \
+                                   <span class="s2">&quot;&lt;p&gt;Authorization failed. Please authenticate at&quot;</span> \
+                                   <span class="s2">&quot;&lt;a href=</span><span class="se">\&quot;</span><span class="si">{0}</span><span class="se">\&quot;</span><span class="s2">&gt;</span><span class="si">{1}</span><span class="s2">&lt;/a&gt;&lt;/p&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">redirect_url</span><span class="p">,</span> <span class="n">redirect_url</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">func</span><span class="p">(</span><span class="n">request_handler</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">check</span></div>
+
+
+<div class="viewcode-block" id="check_authorization"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.auth.check_authorization">[docs]</a><span class="k">def</span> <span class="nf">check_authorization</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assert whether the authorization header is valid by checking it against</span>
+<span class="sd">    the cache first and if unsuccessful, the oauth server. Sets the &#39;user&#39;</span>
+<span class="sd">    field of the request_handler object.</span>
+
+<span class="sd">    :return: When successful returns user&#39;s name. Returns None on failure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">auth_header</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">getheader</span><span class="p">(</span><span class="s1">&#39;Authorization&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">auth_header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;authentication failed: no Authorization header available&quot;</span><span class="p">,</span>
+                                <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">auth_url</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;oauth&#39;</span><span class="p">,</span> <span class="s1">&#39;verify_url&#39;</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;verify_url: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">auth_url</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="n">TimedCache</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># FIXME: Cache is broken</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">auth_header</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">name</span>
+    <span class="n">auth_request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="n">auth_url</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="n">auth_header</span><span class="p">})</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ctx</span> <span class="o">=</span> <span class="n">SSLContext</span><span class="p">(</span><span class="n">SSL_PROTOCOL</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">auth_request</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">HTTPError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">error</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="mi">403</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;authentication failed: Wrong/expired code&quot;</span><span class="p">,</span>
+                                    <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;authentication failed: HttpError </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">error</span><span class="p">,</span>
+                                    <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;authentication failed: response </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span>
+                                <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Authenticated user: &#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span>
+                                <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
+        <span class="n">cache</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">auth_header</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">name</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../localbox.html">localbox</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

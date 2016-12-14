@@ -190,6 +190,15 @@
     <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span></div>
 
 
+<div class="viewcode-block" id="exec_shares_delete"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_shares_delete">[docs]</a><span class="k">def</span> <span class="nf">exec_shares_delete</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="n">share_start</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="s1">&#39;/lox_api/shares/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">shareid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">share_start</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/delete&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;delete from shares where id = ?&#39;</span>
+    <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">shareid</span><span class="p">,))</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span></div>
+
+
 <div class="viewcode-block" id="exec_edit_shares"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_edit_shares">[docs]</a><span class="k">def</span> <span class="nf">exec_edit_shares</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Edits the list of people who can access a certain share object. A list of</span>
@@ -229,6 +238,16 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">path2</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/shares/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">list_share_items</span><span class="p">(</span><span class="n">path2</span><span class="p">)</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">:</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="exec_shares_list"><a class="viewcode-back" href="../../docs/_apidoc/localbox.html#localbox.api.exec_shares_list">[docs]</a><span class="k">def</span> <span class="nf">exec_shares_list</span><span class="p">(</span><span class="n">request_handler</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/shares/user/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">list_share_items</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
     <span class="n">request_handler</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">data</span>
     <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>
     <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">:</span>
@@ -520,8 +539,7 @@
     <span class="n">body</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span>
     <span class="n">json_list</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
     <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;request data: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">json_list</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
-    <span class="n">path2</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-        <span class="s1">&#39;/lox_api/share_create/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">path2</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/share_create/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="n">bindpoint</span> <span class="o">=</span> <span class="n">get_bindpoint</span><span class="p">()</span>
     <span class="n">sender</span> <span class="o">=</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">user</span>
     <span class="n">from_file</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">bindpoint</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">path2</span><span class="p">)</span>
@@ -546,6 +564,7 @@
                 <span class="k">return</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">symlink</span><span class="p">(</span><span class="n">from_file</span><span class="p">,</span> <span class="n">to_file</span><span class="p">)</span>
+                <span class="n">SymlinkCache</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">from_file</span><span class="p">,</span> <span class="n">to_file</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
                 <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;api&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error making symlink from &quot;</span> <span class="o">+</span> <span class="n">from_file</span> <span class="o">+</span>
                                        <span class="s2">&quot; to &quot;</span> <span class="o">+</span> <span class="n">to_file</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">request_handler</span><span class="o">.</span><span class="n">get_log_dict</span><span class="p">())</span>
@@ -621,7 +640,7 @@
         <span class="n">path</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span>
             <span class="n">request_handler</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/lox_api/meta/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;body </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">),</span>
+    <span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;body </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">,</span>
                               <span class="n">extra</span><span class="o">=</span><span class="n">localbox</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_logging_extra</span><span class="p">(</span><span class="n">request_handler</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">:</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">unquote_plus</span><span class="p">(</span><span class="n">loads</span><span class="p">(</span><span class="n">request_handler</span><span class="o">.</span><span class="n">old_body</span><span class="p">)[</span><span class="s1">&#39;path&#39;</span><span class="p">])</span>
@@ -723,12 +742,19 @@
 
 <span class="sd">    :param request_handler: object in which to return the userlist</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;select name, not ((public_key == &quot;&quot; or public_key is NULL) and (private_key == &quot;&quot; or private_key is NULL)) as haskey from users;&#39;</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;select name, not ((public_key == &quot;&quot; or public_key is NULL) and (private_key == &quot;&quot; or private_key is NULL)) as haskey,&#39;</span> \
+          <span class="s1">&#39;public_key from users;&#39;</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">database_execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
     <span class="n">outputlist</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-        <span class="n">outputlist</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span>
-            <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;has_keys&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">])})</span>
+        <span class="n">outputlist</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;user&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;has_keys&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="s1">&#39;public_key&#39;</span><span class="p">:</span> <span class="n">entry</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="p">})</span>
     <span class="k">if</span> <span class="n">outputlist</span> <span class="o">==</span> <span class="p">[]:</span>
         <span class="n">request_handler</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="mi">404</span>
     <span class="k">else</span><span class="p">:</span>
@@ -759,7 +785,9 @@
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/share_create\/.*&quot;</span><span class="p">),</span> <span class="n">exec_create_share</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/.*\/edit&quot;</span><span class="p">),</span> <span class="n">exec_edit_shares</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/.*\/revoke&quot;</span><span class="p">),</span> <span class="n">exec_remove_shares</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/.*\/delete&quot;</span><span class="p">),</span> <span class="n">exec_shares_delete</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/.*\/leave&quot;</span><span class="p">),</span> <span class="n">exec_leave_share</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/user/.*&quot;</span><span class="p">),</span> <span class="n">exec_shares_list</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/shares\/.*&quot;</span><span class="p">),</span> <span class="n">exec_shares</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/user\/.*&quot;</span><span class="p">),</span> <span class="n">exec_user_username</span><span class="p">),</span>
     <span class="p">(</span><span class="n">regex_compile</span><span class="p">(</span><span class="s2">r&quot;\/lox_api\/user&quot;</span><span class="p">),</span> <span class="n">exec_user</span><span class="p">),</span>

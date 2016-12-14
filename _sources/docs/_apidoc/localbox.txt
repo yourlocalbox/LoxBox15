@@ -12,6 +12,22 @@ localbox.api module
     :undoc-members:
     :show-inheritance:
 
+localbox.apitests module
+------------------------
+
+.. automodule:: localbox.apitests
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.auth module
+--------------------
+
+.. automodule:: localbox.auth
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 localbox.cache module
 ---------------------
 
@@ -48,6 +64,22 @@ localbox.shares module
 ----------------------
 
 .. automodule:: localbox.shares
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.test_api module
+------------------------
+
+.. automodule:: localbox.test_api
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+localbox.test_list_share_items module
+-------------------------------------
+
+.. automodule:: localbox.test_list_share_items
     :members:
     :undoc-members:
     :show-inheritance:

@@ -311,6 +311,16 @@ of shares containing the provided path. Called via the routing list.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="localbox.api.exec_shares_delete">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_shares_delete</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_shares_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_shares_delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="localbox.api.exec_shares_list">
+<code class="descclassname">localbox.api.</code><code class="descname">exec_shares_list</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_shares_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_shares_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="localbox.api.exec_user">
 <code class="descclassname">localbox.api.</code><code class="descname">exec_user</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#exec_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.exec_user" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns public- and private key information about the current user. Called
@@ -421,6 +431,48 @@ return the right type of object for sending over the network.</p>
 <dt id="localbox.api.ready_cookie">
 <code class="descclassname">localbox.api.</code><code class="descname">ready_cookie</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/api.html#ready_cookie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.api.ready_cookie" title="Permalink to this definition">¶</a></dt>
 <dd><p>Readies a PHP-like cookie - not to be part of the final codebase</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-localbox.apitests">
+<span id="localbox-apitests-module"></span><h2>localbox.apitests module<a class="headerlink" href="#module-localbox.apitests" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-localbox.auth">
+<span id="localbox-auth-module"></span><h2>localbox.auth module<a class="headerlink" href="#module-localbox.auth" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="localbox.auth.authorize">
+<code class="descclassname">localbox.auth.</code><code class="descname">authorize</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/auth.html#authorize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.auth.authorize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for checking if the user has authorization before executing the request_handler.
+If the user has authorization the request_handler is executed by the decorator.
+Otherwise the user will receive the authentication url as response; sent by
+<a class="reference internal" href="#localbox.LocalBoxHTTPRequestHandler.wrap_request" title="localbox.LocalBoxHTTPRequestHandler.wrap_request"><code class="xref py py-func docutils literal"><span class="pre">wrap_request()</span></code></a> via
+<a class="reference internal" href="#localbox.LocalBoxHTTPRequestHandler.send_response" title="localbox.LocalBoxHTTPRequestHandler.send_response"><code class="xref py py-func docutils literal"><span class="pre">send_response()</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> &#8211; method in <a class="reference internal" href="#localbox.LocalBoxHTTPRequestHandler" title="localbox.LocalBoxHTTPRequestHandler"><code class="xref py py-class docutils literal"><span class="pre">LocalBoxHTTPRequestHandler</span></code></a> that requires authorization</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="localbox.auth.check_authorization">
+<code class="descclassname">localbox.auth.</code><code class="descname">check_authorization</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/auth.html#check_authorization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.auth.check_authorization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert whether the authorization header is valid by checking it against
+the cache first and if unsuccessful, the oauth server. Sets the &#8216;user&#8217;
+field of the request_handler object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">When successful returns user&#8217;s name. Returns None on failure.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -647,6 +699,24 @@ path</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Singleton keeping track of all symlinks (shares)</p>
 <dl class="method">
+<dt id="localbox.files.SymlinkCache.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>from_file</em>, <em>to_file</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#SymlinkCache.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.SymlinkCache.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add entry to symbolic link cache.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>from_file</strong> &#8211; absolute file name of the origin file</li>
+<li><strong>to_file</strong> &#8211; absolute file name of the destination file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="localbox.files.SymlinkCache.build_cache">
 <code class="descname">build_cache</code><span class="sig-paren">(</span><em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#SymlinkCache.build_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.SymlinkCache.build_cache" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build the reverse symlink cache by walking through the filesystem and
@@ -695,6 +765,22 @@ destination of a symlink and thus a &#8216;share&#8217; folder</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="localbox.files.create_user_home">
+<code class="descclassname">localbox.files.</code><code class="descname">create_user_home</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#create_user_home"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.create_user_home" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create user home directory (for storing LocalBox files), if necessary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user</strong> &#8211; username</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="localbox.files.get_bindpoint_user">
 <code class="descclassname">localbox.files.</code><code class="descname">get_bindpoint_user</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/files.html#get_bindpoint_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.files.get_bindpoint_user" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -711,7 +797,7 @@ filesystem path (e.g. &#8216;/var/localbox/data/user/file_name&#8217;)</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>localbox_path</strong> &#8211; the path relative to localbox&#8217; view</li>
 <li><strong>user</strong> &#8211; the user for which to translate the path (the username is part
-of the path and hence cannot be ommitted.</li>
+of the path and hence cannot be omitted.</li>
 </ul>
 </td>
 </tr>
@@ -743,7 +829,7 @@ provided by the stat system call.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>filesystem_path</strong> &#8211; a path referring to the file to stat</li>
-<li><strong>user</strong> &#8211; the user for which to reutrn the info</li>
+<li><strong>user</strong> &#8211; the user for which to return the info</li>
 </ul>
 </td>
 </tr>
@@ -843,7 +929,7 @@ or creating a new one if this Share has no ID yet.</p>
 
 <dl class="class">
 <dt id="localbox.shares.ShareItem">
-<em class="property">class </em><code class="descclassname">localbox.shares.</code><code class="descname">ShareItem</code><span class="sig-paren">(</span><em>icon=None</em>, <em>path=None</em>, <em>has_keys=False</em>, <em>is_share=False</em>, <em>is_shared=False</em>, <em>modified_at=None</em>, <em>title=None</em>, <em>is_dir=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#ShareItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.ShareItem" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">localbox.shares.</code><code class="descname">ShareItem</code><span class="sig-paren">(</span><em>icon=None</em>, <em>path=None</em>, <em>has_keys=False</em>, <em>is_share=False</em>, <em>id=None</em>, <em>is_shared=False</em>, <em>modified_at=None</em>, <em>title=None</em>, <em>is_dir=False</em>, <em>user=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/shares.html#ShareItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.shares.ShareItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Item that signifies a &#8216;share&#8217;. Sharing a folder allows a different user to
 access yor file/folder. A ShareItem is the representation of that folder</p>
@@ -969,6 +1055,34 @@ extract the invite from.</li>
 </dd></dl>
 
 </div>
+<div class="section" id="module-localbox.test_api">
+<span id="localbox-test-api-module"></span><h2>localbox.test_api module<a class="headerlink" href="#module-localbox.test_api" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="localbox.test_api.Test_Api">
+<em class="property">class </em><code class="descclassname">localbox.test_api.</code><code class="descname">Test_Api</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/test_api.html#Test_Api"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.test_api.Test_Api" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<dl class="method">
+<dt id="localbox.test_api.Test_Api.test_exec_identities">
+<code class="descname">test_exec_identities</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/test_api.html#Test_Api.test_exec_identities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.test_api.Test_Api.test_exec_identities" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-localbox.test_list_share_items">
+<span id="localbox-test-list-share-items-module"></span><h2>localbox.test_list_share_items module<a class="headerlink" href="#module-localbox.test_list_share_items" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="localbox.test_list_share_items.TestList_share_items">
+<em class="property">class </em><code class="descclassname">localbox.test_list_share_items.</code><code class="descname">TestList_share_items</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/test_list_share_items.html#TestList_share_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.test_list_share_items.TestList_share_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<dl class="method">
+<dt id="localbox.test_list_share_items.TestList_share_items.test_list_share_items">
+<code class="descname">test_list_share_items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox/test_list_share_items.html#TestList_share_items.test_list_share_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.test_list_share_items.TestList_share_items.test_list_share_items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-localbox.utils">
 <span id="localbox-utils-module"></span><h2>localbox.utils module<a class="headerlink" href="#module-localbox.utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -993,39 +1107,24 @@ extract the invite from.</li>
 <dl class="class">
 <dt id="localbox.LocalBoxHTTPRequestHandler">
 <em class="property">class </em><code class="descclassname">localbox.</code><code class="descname">LocalBoxHTTPRequestHandler</code><span class="sig-paren">(</span><em>request</em>, <em>client_address</em>, <em>server</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">BaseHTTPServer.BaseHTTPRequestHandler</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">BaseHTTPServer.BaseHTTPRequestHandler</span></code>, <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>class extending the BaseHTTPRequestHandler and handling the HTTP requests
 in do_POST and do_GET (which in their turn forward said requests to
 do_request)</p>
 <dl class="method">
-<dt id="localbox.LocalBoxHTTPRequestHandler.check_authorization">
-<code class="descname">check_authorization</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.check_authorization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.check_authorization" title="Permalink to this definition">¶</a></dt>
-<dd><p>assert whether the authorization header is valid by checking it against
-the cache first and if unsuccessful, the oauth server. Sets the &#8216;user&#8217;
-field when successful and returns said name. returns None on failure</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="localbox.LocalBoxHTTPRequestHandler.do_GET">
-<code class="descname">do_GET</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.do_GET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.do_GET" title="Permalink to this definition">¶</a></dt>
-<dd><p>handle a POST request (by forwarding it to do_request)</p>
-</dd></dl>
+<code class="descname">do_GET</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.do_GET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.do_GET" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="localbox.LocalBoxHTTPRequestHandler.do_POST">
-<code class="descname">do_POST</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.do_POST"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.do_POST" title="Permalink to this definition">¶</a></dt>
-<dd><p>handle a POST request (by forwarding it to do_request)</p>
-</dd></dl>
+<code class="descname">do_POST</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.do_POST"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.do_POST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="localbox.LocalBoxHTTPRequestHandler.do_request">
-<code class="descname">do_request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.do_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.do_request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Handle a request (do_POST and do_GET both forward to this function).
-Handling of a requests is done in three phases. First, the
-authorization is checked. When this is in order, the ROUTING_LIST is
-consulted to find the function to do the actual work. After this
-function has executed, the request is responded tousing send_request.</p>
-</dd></dl>
+<code class="descname">do_request</code><span class="sig-paren">(</span><em>request_handler</em><span class="sig-paren">)</span><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.do_request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="localbox.LocalBoxHTTPRequestHandler.get_log_dict">
@@ -1036,12 +1135,39 @@ where this information does not make sense.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="localbox.LocalBoxHTTPRequestHandler.send_request">
-<code class="descname">send_request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.send_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.send_request" title="Permalink to this definition">¶</a></dt>
+<dt id="localbox.LocalBoxHTTPRequestHandler.read_request_body">
+<code class="descname">read_request_body</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.read_request_body"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.read_request_body" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="localbox.LocalBoxHTTPRequestHandler.send_response">
+<code class="descname">send_response</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.send_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.send_response" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an answer to an HTTPRequest in the proper order of status,
 new_headers, body. Other functions can set these values and this
 function will send it over the line properly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
+
+<dl class="method">
+<dt id="localbox.LocalBoxHTTPRequestHandler.wrap_request">
+<code class="descname">wrap_request</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/localbox.html#LocalBoxHTTPRequestHandler.wrap_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#localbox.LocalBoxHTTPRequestHandler.wrap_request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1067,11 +1193,15 @@ been specified as command line argument</p>
 <li><a class="reference internal" href="#">localbox package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-localbox.api">localbox.api module</a></li>
+<li><a class="reference internal" href="#module-localbox.apitests">localbox.apitests module</a></li>
+<li><a class="reference internal" href="#module-localbox.auth">localbox.auth module</a></li>
 <li><a class="reference internal" href="#module-localbox.cache">localbox.cache module</a></li>
 <li><a class="reference internal" href="#module-localbox.database">localbox.database module</a></li>
 <li><a class="reference internal" href="#module-localbox.encoding">localbox.encoding module</a></li>
 <li><a class="reference internal" href="#module-localbox.files">localbox.files module</a></li>
 <li><a class="reference internal" href="#module-localbox.shares">localbox.shares module</a></li>
+<li><a class="reference internal" href="#module-localbox.test_api">localbox.test_api module</a></li>
+<li><a class="reference internal" href="#module-localbox.test_list_share_items">localbox.test_list_share_items module</a></li>
 <li><a class="reference internal" href="#module-localbox.utils">localbox.utils module</a></li>
 <li><a class="reference internal" href="#module-localbox">Module contents</a></li>
 </ul>

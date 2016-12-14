@@ -68,6 +68,20 @@ python -m loauth --add-user &lt;USERNAME&gt;
 </pre></div>
 </div>
 </div>
+<div class="section" id="setup-as-service">
+<h3>Setup as service<a class="headerlink" href="#setup-as-service" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="ubuntu-15-04">
+<h4>Ubuntu &gt;= 15.04<a class="headerlink" href="#ubuntu-15-04" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">echo</span> -e <span class="s2">&quot;export LOX_HOME=/opt/localbox/LoxBox15&quot;</span> <span class="p">|</span> sudo tee /etc/profile.d/localbox.sh
+sudo cp scripts/localbox.service /etc/systemd/system/
+<span class="nb">echo</span> -e <span class="s2">&quot;#!/bin/sh -\ncd </span><span class="si">${</span><span class="nv">LOX_HOME</span><span class="si">}</span><span class="s2">\n/usr/bin/python -m localbox&quot;</span> <span class="p">|</span> sudo tee /usr/local/bin/localbox.sh
+sudo systemctl daemon-reload
+sudo systemctl <span class="nb">enable</span> localbox.service
+sudo systemctl start localbox
+</pre></div>
+</div>
+</div>
+</div>
 <div class="section" id="dependencies">
 <h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>python-mysqldb
@@ -92,6 +106,10 @@ python-oauthlib
 <li><a class="reference internal" href="#install-from-source-code">Install from source code</a><ul>
 <li><a class="reference internal" href="#install-localbox-backend-server">Install LocalBox backend server</a></li>
 <li><a class="reference internal" href="#install-loauth-backend-server">Install loauth backend server</a></li>
+<li><a class="reference internal" href="#setup-as-service">Setup as service</a><ul>
+<li><a class="reference internal" href="#ubuntu-15-04">Ubuntu &gt;= 15.04</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 </ul>
 </li>
