@@ -1,5 +1,5 @@
 #DEBHELPER#
-sudo chmod +x /usr/local/bin/localbox.sh
+sudo chmod +x /usr/bin/localbox.sh
 sudo systemctl daemon-reload
 sudo systemctl enable localbox.service
 sudo systemctl start localbox

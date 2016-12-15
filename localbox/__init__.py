@@ -15,7 +15,7 @@ config = ConfigSingleton('localbox')
 import localbox.utils as lb_utils
 from localbox.auth import authorize
 from localbox.files import create_user_home
-from localbox.utils import get_bindpoint
+from localbox.utils import get_bindpoint, get_ssl_cert
 
 try:
     from cStringIO import StringIO
@@ -200,10 +200,8 @@ def main():
             if "--test-single-call" not in argv:
                 HALTER("Press a key to continue.")
         else:
-            certfile = config.get('httpd', 'certfile')
-            keyfile = config.get('httpd', 'keyfile')
-            httpd.socket = wrap_socket(httpd.socket, server_side=True,
-                                       certfile=certfile, keyfile=keyfile)
+            certfile, keyfile = get_ssl_cert()
+            httpd.socket = wrap_socket(httpd.socket, server_side=True, certfile=certfile, keyfile=keyfile)
 
         getLogger().info("Server ready", extra={'user': None, 'ip': None, 'path': None})
 

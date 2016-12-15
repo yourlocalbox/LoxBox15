@@ -242,6 +242,6 @@ dummy:
 .PHONY: deb
 deb:
 	rm -rf debian
-	make-deb
+	python setup.py --command-packages=stdeb.command debianize
 	cp scripts/postinst debian
-	dpkg-buildpackage -us -uc
+	dpkg-buildpackage -b -rfakeroot -us -uc
