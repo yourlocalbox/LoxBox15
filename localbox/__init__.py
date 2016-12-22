@@ -26,7 +26,7 @@ try:
     HALTER = raw_input  # pylint: disable=E0602
 except NameError:
     # raw_input does not exist in python3, but input does, so in both python2
-    # and python3 we are now able to use the 'input()' funcion.
+    # and python3 we are now able to use the 'input()' function.
     HALTER = input
 
 try:
@@ -56,7 +56,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler, object):
         self.old_body = None
         self.status = 500
         self.protocol = ""
-        self.protocol = "https://" if config.getboolean('http', 'insecure-http', True) else "http://"
+        self.protocol = "https://" if config.getboolean('httpd', 'insecure-http', True) else "http://"
         self.back_url = config.get('oauth', 'direct_back_url')
         BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
