@@ -8,6 +8,7 @@ from shutil import rmtree
 from ssl import wrap_socket
 from sys import argv
 
+from localbox import defaults
 from loxcommon.config import ConfigSingleton
 
 config = ConfigSingleton('localbox')
@@ -57,7 +58,7 @@ class LocalBoxHTTPRequestHandler(BaseHTTPRequestHandler, object):
         self.status = 500
         self.protocol = ""
         self.protocol = "https://" if config.getboolean('httpd', 'insecure-http', True) else "http://"
-        self.back_url = config.get('oauth', 'direct_back_url')
+        self.back_url = config.get('oauth', 'direct_back_url', default=defaults.DIRECT_BACK_URL)
         BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
     def send_response(self):

@@ -3,6 +3,7 @@ from ssl import PROTOCOL_TLSv1_2 as SSL_PROTOCOL
 from logging import getLogger
 
 from localbox import config
+from localbox import defaults
 from localbox.cache import TimedCache
 
 try:
@@ -42,7 +43,7 @@ def authorize(func):
                                                          + request_handler.headers['Host']
                                                          + request_handler.path})
 
-            redirect_url = config.get('oauth', 'redirect_url') + "?" + querystring
+            redirect_url = config.get('oauth', 'redirect_url', default=defaults.REDIRECT_URL) + "?" + querystring
             getLogger(__name__).debug('redirect_url: %s' % redirect_url, extra=request_handler.get_log_dict())
             request_handler.new_headers['WWW-Authenticate'] = 'Bearer domain="' + redirect_url + '"'
             request_handler.body = "<h1>401: Forbidden.</h1>" \
@@ -67,7 +68,7 @@ def check_authorization(request_handler):
         getLogger('auth').debug("authentication failed: no Authorization header available",
                                 extra=request_handler.get_log_dict())
         return None
-    auth_url = config.get('oauth', 'verify_url')
+    auth_url = config.get('oauth', 'verify_url', default=defaults.VERIFY_URL)
     getLogger('auth').debug("verify_url: %s" % auth_url, extra=request_handler.get_log_dict())
     cache = TimedCache(timeout=0)  # FIXME: Cache is broken
     name = cache.get(auth_header)

@@ -22,6 +22,7 @@ from shutil import move
 from shutil import rmtree
 
 import localbox.utils
+from localbox import defaults
 from localbox.utils import get_bindpoint
 
 try:
@@ -643,7 +644,7 @@ def fake_register_app(request_handler):
     configparser = ConfigSingleton('localbox')
     hostcrt = configparser.get('httpd', 'certfile')
 
-    backurl = configparser.get('oauth', 'direct_back_url')
+    backurl = configparser.get('oauth', 'direct_back_url', default=defaults.DIRECT_BACK_URL)
     y = open('host.crt').read()
     result = {'baseurl': backurl, 'name': '1.6.0',
               'user': request_handler.user, 'logourl': 'http://8ch.net/static/logo_33.svg',
