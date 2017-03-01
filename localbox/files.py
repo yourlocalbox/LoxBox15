@@ -6,6 +6,8 @@ from os import chdir
 from os import getcwd
 from os import stat
 from os import walk
+from os import remove
+from os.path import exists
 from os.path import abspath
 from os.path import isdir
 from os.path import islink
@@ -14,9 +16,10 @@ from os.path import relpath
 from os.path import split
 from sys import exit as sysexit
 
-import localbox.utils
 from localbox.database import database_execute
 from localbox.utils import get_bindpoint
+from localbox.utils import get_logging_empty_extra
+from loxcommon.os_utils import mkdir_p
 
 try:
     from os import readlink
@@ -33,7 +36,7 @@ def get_filesystem_path(localbox_path, user):
 
     :param localbox_path: the path relative to localbox' view
     :param user: the user for which to translate the path (the username is part
-           of the path and hence cannot be ommitted.
+           of the path and hence cannot be omitted.
     :returns: a filesystem path to the resource pointed to by the localbox path
     """
     while localbox_path.startswith('/'):
@@ -42,7 +45,7 @@ def get_filesystem_path(localbox_path, user):
         raise ValueError("No relative paths allowed in localbox")
     bindpoint = get_bindpoint()
     filepath = join(bindpoint, user, localbox_path)
-    getLogger(__name__).debug('filesystem path: %s' % filepath, extra=localbox.utils.get_logging_empty_extra())
+    getLogger(__name__).debug('filesystem path: %s' % filepath, extra=get_logging_empty_extra())
     return filepath
 
 
@@ -72,11 +75,11 @@ def stat_reader(filesystem_path, user):
     provided by the stat system call.
 
     :param filesystem_path: a path referring to the file to stat
-    :param user: the user for which to reutrn the info
+    :param user: the user for which to return the info
     :returns: a dictionary of metadata for the filesystem path given
     """
     getLogger(__name__).debug('read stats for file: %s' % filesystem_path,
-                              extra=localbox.utils.get_logging_empty_extra())
+                              extra=get_logging_empty_extra())
     bindpath_user = get_bindpoint_user(user)
     if bindpath_user == abspath(filesystem_path):
         title = 'Home'
@@ -113,6 +116,18 @@ def stat_reader(filesystem_path, user):
     return statdict
 
 
+def create_user_home(user):
+    """
+    Create user home directory (for storing LocalBox files), if necessary.
+
+    :param user: username
+    :return:
+    """
+    user_folder = join(get_bindpoint(), user)
+    if not exists(user_folder):
+        mkdir_p(user_folder)
+
+
 class SymlinkCache(object):
     """
     Singleton keeping track of all symlinks (shares)
@@ -130,12 +145,19 @@ class SymlinkCache(object):
         removes links to and from filename (from the cache)
         :param absolute_filename: the file to remove from the cache
         """
-        if absolute_filename in self.cache.keys():
-            self.cache.pop(absolute_filename)
-        for key, value in self.cache.items():
-            if absolute_filename in value:
-                newvalue = value.remove(absolute_filename)
-                self.cache[key] = newvalue
+        if absolute_filename.endswith('/'):
+            absolute_filename = absolute_filename[:-1]
+
+        try:
+            # check if were are removing the parent of some links
+            map(lambda l: remove(l), self.cache[absolute_filename])
+            del self.cache[absolute_filename]
+        except KeyError:
+            # check if were are removing a link
+            for key, value in self.cache.items():
+                if absolute_filename in value:
+                    newvalue = value.remove(absolute_filename)
+                    self.cache[key] = newvalue
 
     def exists(self, absolute_file_name):
         """
@@ -145,6 +167,18 @@ class SymlinkCache(object):
         :param absolute_file_name: name of the file to check in the cache
         """
         return absolute_file_name in self.cache
+
+    def add(self, from_file, to_file):
+        """
+        Add entry to symbolic link cache.
+
+        :param from_file: absolute file name of the origin file
+        :param to_file: absolute file name of the destination file
+        """
+        if self.cache.get(from_file):
+            self.cache[from_file].append(to_file)
+        else:
+            self.cache[from_file] = [to_file]
 
     def get(self, path):
         """

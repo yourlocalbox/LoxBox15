@@ -58,6 +58,9 @@ redirect_url
 ++++++++++++
 When the user is not authenticated he is redirected to this URL. Example: http://localhost:5000/loauth
 
+direct_back_url
++++++++++++++++
+
 
 loauth.ini
 ==========

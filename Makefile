@@ -56,8 +56,9 @@ clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf $(APIDOCDIR)/*
 
+.PHONY: apidoc
 apidoc:
-	$(SPHINXAPIDOC) -o $(APIDOCDIR) localbox
+	$(SPHINXAPIDOC) -f -o $(APIDOCDIR) localbox
 
 diagrams:
 	chmod +x $(SCRIPT_DIA_EXPORT) && $(SCRIPT_DIA_EXPORT) $(DIAGRAMSDIR)
@@ -238,3 +239,9 @@ dummy:
 	@echo
 	@echo "Build finished. Dummy builder generates no files."
 
+.PHONY: deb
+deb:
+	rm -rf debian
+	python setup.py --command-packages=stdeb.command debianize
+	cp scripts/postinst debian
+	dpkg-buildpackage -b -rfakeroot -us -uc

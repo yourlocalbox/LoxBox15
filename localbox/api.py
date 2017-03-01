@@ -22,6 +22,7 @@ from shutil import move
 from shutil import rmtree
 
 import localbox.utils
+from localbox import defaults
 from localbox.utils import get_bindpoint
 
 try:
@@ -145,6 +146,15 @@ def exec_remove_shares(request_handler):
     request_handler.status = 200
 
 
+def exec_shares_delete(request_handler):
+    share_start = request_handler.path.replace(
+        '/lox_api/shares/', '', 1)
+    shareid = int(share_start.replace('/delete', '', 1))
+    sql = 'delete from shares where id = ?'
+    database_execute(sql, (shareid,))
+    request_handler.status = 200
+
+
 def exec_edit_shares(request_handler):
     """
     Edits the list of people who can access a certain share object. A list of
@@ -184,6 +194,16 @@ def exec_shares(request_handler):
     """
     path2 = request_handler.path.replace('/lox_api/shares/', '', 1)
     data = list_share_items(path2)
+    request_handler.body = data
+    request_handler.status = 200
+    if data == "{}":
+        request_handler.status = 404
+        request_handler.body = None
+
+
+def exec_shares_list(request_handler):
+    user = unquote_plus(request_handler.path.replace('/lox_api/shares/user/', '', 1))
+    data = list_share_items(user=user)
     request_handler.body = data
     request_handler.status = 200
     if data == "{}":
@@ -475,8 +495,7 @@ def exec_create_share(request_handler):
     body = request_handler.old_body
     json_list = loads(body)
     getLogger(__name__).debug('request data: %s' % json_list, extra=request_handler.get_log_dict())
-    path2 = request_handler.path.replace(
-        '/lox_api/share_create/', '', 1)
+    path2 = unquote_plus(request_handler.path.replace('/lox_api/share_create/', '', 1))
     bindpoint = get_bindpoint()
     sender = request_handler.user
     from_file = join(bindpoint, sender, path2)
@@ -501,6 +520,7 @@ def exec_create_share(request_handler):
                 return
             try:
                 symlink(from_file, to_file)
+                SymlinkCache().add(from_file, to_file)
             except OSError:
                 getLogger('api').error("Error making symlink from " + from_file +
                                        " to " + to_file, extra=request_handler.get_log_dict())
@@ -576,7 +596,7 @@ def exec_meta(request_handler):
         path = unquote_plus(
             request_handler.path.replace('/lox_api/meta/', '', 1))
 
-    getLogger(__name__).debug('body %s' % (request_handler.old_body),
+    getLogger(__name__).debug('body %s' % request_handler.old_body,
                               extra=localbox.utils.get_logging_extra(request_handler))
     if request_handler.old_body:
         path = unquote_plus(loads(request_handler.old_body)['path'])
@@ -624,7 +644,7 @@ def fake_register_app(request_handler):
     configparser = ConfigSingleton('localbox')
     hostcrt = configparser.get('httpd', 'certfile')
 
-    backurl = configparser.get('oauth', 'direct_back_url')
+    backurl = configparser.get('oauth', 'direct_back_url', default=defaults.DIRECT_BACK_URL)
     y = open('host.crt').read()
     result = {'baseurl': backurl, 'name': '1.6.0',
               'user': request_handler.user, 'logourl': 'http://8ch.net/static/logo_33.svg',
@@ -678,12 +698,19 @@ def exec_identities(request_handler):
 
     :param request_handler: object in which to return the userlist
     """
-    sql = 'select name, not ((public_key == "" or public_key is NULL) and (private_key == "" or private_key is NULL)) as haskey from users;'
+    sql = 'select name, not ((public_key == "" or public_key is NULL) and (private_key == "" or private_key is NULL)) as haskey,' \
+          'public_key from users;'
     result = database_execute(sql)
     outputlist = []
     for entry in result:
-        outputlist.append({'id': entry[0], 'title': entry[0], 'username': entry[
-            0], 'type': 'user', 'has_keys': bool(entry[1])})
+        outputlist.append({
+            'id': entry[0],
+            'title': entry[0],
+            'username': entry[0],
+            'type': 'user',
+            'has_keys': bool(entry[1]),
+            'public_key': entry[2]
+        })
     if outputlist == []:
         request_handler.status = 404
     else:
@@ -714,7 +741,9 @@ ROUTING_LIST = [
     (regex_compile(r"\/lox_api\/share_create\/.*"), exec_create_share),
     (regex_compile(r"\/lox_api\/shares\/.*\/edit"), exec_edit_shares),
     (regex_compile(r"\/lox_api\/shares\/.*\/revoke"), exec_remove_shares),
+    (regex_compile(r"\/lox_api\/shares\/.*\/delete"), exec_shares_delete),
     (regex_compile(r"\/lox_api\/shares\/.*\/leave"), exec_leave_share),
+    (regex_compile(r"\/lox_api\/shares\/user/.*"), exec_shares_list),
     (regex_compile(r"\/lox_api\/shares\/.*"), exec_shares),
     (regex_compile(r"\/lox_api\/user\/.*"), exec_user_username),
     (regex_compile(r"\/lox_api\/user"), exec_user),

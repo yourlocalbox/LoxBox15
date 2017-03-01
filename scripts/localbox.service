@@ -1,0 +1,10 @@
+[Unit]
+Description=LocalBox server
+
+[Service]
+Type=idle
+ExecStart=/usr/local/bin/localbox.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
